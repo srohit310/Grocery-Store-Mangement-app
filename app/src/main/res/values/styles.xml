@@ -1,0 +1,129 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="editTextStyle">@style/AddEditTexts</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSurface">#FFFFFF</item>
+
+        <item name="android:colorButtonNormal">@drawable/button_selector</item>
+        <item name="colorButtonNormal">@drawable/button_selector</item>
+        <item name="android:buttonStyle">@style/FriendlyButtonStyle</item>
+    </style>
+
+    <style name="CustomTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textViewStyle">@style/MyTextViewStyle</item>
+        <item name="editTextStyle">@style/AddEditTexts</item>
+        <item name="autoCompleteTextViewStyle">@style/AddAutoCompleteText</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    
+    <style name="SettingsLayout" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:buttonStyle">@style/ButtonSettingsStyle</item>
+    </style>
+    
+    <style name="ButtonSettingsStyle" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:background">@drawable/button_simple_border</item>
+        <item name="android:paddingBottom">15dp</item>
+    </style>
+
+    <style name="FriendlyButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@color/colorTitle</item>
+
+    </style>
+
+    <style name="LoginTheme" parent="FirebaseUI">
+        <item name="backgroundColor">#ffffff</item>
+        <item name="colorButtonNormal">@color/colorPrimary</item>
+    </style>
+
+    <style name="Additionclass" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textViewStyle">@style/MyTextViewStyle</item>
+        <item name="editTextStyle">@style/LocationAddEditText</item>
+        <item name="autoCompleteTextViewStyle">@style/AdditionAutotext</item>
+    </style>
+
+    <style name="MyTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="RegisterEditViewStyle" parent="android:Widget.EditText">
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textSize">15dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:layout_marginLeft">25dp</item>
+        <item name="android:layout_marginRight">25dp</item>
+    </style>
+
+
+    <style name="RegisterTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textSize">15dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:layout_marginTop">3dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+    </style>
+
+    <style name="BlackTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+    
+    <style name="AlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
+
+    <style name="LocationAddEditText" parent="android:Widget.EditText">
+        <item name="android:textSize">15sp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:backgroundTint">@color/Edittext</item>
+    </style>
+
+    <style name="AddEditTexts" parent="android:Widget.EditText">
+        <item name="android:backgroundTint">@color/Edittext</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="AddAutoCompleteText" parent="android:Widget.AutoCompleteTextView">
+        <item name="android:backgroundTint">#dadbd7</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="AdditionAutotext" parent="android:Widget.AutoCompleteTextView">
+        <item name="android:backgroundTint">#dadbd7</item>
+    </style>
+
+    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/black</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+</resources>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="array_permission_options">
+        <item>@string/permission_admin</item>
+        <item>@string/permission_employee</item>
+    </string-array>
+    <string-array name="array_item_search_options">
+        <item>@string/item_name</item>
+        <item>@string/item_code</item>
+    </string-array>
+    <string-array name="array_item_sort_options">
+        <item>@string/item_name</item>
+        <item>@string/S_Price</item>
+    </string-array>
+    <string-array name="array_reason_options">
+        <item>@string/fire</item>
+        <item>@string/stole</item>
+        <item>@string/damaged</item>
+        <item>@string/written_off</item>
+        <item>@string/Stocktaking</item>
+        <item>@string/revalutaion</item>
+    </string-array>
+    <string-array name="array_agent_type">
+        <item>@string/Customer</item>
+        <item>@string/Vendor</item>
+        <item>@string/Both</item>
+    </string-array>
+    <string name="permission_admin">Admin</string>
+    <string name="permission_employee">Employee</string>
+    <string name="item_name">Name</string>
+    <string name="item_code">Code</string>
+    <string name="Balace_qty">Balance Quantity</string>
+    <string name="S_Price">Selling Price</string>
+    <string name="fire">Stock on fire</string>
+    <string name="stole">Stolen goods</string>
+    <string name="damaged">Damaged Goods</string>
+    <string name="written_off">Stock Written off</string>
+    <string name="Stocktaking">Stocktaking results</string>
+    <string name="revalutaion">Inventory Revaluation</string>
+    <string name="Customer">Customer</string>
+    <string name="Vendor">Vendor</string>
+    <string name="Both"><![CDATA[Customer & Vendor]]></string>
+</resources>

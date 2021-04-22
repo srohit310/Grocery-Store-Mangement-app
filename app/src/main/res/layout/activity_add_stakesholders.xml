@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddActivities.AddStakesholdersActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/mainAgentDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                app:cardElevation="4dp"
+                app:contentPadding="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/stakeholderTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:text="Contact Information"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/AddTextview1"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/itemTitle"
+                        android:paddingVertical="5dp"
+                        android:paddingLeft="20dp"
+                        android:text="Select Type *" />
+
+                    <Spinner
+                        android:id="@+id/AgentType"
+                        android:layout_width="220dp"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/AddTextview1"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginVertical="10dp"
+                        android:background="@drawable/simple_spinner_layout"
+                        android:hint="Enter Code" />
+
+                    <LinearLayout
+                        android:id="@+id/customertypeLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/CustomerType"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/itemTitle"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="Select Customer Type *" />
+
+                        <RadioGroup
+                            android:id="@+id/radioGroup"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/imageView"
+                            android:layout_marginLeft="5dp"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+                            <RadioButton
+                                android:id="@+id/radioButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:checked="true"
+                                android:scaleX="0.85"
+                                android:scaleY="0.85"
+                                android:text="Business"
+                                android:textSize="15dp" />
+
+                            <RadioButton
+                                android:id="@+id/radioButton2"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:checked="false"
+                                android:scaleX="0.85"
+                                android:scaleY="0.85"
+                                android:text="Indivitual"
+                                android:textSize="15dp" />
+                        </RadioGroup>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/personNameLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="Name *" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/firstName"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Enter First Name" />
+
+                            <EditText
+                                android:id="@+id/lastName"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:layout_weight="1"
+                                android:hint="Enter Last Name" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/companynameLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/AddTextview3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="Company Name *" />
+
+                        <EditText
+                            android:id="@+id/companyName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:hint="Enter Company Name" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/AddTextview4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="5dp"
+                        android:paddingLeft="20dp"
+                        android:text="Email *" />
+
+                    <EditText
+                        android:id="@+id/email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:hint="Enter Email"
+                        android:inputType="textEmailAddress" />
+
+                    <TextView
+                        android:id="@+id/AddTextview5"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="5dp"
+                        android:paddingLeft="20dp"
+                        android:text="Phoneno *" />
+
+                    <EditText
+                        android:id="@+id/phoneno"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:hint="Enter Phoneno"
+                        android:inputType="phone" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/deliverydetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/mainAgentDetails"
+                android:layout_margin="10dp"
+                app:cardElevation="4dp"
+                app:contentPadding="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:text="Delivery Details"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="15dp"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/deliverydropdown"
+                            android:layout_width="30dp"
+                            android:layout_height="25dp"
+                            android:layout_marginLeft="20dp"
+                            android:background="@drawable/ic_baseline_arrow_drop_down_24" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/Visibledelivery"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/AddStreet"
+                            android:layout_width="120dp"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/itemTitle"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="Street " />
+
+                        <EditText
+                            android:id="@+id/streetEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:hint="Enter Street" />
+
+                        <TextView
+                            android:id="@+id/AddCity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="City " />
+
+                        <EditText
+                            android:id="@+id/cityEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:hint="Enter City" />
+
+                        <TextView
+                            android:id="@+id/AddState"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="State" />
+
+                        <EditText
+                            android:id="@+id/stateEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:hint="Enter State" />
+
+                        <TextView
+                            android:id="@+id/AddPincode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="Pincode" />
+
+                        <EditText
+                            android:id="@+id/pincodeEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:hint="Enter PinCode"
+                            android:inputType="number" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/altContactPerson"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/deliverydetails"
+                android:layout_margin="10dp"
+                app:cardElevation="4dp"
+                app:contentPadding="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:text="Additional Contact"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="15dp"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/contactdropdown"
+                            android:layout_width="30dp"
+                            android:layout_height="25dp"
+                            android:layout_marginLeft="20dp"
+                            android:background="@drawable/ic_baseline_arrow_drop_down_24" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/Visiblealtcontact"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/additionalName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="Name" />
+
+                        <EditText
+                            android:id="@+id/Namealt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:hint="Enter Name" />
+
+                        <TextView
+                            android:id="@+id/additionalEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="Email" />
+
+                        <EditText
+                            android:id="@+id/Emailalt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:hint="Enter Email"
+                            android:inputType="textEmailAddress" />
+
+                        <TextView
+                            android:id="@+id/additionalPhoneno"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="Phoneno" />
+
+                        <EditText
+                            android:id="@+id/Phonenoalt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:hint="Enter Phoneno"
+                            android:inputType="phone" />
+
+                        <TextView
+                            android:id="@+id/additionalDetails"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:paddingVertical="5dp"
+                            android:paddingLeft="20dp"
+                            android:text="Other Details" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="20dp"
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/additionalDesignation"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Designation" />
+
+                            <EditText
+                                android:id="@+id/additionalDept"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:layout_weight="1"
+                                android:hint="Department" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </RelativeLayout>
+    </ScrollView>
+
+    <RelativeLayout
+        android:id="@+id/ProgressLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#2f000000"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/contentbackground"
+            android:padding="10dp" />
+    </RelativeLayout>
+</RelativeLayout>

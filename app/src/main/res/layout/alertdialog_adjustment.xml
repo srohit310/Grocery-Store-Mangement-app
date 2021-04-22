@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/addadjustmentalertcontainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/contentbackground">
+
+        <TextView
+            android:id="@+id/AddTitle"
+            style="@style/RegisterTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:background="@drawable/add_item_alert_title"
+            android:dropDownWidth="fill_parent"
+            android:text="Make Item Adjustment"
+            android:textAlignment="center"
+            android:textStyle="bold" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/AddTitle">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:text="Adjustment Mode"
+                    android:textColor="@color/black"
+                    android:textSize="15dp" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/imageView"
+                    android:layout_marginLeft="5dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <RadioButton
+                        android:id="@+id/radioButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="true"
+                        android:scaleX="0.85"
+                        android:scaleY="0.85"
+                        android:text="Quantity"
+                        android:textSize="15dp" />
+
+                    <RadioButton
+                        android:id="@+id/radioButton2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="false"
+                        android:scaleX="0.85"
+                        android:scaleY="0.85"
+                        android:text="Selling Price"
+                        android:textSize="15dp" />
+                </RadioGroup>
+
+                <EditText
+                    android:id="@+id/AmountAdjusted"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/AddLocationEditTextMargin"
+                    android:maxLines="1"
+                    android:alpha="0.7"
+                    android:textSize="15sp"
+                    android:hint="Enter Amount after Ajustment"
+                    android:textColor="@color/black" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="15dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="3"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="10dp"
+                        android:text="Reason"
+                        android:textColor="@color/black"
+                        android:textSize="15dp" />
+
+                    <Spinner
+                        android:id="@+id/Reason"
+                        style="@style/RegisterTextViewStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="0dp"
+                        android:layout_weight="5"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/userspinnerbackground"
+                        android:dropDownWidth="fill_parent"
+                        android:text="Enter Admin Details" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginHorizontal="15dp">
+                    <TextView
+                        android:id="@+id/Locationtextview"
+                        android:layout_width="0dp"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="10dp"
+                        android:text="Location"
+                        android:textColor="@color/black"
+                        android:textSize="15dp" />
+
+                    <AutoCompleteTextView
+                        android:id="@+id/getLocation"
+                        style="@style/RegisterTextViewStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="0dp"
+                        android:layout_weight="5"
+                        android:hint="Select Location Name"
+                        android:padding="10dp"
+                        android:textSize="15sp"/>
+
+                    <ProgressBar
+                        android:id="@+id/autoprogress"
+                        android:layout_width="0dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="15dp"
+                        android:layout_weight="1"
+                        android:visibility="gone"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ReorderLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="15dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Reorder Quantity"
+                        android:textColor="@color/colorAccent"/>
+
+                    <EditText
+                        android:id="@+id/Reorderlvl"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:textSize="15sp"
+                        android:hint="Enter Reorder Quantity"
+                        android:textColor="@color/black" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/AddEmployeeLocation"
+                    android:layout_gravity="center_horizontal"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/ConfirmAdjustmentButton"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:background="@drawable/buttonbackground"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:text="Adjust" />
+
+                    <Button
+                        android:id="@+id/CancelAdjustmentButton"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:background="@drawable/buttonbackground"
+                        android:text="Cancel" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+</RelativeLayout>

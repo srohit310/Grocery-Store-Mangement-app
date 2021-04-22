@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/RegisterLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginModule.RegisterActivity">
+
+    <ScrollView
+        android:id="@+id/registerscrollview"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#ffbe0b">
+
+            <LinearLayout
+                android:id="@+id/ShopRegisteredBooleanLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:paddingHorizontal="20dp"
+                    android:text="Shop Registered?"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/RegisterSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/registeractivityRegisterText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/ShopRegisteredBooleanLayout"
+                android:fontFamily="@font/roboto_bold"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="15dp"
+                android:paddingBottom="0dp"
+                android:text="Register Shop"
+                android:textColor="@color/colorAccent"
+                android:textSize="25dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/RegisterShopDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/registeractivityRegisterText"
+                android:paddingHorizontal="20dp"
+                android:text="@string/details_shop_description"
+                android:textColor="@color/colorAccent"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/ShopDetailsLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/registeractivityRegisterText"
+                android:layout_marginTop="60dp"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/contentbackground"
+                android:orientation="vertical"
+                android:paddingBottom="20dp">
+
+                <TextView
+                    android:id="@+id/ShopCodeTextView"
+                    style="@style/RegisterTextViewStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Shop Code (Automatically assigned)"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/AddShopCode"
+                    style="@style/RegisterEditViewStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter Shop Code"
+                    android:inputType="textCapCharacters"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/ShopNameTextView"
+                    style="@style/RegisterTextViewStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Shop Name"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/AddShopName"
+                    style="@style/RegisterEditViewStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter Name" />
+
+            </LinearLayout>
+
+            <Spinner
+                android:id="@+id/AddUserSpinner"
+                style="@style/RegisterTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ShopDetailsLinearLayout"
+                android:layout_margin="0dp"
+                android:background="@drawable/adminaddtitle"
+                android:dropDownWidth="fill_parent"
+                android:text="Enter Admin Details"
+                android:textAlignment="center"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/registeractivityAdminText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/AddUserSpinner"
+                android:fontFamily="@font/roboto_bold"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="15dp"
+                android:paddingBottom="0dp"
+                android:text="Admin"
+                android:textColor="@color/colorAccent"
+                android:textSize="25dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/registerAdminDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/registeractivityAdminText"
+                android:paddingHorizontal="20dp"
+                android:text="@string/details_admin_description"
+                android:textColor="@color/colorAccent"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/reg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/registeractivityAdminText"
+                android:layout_marginTop="60dp"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/contentbackground"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/contentbackground"
+                    android:paddingBottom="10dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/AdminImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_margin="10dp"
+                        android:elevation="10dp"
+                        app:cardCornerRadius="8dp">
+
+                        <ImageView
+                            android:id="@+id/AdminImageSource"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:background="@drawable/ic_baseline_image_24"
+                            android:scaleType="centerCrop" />
+                    </androidx.cardview.widget.CardView>
+
+                    <Button
+                        android:id="@+id/cancelimage"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_toEndOf="@id/AdminImage"
+                        android:background="@drawable/ic_baseline_cancel_24" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/AdminImage"
+                        android:layout_marginHorizontal="15dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/AddAdminName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            app:counterEnabled="true"
+                            app:counterMaxLength="16"
+                            app:errorEnabled="true">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="5dp"
+                                android:background="@drawable/textinputedittext"
+                                android:backgroundTint="@null"
+                                android:drawableRight="@drawable/ic_baseline_account_circle_accent_24"
+                                android:hint="Enter Name"
+                                android:padding="10dp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/AddAdminEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textColor="@color/colorAccent"
+                            app:errorEnabled="true">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="5dp"
+                                android:background="@drawable/textinputedittext"
+                                android:backgroundTint="@null"
+                                android:drawableRight="@drawable/ic_baseline_email_24"
+                                android:hint="Enter Email"
+                                android:inputType="textEmailAddress"
+                                android:padding="10dp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/AddAdminPhone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textColor="@color/colorAccent"
+                            app:counterEnabled="true"
+                            app:counterMaxLength="10"
+                            app:errorEnabled="true">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="5dp"
+                                android:background="@drawable/textinputedittext"
+                                android:backgroundTint="@null"
+                                android:drawableRight="@drawable/ic_baseline_local_phone_24"
+                                android:hint="Enter Phone no"
+                                android:inputType="number"
+                                android:padding="10dp"
+                                android:singleLine="true" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/AddAdminPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textColor="@color/colorAccent"
+                            app:counterEnabled="true"
+                            app:counterMaxLength="16"
+                            app:errorEnabled="true"
+                            app:passwordToggleEnabled="true">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="5dp"
+                                android:background="@drawable/textinputedittext"
+                                android:backgroundTint="@null"
+                                android:hint="Enter Password"
+                                android:padding="10dp"
+                                android:singleLine="true" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/AddAdminConfirmPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textColor="@color/colorAccent"
+                            app:counterEnabled="true"
+                            app:counterMaxLength="16"
+                            app:errorEnabled="true"
+                            app:passwordToggleEnabled="true">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="5dp"
+                                android:background="@drawable/textinputedittext"
+                                android:backgroundTint="@null"
+                                android:hint="Confirm Password"
+                                android:padding="10dp"
+                                android:singleLine="true" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                </RelativeLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+    <RelativeLayout
+        android:id="@+id/ProgressLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="#2f000000"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/contentbackground">
+
+            <ProgressBar
+                android:id="@+id/ProgressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/contentbackground"
+                android:padding="10dp" />
+
+            <TextView
+                android:id="@+id/ProgressText"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/ProgressBar"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="10dp"
+                android:textAlignment="center"
+                android:textColor="@color/colorAccent"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

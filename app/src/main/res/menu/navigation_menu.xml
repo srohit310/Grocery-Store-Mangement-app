@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/dash"
+            android:icon="@drawable/ic_baseline_dash_24"
+            android:title="@string/main_menu" />
+        <item
+            android:id="@+id/item_menu"
+            android:icon="@drawable/ic_baseline_shopping_basket_24"
+            android:title="@string/item_menu" />
+        <item
+            android:id="@+id/purchase_menu"
+            android:icon="@drawable/ic_baseline_business_center_24"
+            android:title="@string/purchase_menu" />
+        <item
+            android:id="@+id/sales_menu"
+            android:icon="@drawable/ic_baseline_sale_24"
+            android:title="@string/sales_menu" />
+        <item
+            android:id="@+id/customers_menu"
+            android:icon="@drawable/ic_baseline_customer_24"
+            android:title="@string/customers_menu" />
+        <item
+            android:id="@+id/vendors_menu"
+            android:icon="@drawable/ic_baseline_vendor_24"
+            android:title="@string/vendors_menu" />
+        <item
+            android:id="@+id/Locations_menu"
+            android:icon="@drawable/ic_baseline_store_24"
+            android:title="@string/Locations_menu" />
+        <item
+            android:id="@+id/manage_users_menu"
+            android:icon="@drawable/ic_baseline_supervised_user_circle_24"
+            android:title="@string/manage_users_menu" />
+        <item android:title="Account">
+            <menu>
+                <item
+                    android:id="@+id/settings_change_menu"
+                    android:title="User Settings" />
+                <item
+                    android:id="@+id/sign_out_menu"
+                    android:title="Sign Out"/>
+            </menu>
+        </item>
+    </group>
+</menu>

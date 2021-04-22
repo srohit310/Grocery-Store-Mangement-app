@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">GSM</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="send_button_label">Send</string>
+    <string name="item_menu">Items</string>
+    <string name="sales_menu">Sales</string>
+    <string name="purchase_menu">Purchase</string>
+    <string name="vendors_menu">Vendor</string>
+    <string name="customers_menu">Customer</string>
+    <string name="Open">Nav Bar</string>
+    <string name="Close">Nav Bar</string>
+    <string name="main_menu">Main Menu</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
+    <string name="save">SAVE</string>
+    <string name="title_activity_item_display">ItemDisplayActivity</string>
+    <string name="tab_text_1">Details</string>
+    <string name="tab_text_2">Adjustments</string>
+    <string name="tab_text_3">Stock</string>
+    <string name="title_activity_item_view_adaptor">ItemViewAdaptor</string>
+    <string name="title_activity_item_view">ItemViewActivity</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="details_shop_description">Enter the details of the shop to be registered into the system</string>
+    <string name="details_admin_description">Enter the Login credentials of admin who will manage entire store inventory</string>
+    <string name="Signinbutton">SIGN IN</string>
+    <string name="NextButton">NEXT</string>
+    <string name="details_location_description">Add the different locations in which your branch is situated</string>
+    <string name="Locations_menu">Locations</string>
+    <string name="manage_users_menu">Manage Users</string>
+</resources>

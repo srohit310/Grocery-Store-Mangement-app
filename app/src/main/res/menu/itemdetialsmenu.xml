@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/Adjustment"
+        android:title="Make Adjustment"/>
+    <item
+        android:id="@+id/Edit"
+        android:title="Edit"
+        android:icon="@drawable/ic_baseline_edit_24"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/Invalid"
+        android:title="Mark As Invalid"/>
+</menu>
