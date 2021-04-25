@@ -62,6 +62,7 @@
                     android:layout_marginBottom="2dp">
 
                     <TextView
+                        android:id="@+id/openingstocktext"
                         android:layout_width="0dp"
                         android:layout_weight="2"
                         android:layout_height="wrap_content"
@@ -88,7 +89,7 @@
                     android:layout_marginBottom="2dp">
 
                     <TextView
-
+                        android:id="@+id/openingstockvaluetext"
                         android:layout_width="0dp"
                         android:layout_weight="2"
                         android:layout_height="wrap_content"
@@ -109,6 +110,7 @@
                         android:textStyle="bold" />
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/reorderlayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">

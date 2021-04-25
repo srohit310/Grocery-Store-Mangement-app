@@ -2,16 +2,22 @@ package com.stancorp.grocerystorev1.GlobalClass;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.format.DateFormat;
 
 import androidx.appcompat.app.AlertDialog;
 
 import com.stancorp.grocerystorev1.R;
 
+import java.util.Date;
 import java.util.regex.Pattern;
 
 public class Gfunc {
 
-    public Gfunc(){ }
+    public String getCurrentDate(){
+        Date date= new Date();
+        String currentdate = (String) DateFormat.format("MMMM d, yyyy ", date.getTime());
+        return  currentdate;
+    }
 
     public boolean isEmailValid(String email)
     {

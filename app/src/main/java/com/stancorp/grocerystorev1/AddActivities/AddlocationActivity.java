@@ -79,10 +79,10 @@ public class AddlocationActivity extends AppCompatActivity {
     ArrayList<EditText> editTexts;
     ArrayList<EditText> alertEditTexts;
     ArrayList<String> ItemString;
-    HashMap<String, ItemStockInfo> ItemCodes;
+    LinkedHashMap<String, ItemStockInfo> ItemCodes;
     LinkedHashMap<String, ItemStockInfo> items;
-    HashMap<String, Float> StockValue;
-    HashMap<String, LocationStockItem> locationStockItems;
+    LinkedHashMap<String, Float> StockValue;
+    LinkedHashMap<String, LocationStockItem> locationStockItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,9 +102,9 @@ public class AddlocationActivity extends AppCompatActivity {
         ItemString = new ArrayList<>(Arrays.asList("Location Code", "Location Name", "State, Location is in"
                 , "City, Location is in","Streey, Location is in", "Pincode of Location"));
         items = new LinkedHashMap<>();
-        locationStockItems = new HashMap<>();
-        StockValue = new HashMap<>();
-        ItemCodes = new HashMap<>();
+        locationStockItems = new LinkedHashMap<>();
+        StockValue = new LinkedHashMap<>();
+        ItemCodes = new LinkedHashMap<>();
 
         Itemsearch = findViewById(R.id.ItemsearchAuto);
         AutoProgress = findViewById(R.id.autoprogress);

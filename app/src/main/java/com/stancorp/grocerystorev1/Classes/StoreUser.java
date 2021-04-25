@@ -19,7 +19,7 @@ public class StoreUser implements Serializable {
     public StoreUser(){ }
 
     public StoreUser(String Name, String Email, String Phone, Boolean Uri, String PermissionLvl, String ShopCode, String Location, Boolean Registeredflag){
-        this.Name = Name;
+        this.Name = Name.toLowerCase();
         this.Email = Email;
         this.Phone = Phone;
         this.PhotoUri = Uri;

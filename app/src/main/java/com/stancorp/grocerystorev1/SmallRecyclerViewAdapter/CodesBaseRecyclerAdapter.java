@@ -13,12 +13,13 @@ import com.stancorp.grocerystorev1.Classes.LocationStockItem;
 import com.stancorp.grocerystorev1.R;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public abstract class CodesBaseRecyclerAdapter extends RecyclerView.Adapter<CodesBaseRecyclerAdapter.CodesBaseViewHolder> {
 
-    protected HashMap<String,LocationStockItem> locationStockItems;
-    protected HashMap<String,Float> StockValue;
+    protected LinkedHashMap<String,LocationStockItem> locationStockItems;
+    protected LinkedHashMap<String,Float> StockValue;
     protected Context BASE_CONTEXT;
 
     public CodesBaseRecyclerAdapter(Context context){
@@ -35,10 +36,12 @@ public abstract class CodesBaseRecyclerAdapter extends RecyclerView.Adapter<Code
 
     @Override
     public void onBindViewHolder(@NonNull CodesBaseViewHolder holder,final int position) {
-
-        LocationStockItem locationStockItem = (LocationStockItem) locationStockItems.values().toArray()[position];
-        Float value = (Float) StockValue.values().toArray()[position];
-
+        LocationStockItem locationStockItem = new LocationStockItem();
+        Float value = 0f;
+        if(locationStockItems !=null && StockValue!=null) {
+            locationStockItem = (LocationStockItem) locationStockItems.values().toArray()[position];
+            value = (Float) StockValue.values().toArray()[position];
+        }
         if(locationStockItem!=null && value!=null){
             holder.OpeningStock.setText(locationStockItem.Balance_Qty);
             holder.OpeningStockValue.setText(String.valueOf(value));

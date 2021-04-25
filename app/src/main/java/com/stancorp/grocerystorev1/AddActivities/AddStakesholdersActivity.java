@@ -253,7 +253,16 @@ public class AddStakesholdersActivity extends AppCompatActivity {
                 }).setNegativeButton("Cancel", null).show();
                 return true;
             case android.R.id.home:
-                onBackPressed();
+                new AlertDialog.Builder(AddStakesholdersActivity.this,R.style.MyDialogTheme)
+                        .setTitle("Discard Stakeholder")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                onBackPressed();
+                            }
+                        })
+                        .setNegativeButton("Cancel",null)
+                        .show();
                 return true;
         }
         return false;

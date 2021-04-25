@@ -48,14 +48,10 @@ public class AgentAdapter extends BaseRecyclerAdapter {
         Phoneno = holder.itemView.findViewById(R.id.Phoneno);
         customertypeLayout = holder.itemView.findViewById(R.id.CustomerType);
 
-        if(agent != null){
+        if (agent != null) {
             Name.setText(gfunc.capitalize(agent.Name));
             Code.setText(agent.Code);
-            if(agenttype == "Customer"){
-                Type.setText(agent.CustomerType);
-            }else{
-                customertypeLayout.setVisibility(View.GONE);
-            }
+            Type.setText(agent.CustomerType);
             Phoneno.setText(String.valueOf(agent.Phoneno));
         }
     }

@@ -344,7 +344,7 @@ public class RegisterActivity extends AppCompatActivity {
                         if (flagAlert == "Register") {
                             registershop();
                         } else if (flagAlert == "Cancel")
-                            finish();
+                            finishAffinity();
                     }
                 })
                 .setNegativeButton("Decline", null)

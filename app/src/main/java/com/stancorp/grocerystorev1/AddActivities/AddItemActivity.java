@@ -66,12 +66,14 @@ import com.stancorp.grocerystorev1.Classes.Items;
 import com.stancorp.grocerystorev1.Classes.Location;
 import com.stancorp.grocerystorev1.Classes.LocationStockItem;
 import com.stancorp.grocerystorev1.Classes.Unit;
+import com.stancorp.grocerystorev1.DisplayItems.ScanSkuCodeActivity;
 import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 import com.stancorp.grocerystorev1.SmallRecyclerViewAdapter.CodesLocationRecyclerAdapter;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -82,7 +84,7 @@ public class AddItemActivity extends AppCompatActivity {
     TextView CodeText;
     AutoCompleteTextView LocationSearch;
     AutoCompleteLocationAdapter locationStockAdapter;
-    Handler locationhandler;
+    Handler locationhandler = new Handler();
     RecyclerView recyclerView;
     CodesLocationRecyclerAdapter codesRecyclerAdapter;
     RecyclerView.LayoutManager mLayoutManager;
@@ -114,9 +116,9 @@ public class AddItemActivity extends AppCompatActivity {
     ArrayList<String> ItemDetailsString;
     LinkedHashMap<String, Location> locations;
 
-    HashMap<String, LocationStockItem> locationStockItems;
+    LinkedHashMap<String, LocationStockItem> locationStockItems;
     ArrayList<String> LocationCodes;
-    HashMap<String, Float> StockValue;
+    LinkedHashMap<String, Float> StockValue;
 
     Gfunc gfunc;
     float total_balance = (float) 0;
@@ -144,7 +146,9 @@ public class AddItemActivity extends AppCompatActivity {
     ProgressBar AutoProgress;
 
     private static final int RC_PHOTO_PICKER = 4;
+    private static final int RC_SKU_CODE_PICKER = 6;
     public static final int STOREAGE_PERMISSION_CODE = 21;
+    public static final int CAMERA_PERMISSION_CODE = 22;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -168,9 +172,9 @@ public class AddItemActivity extends AppCompatActivity {
         Categorys = new ArrayList<>();
         Brands = new ArrayList<>();
         locations = new LinkedHashMap<>();
-        locationStockItems = new HashMap<>();
+        locationStockItems = new LinkedHashMap<>();
         LocationCodes = new ArrayList<>();
-        StockValue = new HashMap<>();
+        StockValue = new LinkedHashMap<>();
 
         ItemDetailsString = new ArrayList<>(Arrays.asList("Item Code", "Name", "Selling Price", "Purchase Price",
                 "Stock Type", "Default Reorder Quantity", "Reorder Level", "Excess Level", "Unit", "Category", "Brand"));
@@ -200,6 +204,17 @@ public class AddItemActivity extends AppCompatActivity {
         ItemStockview = findViewById(R.id.Additemstocklayout);
         CodeText = findViewById(R.id.AddTextview1);
         Scan = findViewById(R.id.ScanSku);
+        Scan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContextCompat.checkSelfPermission(AddItemActivity.this,
+                        Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
+                    startActivityForResult(new Intent(getApplicationContext(), ScanSkuCodeActivity.class),RC_SKU_CODE_PICKER);
+                }else
+                    requeststoragepermission(Manifest.permission.CAMERA,"In order to scan Barcode" +
+                            " permission to use camera is required",CAMERA_PERMISSION_CODE);
+            }
+        });
         LocationSearch = findViewById(R.id.LocationsearchAuto);
         Validity = findViewById(R.id.radioGroup);
         ItemValid = true;
@@ -340,7 +355,8 @@ public class AddItemActivity extends AppCompatActivity {
                             .setAspectRatio(1, 1)
                             .start(AddItemActivity.this);
                 } else
-                    requeststoragepermission();
+                    requeststoragepermission(Manifest.permission.READ_EXTERNAL_STORAGE,"In order to access gallery permission" +
+                            " to read external storage is required",STOREAGE_PERMISSION_CODE);
             }
         });
 
@@ -405,7 +421,7 @@ public class AddItemActivity extends AppCompatActivity {
                                 LocationSearch.setError("Location Code already entered");
                             }
                             if (Locationexists) {
-                                alertDiaglogAddItem();
+                                checkmodeadditem();
                             }
                         }
                     }
@@ -620,6 +636,11 @@ public class AddItemActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
+        if(requestCode == RC_SKU_CODE_PICKER){
+            if(resultCode == RESULT_OK){
+                editTexts.get(0).setText(data.getStringExtra("SKUCODE"));
+            }
+        }
     }
 
     @Override
@@ -721,13 +742,37 @@ public class AddItemActivity extends AppCompatActivity {
                 , autoeditViews.get(0).getText().toString().trim(), autoeditViews.get(1).getText().toString().trim()
                 , autoeditViews.get(2).getText().toString().trim(), editTexts.get(2).getText().toString().trim()
                 , editTexts.get(3).getText().toString().trim(), editTexts.get(4).getText().toString().trim(), ItemValid
-                , Photoexists, editTexts.get(6).getText().toString().trim(), editTexts.get(7).getText().toString().trim());
+                , Photoexists,"", editTexts.get(6).getText().toString().trim(), editTexts.get(7).getText().toString().trim());
 
         itemStockInfo = new ItemStockInfo(item.ItemCode, item.name,
                 String.valueOf(total_cost), String.valueOf(total_balance), editTexts.get(5).getText().toString().trim(),
                 String.valueOf(item.Selling_Price), ItemValid);
 
         Default_Reorder_qty = editTexts.get(5).getText().toString().trim();
+
+        if (Photoexists) {
+            photostorage.child(ShopCode).child(item.ItemCode)
+                    .putFile(photouri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    photostorage.child(ShopCode).child(item.ItemCode).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            item.ImgUriString = uri.toString();
+                            executetransaction();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(),"Image Uri Could not be Fetched",Toast.LENGTH_SHORT).show();
+                            executetransaction();
+                        }
+                    });
+                }
+            });
+        } else {
+            executetransaction();
+        }
 
         executetransaction();
     }
@@ -803,17 +848,7 @@ public class AddItemActivity extends AppCompatActivity {
             doc = firebaseFirestore.collection(ShopCode).document("doc").collection("Location").document(item.ItemCode + temploc.LocationCode);
             transaction.set(doc, temploc);
         }
-        if (Photoexists) {
-            photostorage.child(ShopCode).child(item.ItemCode)
-                    .putFile(photouri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    checkifCodesMastersExists(transaction);
-                }
-            });
-        } else {
-            checkifCodesMastersExists(transaction);
-        }
+        checkifCodesMastersExists(transaction);
 
     }
 
@@ -845,16 +880,16 @@ public class AddItemActivity extends AppCompatActivity {
 
     }
 
-    private void requeststoragepermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+    private void requeststoragepermission(final String Permission, String Message, final Integer code) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Permission)) {
             new AlertDialog.Builder(this)
                     .setTitle("Permission Needed")
-                    .setMessage("In order to access you gallery permission to read external storage is required")
+                    .setMessage(Message)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             ActivityCompat.requestPermissions(AddItemActivity.this,
-                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STOREAGE_PERMISSION_CODE);
+                                    new String[]{Permission}, code);
                         }
                     })
                     .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -866,8 +901,8 @@ public class AddItemActivity extends AppCompatActivity {
                     .create().show();
         } else {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    STOREAGE_PERMISSION_CODE);
+                    new String[]{Permission},
+                    code);
         }
     }
 

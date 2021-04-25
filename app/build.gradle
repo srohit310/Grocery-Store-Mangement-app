@@ -20,10 +20,16 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
+        debug {
+            debuggable true
+        }
     }
 }
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
+    implementation 'me.dm7.barcodescanner:zxing:1.9'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.google.firebase:firebase-firestore'
     implementation fileTree(dir: "libs", include: ["*.jar"])

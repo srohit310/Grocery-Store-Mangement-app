@@ -26,7 +26,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -68,12 +67,9 @@ import com.stancorp.grocerystorev1.Classes.LocationStockItem;
 import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 import com.stancorp.grocerystorev1.ui.main.ItemSectionsPagerAdapter;
-import com.stancorp.grocerystorev1.ui.main.StakeholderSectionsPagerAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class ItemViewActivity extends AppCompatActivity {
@@ -453,10 +449,9 @@ public class ItemViewActivity extends AppCompatActivity {
                     }
                 }
                 if (flag) {
-                    Date date = new Date();
                     adjustedamount = Float.parseFloat(adjustmentamount.getText().toString());
                     LocationCode = locationsearch.getText().toString();
-                    String currentdate = (String) DateFormat.format("MMMM d, yyyy ", date.getTime());
+                    String currentdate = gfunc.getCurrentDate();
                     itemAdjustmentClass = new ItemAdjustmentClass(modeselected, iteminfo.ItemCode, LocationCode,
                             currentdate, Reason, "", UserName);
                 }

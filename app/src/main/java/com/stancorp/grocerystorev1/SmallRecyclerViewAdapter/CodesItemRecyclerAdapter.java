@@ -13,15 +13,16 @@ import com.stancorp.grocerystorev1.Classes.LocationStockItem;
 import com.stancorp.grocerystorev1.R;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class CodesItemRecyclerAdapter extends CodesBaseRecyclerAdapter {
     Button Delete ;
     TextView Code;
-    HashMap<String,ItemStockInfo> Codes;
+    LinkedHashMap<String,ItemStockInfo> Codes;
 
-    public CodesItemRecyclerAdapter(Context context, @NonNull HashMap<String,LocationStockItem> objects
-            , HashMap<String,ItemStockInfo> Codes, HashMap<String,Float> StockValue) {
+    public CodesItemRecyclerAdapter(Context context, @NonNull LinkedHashMap<String,LocationStockItem> objects
+            , LinkedHashMap<String,ItemStockInfo> Codes, LinkedHashMap<String,Float> StockValue) {
         super(context);
 
         this.locationStockItems = objects;

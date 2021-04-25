@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright Google Inc. All Rights Reserved.
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -50,6 +51,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.stancorp.grocerystorev1.Classes.StoreUser;
+import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.UserSettings.UserSettingsActivity;
 import com.stancorp.grocerystorev1.ViewFragments.FragmentGroupItems;
 import com.stancorp.grocerystorev1.ViewFragments.FragmentGroupManageUsers;
@@ -76,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TextView textViewemail;
     private TextView textViewname;
     private ImageView imageView;
-    ProgressBar progressBar;
+    public RelativeLayout ProgressLayout;
     RelativeLayout relativeLayout;
 
     private String mUsername;
@@ -84,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String UID;
     StoreUser User;
     NavigationView navigationView;
+    Gfunc gfunc;
 
     private FirebaseFirestore firebaseFirestore;
     private FirebaseAuth firebaseAuth;
@@ -102,12 +105,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mEmail = ANONYMOUS;
         UID = ANONYMOUS;
 
+        gfunc = new Gfunc();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         firebaseFirestore = FirebaseFirestore.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
-        progressBar = findViewById(R.id.progressBarMain);
         relativeLayout = findViewById(R.id.MainRelativeLayout);
         getSupportActionBar().hide();
+
+        ProgressLayout = findViewById(R.id.ProgressLayout);
 
         photostorageReference = firebaseStorage.getReference();
 
@@ -218,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void OnSignedInInitialize(String email) {
-        progressBar.setVisibility(View.VISIBLE);
+        ProgressLayout.setVisibility(View.VISIBLE);
         actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
         relativeLayout.setEnabled(false);
         mEmail = email;
@@ -233,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 for(DocumentSnapshot snapshot1: task.getResult()){
                     User = snapshot1.toObject(StoreUser.class);
                 }
-                textViewname.setText(User.Name);
+                textViewname.setText(gfunc.capitalize(User.Name));
                 if(User.PhotoUri) {
                     photostorageReference.child(User.ShopCode).child("ProfileImages").child(User.Email)
                             .getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -252,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     });
                 }
                 getSupportActionBar().show();
-                progressBar.setVisibility(View.GONE);
+                ProgressLayout.setVisibility(View.GONE);
                 actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
                 relativeLayout.setEnabled(true);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);

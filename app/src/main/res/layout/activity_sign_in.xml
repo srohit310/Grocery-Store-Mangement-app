@@ -74,8 +74,7 @@
                     android:layout_below="@+id/signinTextView"
                     android:layout_marginHorizontal="25dp"
                     android:layout_marginTop="100dp"
-                    android:textColor="@color/colorAccent"
-                    app:errorEnabled="true">
+                    android:textColor="@color/colorAccent">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
@@ -93,8 +92,7 @@
                     android:layout_below="@+id/signinshop"
                     android:layout_marginHorizontal="25dp"
                     android:layout_marginTop="5dp"
-                    android:textColor="@color/colorAccent"
-                    app:errorEnabled="true">
+                    android:textColor="@color/colorAccent">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
@@ -113,7 +111,6 @@
                     android:layout_marginHorizontal="25dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/colorAccent"
-                    app:errorEnabled="true"
                     android:visibility="gone"
                     app:passwordToggleEnabled="true">
 
@@ -123,6 +120,18 @@
                         android:hint="Password"
                         android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/ForgotPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/signinpassword"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="25dp"
+                    android:text="Forgot Password?"
+                    android:visibility="gone"
+                    android:textColor="@color/colorAccent" />
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/RegisterCardView"
@@ -144,6 +153,29 @@
                         android:textStyle="bold" />
                 </androidx.cardview.widget.CardView>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/Registerintenttext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="DON'T HAVE AN ACCOUNT?"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/Registerintent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/white"
+                        android:gravity="center"
+                        android:text="Register ACCOUNT"
+                        android:textColor="@color/colorAccent" />
+                </LinearLayout>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
     </ScrollView>

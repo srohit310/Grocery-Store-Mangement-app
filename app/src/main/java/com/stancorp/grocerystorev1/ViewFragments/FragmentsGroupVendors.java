@@ -1,22 +1,17 @@
 package com.stancorp.grocerystorev1.ViewFragments;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.AdapterClasses.AgentAdapter;
 import com.stancorp.grocerystorev1.AddActivities.AddStakesholdersActivity;
@@ -35,39 +30,19 @@ public class FragmentsGroupVendors extends FragmentsGroups {
     LinkedHashMap<String,Agent> filteredList;
 
     @Override
-    protected void initialize() {
-        agents = new LinkedHashMap<>();
-        filteredList = new LinkedHashMap<>();
-        agentAdaptor = new AgentAdapter(agents,getContext(),this,"Vendor");
-        recyclerView.setAdapter(agentAdaptor);
-        sortby = "Name";
+    protected void toolbarspinnersetup(Spinner toolbarspinner) {
+        toolbarspinner.setVisibility(View.GONE);
+        attachListData(startcode,endcode);
+
     }
 
     @Override
-    protected void setupSpinner(View view) {
-        ArrayAdapter itemsortoptions = ArrayAdapter.createFromResource(getContext(),
-                R.array.array_item_search_options, R.layout.spinner_user_item_text);
-
-        itemsortoptions.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-        spinner.setAdapter(itemsortoptions);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selection = parent.getItemAtPosition(position).toString();
-                if (!TextUtils.isEmpty(selection)) {
-                    if (selection.equals(getString(R.string.item_name))) {
-                        sortby = "Name";
-                    } else if (selection.equals(getString(R.string.item_code))) {
-                        sortby = "codeno";
-                    }
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                sortby = "Name";
-            }
-        });
+    protected void initialize() {
+        agents = new LinkedHashMap<>();
+        filteredList = new LinkedHashMap<>();
+        searchedittext.setHint("Search for vendor using name");
+        agentAdaptor = new AgentAdapter(agents,getContext(),this,"Vendor");
+        recyclerView.setAdapter(agentAdaptor);
     }
 
     @Override
@@ -78,13 +53,14 @@ public class FragmentsGroupVendors extends FragmentsGroups {
     }
 
     @Override
-    protected void attachListData(String sortby) {
+    protected void attachListData(String startcode,String endcode) {
         SDProgress(true);
         agents.clear();
         filteredList.clear();
 
         firebaseFirestore.collection(user.ShopCode).document("doc").collection("StakeHolders")
-                .whereIn("AgentType", Arrays.asList("Both","Vendor")).orderBy(sortby, direction)
+                .whereGreaterThanOrEqualTo("Name", startcode).whereLessThan("Name", endcode)
+                .whereIn("AgentType", Arrays.asList("Both","Vendor")).orderBy("Name", direction)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
@@ -118,17 +94,6 @@ public class FragmentsGroupVendors extends FragmentsGroups {
                         }
                     }
                 });
-    }
-
-    @Override
-    protected void filteredlistcondition(String text) {
-        filteredList = new LinkedHashMap<>();
-        for(Agent agent: agents.values() ){
-            if(agent.Name.toLowerCase().startsWith(text.toLowerCase())){
-                filteredList.put(agent.Code,agent);
-            }
-        }
-        agentAdaptor.filterList(filteredList);
     }
 
     @Override

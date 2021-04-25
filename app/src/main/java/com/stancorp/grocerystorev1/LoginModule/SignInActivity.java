@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -52,7 +53,10 @@ public class SignInActivity extends AppCompatActivity {
     TextInputLayout Shop;
     TextInputLayout Email;
     TextInputLayout Password;
+    TextView ForgetPassword;
     Button signInButton;
+    Button RegisterIntent;
+    TextView RegisterIntentText;
     FirebaseAuth mAuth;
     ArrayList<String> hints;
     FirebaseFirestore firebaseFirestore;
@@ -71,7 +75,7 @@ public class SignInActivity extends AppCompatActivity {
         hints = new ArrayList<>();
         HomeButton = findViewById(R.id.upbutton);
         ProgressLayout = findViewById(R.id.ProgressLayout);
-
+        RegisterIntentText = findViewById(R.id.Registerintenttext);
         firebaseFirestore = FirebaseFirestore.getInstance();
 
         Wrongcredential = findViewById(R.id.incorrectTextView);
@@ -79,6 +83,42 @@ public class SignInActivity extends AppCompatActivity {
         Shop = findViewById(R.id.signinshop);
         Email = findViewById(R.id.signinemail);
         Password = findViewById(R.id.signinpassword);
+        ForgetPassword = findViewById(R.id.ForgotPassword);
+        ForgetPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SDProgress(true);
+                FirebaseAuth.getInstance().sendPasswordResetEmail(Email.getEditText().getText().toString())
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    SDProgress(false);
+                                    Password.setEnabled(false);
+                                    ForgetPassword.setText("LINK SENT!");
+                                    ForgetPassword.setEnabled(false);
+                                    signInButton.setText("go back");
+                                }else{
+                                    SDProgress(false);
+                                    Toast.makeText(getApplicationContext(),"Couldn't send Link",Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i("failreset",e.getMessage());
+                    }
+                });
+            }
+        });
+
+        RegisterIntent = findViewById(R.id.Registerintent);
+        RegisterIntent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(),RegisterActivity.class));
+            }
+        });
 
         signInButton = findViewById(R.id.SignInButton);
         signInButton.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +144,7 @@ public class SignInActivity extends AppCompatActivity {
                             })
                             .create().show();
                 } else {
-                    if (signInButton.getText().toString() == getString(R.string.NextButton)) {
+                    if (signInButton.getText().toString().compareTo(getString(R.string.NextButton))==0) {
                         if (Shop.getEditText().getText().toString().length() == 0) {
                             Shop.getEditText().setText("");
                             Shop.setError("Please enter shop code assigned");
@@ -115,7 +155,7 @@ public class SignInActivity extends AppCompatActivity {
                             Email.requestFocus();
                         } else
                             Authenticate();
-                    } else {
+                    } else if(signInButton.getText().toString().compareTo(getString(R.string.Signinbutton))==0) {
                         if (Password.getEditText().getText().toString().length() == 0) {
                             Password.getEditText().setText("");
                             Password.setError("Please enter password");
@@ -139,6 +179,8 @@ public class SignInActivity extends AppCompatActivity {
                                         }
                                     });
                         }
+                    }else {
+                        onBackPressed();
                     }
                 }
             }
@@ -153,7 +195,20 @@ public class SignInActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        if(Password.getVisibility() == View.VISIBLE){
+            signInButton.setText(getString(R.string.NextButton));
+            Shop.setEnabled(true);
+            Email.setEnabled(true);
+            Shop.getEditText().setText("");
+            Email.getEditText().setText("");
+            Password.setVisibility(View.GONE);
+            Password.setEnabled(true);
+            ForgetPassword.setText("Forget Password?");
+            ForgetPassword.setEnabled(true);
+            ForgetPassword.setVisibility(View.GONE);
+            signInButton.setText(getString(R.string.NextButton));
+        }else
+            finishAffinity();
     }
 
     @Override
@@ -186,6 +241,7 @@ public class SignInActivity extends AppCompatActivity {
                         Shop.setEnabled(false);
                         Email.setEnabled(false);
                         Password.setVisibility(View.VISIBLE);
+                        ForgetPassword.setVisibility(View.VISIBLE);
                         signInButton.setText("SIGN IN");
                     }
                 }else{

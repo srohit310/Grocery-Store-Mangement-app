@@ -8,6 +8,9 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -23,6 +26,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -60,9 +67,10 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
     TextInputLayout UserPhone;
     TextInputLayout UserLocation;
     StoreUser Currentuser;
+    Spinner toolbarspinner;
     AlertDialog alertDialog;
 
-    EditText searchedittext;
+    String startcode, endcode;
 
     TextView EmptyAdmin;
     TextView EmptyEmployee;
@@ -76,7 +84,6 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
     Spinner ListPermissionLvL;
     ArrayList<String> hints;
 
-    RecyclerView adminList, employeeList;
     ManageUserAdapter adminadapter, employeeadapter;
     RecyclerView.LayoutManager madminLayoutManager, memployeeLayoutManager;
     LinkedHashMap<String, StoreUser> admin;
@@ -97,7 +104,15 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_user_details, container, false);
+        View view = inflater.inflate(R.layout.fragment_user_details, container, false);
+        setHasOptionsMenu(true);
+        final AppCompatActivity act = (AppCompatActivity) getActivity();
+        if (act.getSupportActionBar() != null) {
+            Toolbar toolbar = (Toolbar) act.findViewById(R.id.toolbar);
+            toolbarspinner = toolbar.findViewById(R.id.spinnertoolbar);
+            toolbarspinner.setVisibility(View.VISIBLE);
+        }
+        return view;
     }
 
     @Override
@@ -105,14 +120,14 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
         super.onViewCreated(view, savedInstanceState);
         permission = "Admin";
         Location = "All";
+        startcode = "a";
+        endcode = "{";
         admin = new LinkedHashMap<>();
         employee = new LinkedHashMap<>();
         adminfilteredlist = new LinkedHashMap<>();
         employeefilteredlist = new LinkedHashMap<>();
 
         gfunc = new Gfunc();
-
-        ListPermissionLvL = view.findViewById(R.id.ChangeUserlvl);
 
         //Initalizing layout and progressbar
         ProgressLayout = view.findViewById(R.id.ProgressLayout);
@@ -122,24 +137,6 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
         EmptyEmployee = view.findViewById(R.id.emptyemployeetextview);
         EmptyAdminImage = view.findViewById(R.id.EmptyAdminImage);
         EmptyEmployeeImage = view.findViewById(R.id.EmptyEmployeeImage);
-
-        searchedittext = view.findViewById(R.id.SearchText);
-        searchedittext.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                filter(editable.toString());
-            }
-        });
 
         madminLayoutManager = new LinearLayoutManager(getContext());
         memployeeLayoutManager = new LinearLayoutManager(getContext());
@@ -167,14 +164,49 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
 
     }
 
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.fragments_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchbarView = (SearchView) searchItem.getActionView();
+        EditText searchedittext = (EditText) searchbarView.findViewById(androidx.appcompat.R.id.search_src_text);
+        searchedittext.setHint("Search for user using name");
+        searchedittext.setHintTextColor(ContextCompat.getColor(getContext(),R.color.hintColor));
+        searchbarView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String search) {
+                if (search.length() > 0) {
+                    int strlength = search.length();
+                    String strFrontCode = search.substring(0, strlength - 1);
+                    String strEndCode = search.substring(strlength - 1, search.length());
+                    startcode = search;
+                    endcode = strFrontCode + Character.toString((char) (strEndCode.charAt(0) + 1));
+                    attachDatabaseListener(startcode, endcode);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                if (s.length() == 0) {
+                    startcode = "a";
+                    endcode = "{";
+                    attachDatabaseListener(startcode, endcode);
+                }
+                return false;
+            }
+        });
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
     private void setupListSpinner() {
         ArrayAdapter PermissionSpinnerAdapter = ArrayAdapter.createFromResource(Objects.requireNonNull(getContext()),
-                R.array.array_permission_options, R.layout.spinner_user_item_text);
+                R.array.array_permission_options, R.layout.spinner_item_text);
 
-        PermissionSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        ListPermissionLvL.setAdapter(PermissionSpinnerAdapter);
-        ListPermissionLvL.setSelection(0);
-        ListPermissionLvL.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        PermissionSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        toolbarspinner.setAdapter(PermissionSpinnerAdapter);
+        toolbarspinner.setSelection(0);
+        toolbarspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selection = parent.getItemAtPosition(position).toString();
@@ -224,31 +256,20 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
         });
     }
 
-    private void filter(String text) {
-        adminfilteredlist = new LinkedHashMap<>();
-        employeefilteredlist = new LinkedHashMap<>();
-        for (StoreUser user : admin.values()) {
-            if (text.toLowerCase().compareTo(user.Name.substring(0
-                    , user.Name.length() < text.length() ? user.Name.length() : text.length()).toLowerCase()) == 0) {
-                adminfilteredlist.put(user.Email, user);
-            }
-        }
-        for (StoreUser user : employee.values()) {
-            if (text.toLowerCase().compareTo(user.Name.substring(0, user.Name.length() < text.length() ?
-                    user.Name.length() : text.length()).toLowerCase()) == 0) {
-                employeefilteredlist.put(user.Email, user);
-            }
-        }
-        adminadapter.filterList(adminfilteredlist);
-        employeeadapter.filterList(employeefilteredlist);
-    }
-
-    private void attachDatabaseListener() {
+    private void attachDatabaseListener(String startcode,String endcode) {
         SDProgress(true, false);
+        admin.clear();
+        employee.clear();
+        adminadapter.notifyDataSetChanged();
+        employeeadapter.notifyDataSetChanged();
         firebaseFirestore.collection("UserDetails").whereEqualTo("ShopCode", Currentuser.ShopCode)
+                .whereGreaterThanOrEqualTo("Name", startcode).whereLessThan("Name", endcode).limit(50)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if(error!=null){
+                            Log.i("failuserentry",error.getMessage());
+                        }
                         if (value != null && !value.isEmpty()) {
                             for (DocumentChange doc : value.getDocumentChanges()) {
                                 StoreUser temp;
@@ -261,7 +282,7 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
                                                 adminfilteredlist.put(temp.Email, temp);
                                                 adminadapter.notifyDataSetChanged();
 
-                                                if(admin.size()>0 && optionselected.compareTo("Admin")==0){
+                                                if (admin.size() > 0 && optionselected.compareTo("Admin") == 0) {
                                                     adminrecyclerview.setVisibility(View.VISIBLE);
                                                     EmptyAdmin.setVisibility(View.GONE);
                                                     EmptyAdminImage.setVisibility(View.GONE);
@@ -271,7 +292,7 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
                                                 employeefilteredlist.put(temp.Email, temp);
                                                 employeeadapter.notifyDataSetChanged();
 
-                                                if(employee.size()>0 && optionselected.compareTo("Employee")==0){
+                                                if (employee.size() > 0 && optionselected.compareTo("Employee") == 0) {
                                                     employeerecyclerview.setVisibility(View.VISIBLE);
                                                     EmptyEmployee.setVisibility(View.GONE);
                                                     EmptyEmployeeImage.setVisibility(View.GONE);
@@ -300,7 +321,7 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
                                             adminfilteredlist.remove(temp.Email);
                                             adminadapter.notifyDataSetChanged();
 
-                                            if(admin.size()==0 && optionselected.compareTo("Admin")==0){
+                                            if (admin.size() == 0 && optionselected.compareTo("Admin") == 0) {
                                                 adminrecyclerview.setVisibility(View.GONE);
                                                 EmptyAdmin.setVisibility(View.VISIBLE);
                                                 EmptyAdminImage.setVisibility(View.VISIBLE);
@@ -310,7 +331,7 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
                                             employeefilteredlist.remove(temp.Email);
                                             employeeadapter.notifyDataSetChanged();
 
-                                            if(employee.size()==0 && optionselected.compareTo("Employee")==0){
+                                            if (employee.size() == 0 && optionselected.compareTo("Employee") == 0) {
                                                 employeerecyclerview.setVisibility(View.GONE);
                                                 EmptyEmployee.setVisibility(View.VISIBLE);
                                                 EmptyEmployeeImage.setVisibility(View.VISIBLE);
@@ -335,7 +356,7 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
                 for (DocumentSnapshot doc : task.getResult()) {
                     Currentuser = doc.toObject(StoreUser.class);
                 }
-                attachDatabaseListener();
+                attachDatabaseListener(startcode,endcode);
             }
         });
     }
@@ -368,7 +389,7 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
             public void onClick(View view) {
                 Location = "All";
                 Boolean flag = true;
-                if (UserName.getEditText().getText().toString().length() < 8 || UserName.getEditText().getText().toString().length()>16) {
+                if (UserName.getEditText().getText().toString().length() < 8 || UserName.getEditText().getText().toString().length() > 16) {
                     UserName.getEditText().setText("");
                     UserName.getEditText().setError("Enter between 8 to 16 characters");
                     UserName.requestFocus();
@@ -392,7 +413,7 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
                 if (flag) {
                     RegisterUser();
                 } else {
-                    SDProgress(false,true);
+                    SDProgress(false, true);
                 }
 
             }
@@ -506,16 +527,14 @@ public class FragmentGroupManageUsers extends Fragment implements BaseRecyclerAd
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             if (alertDialog) {
                 ProgressAlertLayout.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else {
                 ProgressLayout.setVisibility(View.VISIBLE);
             }
         } else {
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             if (alertDialog) {
                 ProgressAlertLayout.setVisibility(View.GONE);
-            }
-            else {
+            } else {
                 ProgressLayout.setVisibility(View.GONE);
             }
         }

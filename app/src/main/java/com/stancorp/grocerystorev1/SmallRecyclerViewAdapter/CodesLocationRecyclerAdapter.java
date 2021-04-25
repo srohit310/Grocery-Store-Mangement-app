@@ -12,6 +12,7 @@ import com.stancorp.grocerystorev1.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class CodesLocationRecyclerAdapter extends CodesBaseRecyclerAdapter {
@@ -20,8 +21,8 @@ public class CodesLocationRecyclerAdapter extends CodesBaseRecyclerAdapter {
     protected List<String> Codes;
     TextView Code;
 
-    public CodesLocationRecyclerAdapter(Context context, @NonNull HashMap<String,LocationStockItem> objects
-            , List<String> Codes, HashMap<String,Float> StockValue) {
+    public CodesLocationRecyclerAdapter(Context context, @NonNull LinkedHashMap<String,LocationStockItem> objects
+            , List<String> Codes, LinkedHashMap<String,Float> StockValue) {
         super(context);
         this.locationStockItems = objects;
         this.Codes = Codes;

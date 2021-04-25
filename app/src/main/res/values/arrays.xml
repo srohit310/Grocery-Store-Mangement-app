@@ -12,6 +12,14 @@
         <item>@string/item_name</item>
         <item>@string/S_Price</item>
     </string-array>
+    <string-array name="array_item_filter_options">
+        <item>@string/valid_items</item>
+        <item>@string/invalid_items</item>
+    </string-array>
+    <string-array name="array_transaction_filter_options">
+        <item>@string/pending</item>
+        <item>@string/completed</item>
+    </string-array>
     <string-array name="array_reason_options">
         <item>@string/fire</item>
         <item>@string/stole</item>
@@ -40,4 +48,8 @@
     <string name="Customer">Customer</string>
     <string name="Vendor">Vendor</string>
     <string name="Both"><![CDATA[Customer & Vendor]]></string>
+    <string name="valid_items">Valid Items</string>
+    <string name="invalid_items">Invalid Items</string>
+    <string name="pending">Pending Transaction</string>
+    <string name="completed">Completed Transaction</string>
 </resources>

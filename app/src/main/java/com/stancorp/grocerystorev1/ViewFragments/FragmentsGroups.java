@@ -20,6 +20,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,35 +38,47 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.AdapterClasses.BaseRecyclerAdapter;
 import com.stancorp.grocerystorev1.Classes.StoreUser;
+import com.stancorp.grocerystorev1.MainActivity;
 import com.stancorp.grocerystorev1.R;
 
 public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAdapter.OnNoteListner {
 
     public FloatingActionButton mfloat;
     public RecyclerView recyclerView;
-    private EditText editText;
     private RecyclerView.LayoutManager mLayoutManager;
     public FirebaseFirestore firebaseFirestore;
     public  RelativeLayout progressLayout;
     private static final int RC_ADD = 251;
     public StoreUser user;
-    public String sortby;
-    RadioGroup SortGroup;
+    public EditText searchedittext;
+    public SearchView searchbarView;
+    public String filterby;
+    public String startcode,endcode;
     public Query.Direction direction;
     public EditText searchBox;
-    public Spinner spinner;
+    public Spinner sortSpinner;
+    public Spinner toolbarspinner;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_group,container,false);
+        View view = inflater.inflate(R.layout.fragment_group,container,false);
+        final AppCompatActivity act = (AppCompatActivity) getActivity();
+        if (act.getSupportActionBar() != null) {
+            Toolbar toolbar = (Toolbar) act.findViewById(R.id.toolbar);
+            toolbarspinner = toolbar.findViewById(R.id.spinnertoolbar);
+            toolbarspinner.setVisibility(View.VISIBLE);
+        }
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         searchBox = view.findViewById(R.id.SearchText);
+        startcode = "!";
+        endcode = "{";
         mfloat = view.findViewById(R.id.floatingActionButton);
         mfloat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,31 +87,15 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
             }
         });
         direction = Query.Direction.ASCENDING;
-        progressLayout = view.findViewById(R.id.ProgressLayout);
+        progressLayout = ((AppCompatActivity) getActivity()).findViewById(R.id.ProgressLayout);
         firebaseFirestore = FirebaseFirestore.getInstance();
-        editText = view.findViewById(R.id.SearchText);
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                filter(editable.toString());
-            }
-        });
         recyclerView = view.findViewById(R.id.recyclerView);
         mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
-        initialize();
         fetchUserData();
     }
+
+    protected abstract void toolbarspinnersetup(Spinner toolbarspinner);
 
     protected abstract void initialize();
 
@@ -108,8 +108,9 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
                     for(DocumentSnapshot snapshot1: task.getResult()){
                         user = snapshot1.toObject(StoreUser.class);
                     }
+                    initialize();
+                    toolbarspinnersetup(toolbarspinner);
                     mfloat.setVisibility(View.VISIBLE);
-                    attachListData(sortby);
                 }
             });
     }
@@ -117,73 +118,41 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.fragments_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchbarView = (SearchView) searchItem.getActionView();
+        searchedittext = (EditText) searchbarView.findViewById(androidx.appcompat.R.id.search_src_text);
+        searchedittext.setHintTextColor(ContextCompat.getColor(getContext(),R.color.hintColor));
+        searchedittext.setTextSize(16f);
+        searchbarView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String search) {
+                if(search.length()>0){
+                    int strlength = search.length();
+                    String strFrontCode = search.substring(0, strlength - 1);
+                    String strEndCode = search.substring(strlength - 1, search.length());
+                    startcode = search;
+                    endcode = strFrontCode + Character.toString((char) (strEndCode.charAt(0) + 1));
+                    attachListData(startcode,endcode);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                if(s.length() == 0){
+                    startcode = "!";
+                    endcode = "{";
+                    attachListData(startcode,endcode);
+                }
+                return false;
+            }
+        });
         super.onCreateOptionsMenu(menu,inflater);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.Sort:
-                alertDialogSort();
-                return true;
-        }
-        return false;
-    }
-
-    protected void alertDialogSort(){
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
-        final View view = LayoutInflater.from(getContext()).inflate(
-                R.layout.alertdialog_sort, (RelativeLayout) getView().findViewById(R.id.addsortalertcontainer)
-        );
-        builder.setView(view);
-        spinner = view.findViewById(R.id.Sortoptions);
-        final AlertDialog alertDialog = builder.create();
-        view.findViewById(R.id.CancelAddItemButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                alertDialog.dismiss();
-            }
-        });
-        SortGroup = view.findViewById(R.id.radioGroup);
-        direction = Query.Direction.ASCENDING;
-        SortGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                int selectedId = SortGroup.getCheckedRadioButtonId();
-                RadioButton SelectedSort = (RadioButton) view.findViewById(selectedId);
-                if (SelectedSort.getText().toString().compareTo("Ascending") == 0) {
-                    direction = Query.Direction.ASCENDING;
-                } else {
-                    direction = Query.Direction.DESCENDING;
-                }
-            }
-        });
-        setupSpinner(view);
-
-        view.findViewById(R.id.ConfirmAddAdminButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attachListData(sortby);
-                alertDialog.dismiss();
-            }
-        });
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
-        }
-        alertDialog.show();
-    }
-
-    protected abstract void setupSpinner(View view);
-
     protected abstract void AddIntent();
 
-    protected abstract void attachListData(String sortby);
-
-    private void filter(String text){
-        filteredlistcondition(text);
-    }
-
-    protected abstract void filteredlistcondition(String text);
+    protected abstract void attachListData(String startcode,String endcode);
 
     @Override
     public void OnNoteClick(int position) {

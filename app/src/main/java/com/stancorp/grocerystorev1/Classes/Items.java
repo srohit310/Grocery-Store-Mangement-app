@@ -1,7 +1,5 @@
 package com.stancorp.grocerystorev1.Classes;
 
-import android.net.Uri;
-
 import java.io.Serializable;
 
 public class Items implements Serializable {
@@ -15,14 +13,15 @@ public class Items implements Serializable {
     public String Stock_Type;
     public Boolean Valid;
     public Boolean Imguri;
+    public String ImgUriString;
     public String Reorder_Lvl;
     public String Excess_LvL;
     public Items(){
 
     }
-    public Items(String ItemCode,String name,String Unit, String Category,
-            String Brand, String Selling_Price, String Buying_Price, String Stock_Type,
-            Boolean Valid, Boolean Imguri, String Reorder_Lvl, String Excess_Lvl){
+    public Items(String ItemCode, String name, String Unit, String Category,
+                 String Brand, String Selling_Price, String Buying_Price, String Stock_Type,
+                 Boolean Valid, Boolean Imguri, String ImgUriString, String Reorder_Lvl, String Excess_Lvl){
         this.name = name;
         this.ItemCode = ItemCode;
         this.Unit = Unit;
@@ -33,6 +32,7 @@ public class Items implements Serializable {
         this.Stock_Type = Stock_Type;
         this.Valid = Valid;
         this.Imguri = Imguri;
+        this.ImgUriString = ImgUriString;
         this.Reorder_Lvl = Reorder_Lvl;
         this.Excess_LvL = Excess_Lvl;
     }
@@ -48,6 +48,7 @@ public class Items implements Serializable {
         this.Stock_Type = item.Stock_Type;
         this.Valid = item.Valid;
         this.Imguri = item.Imguri;
+        this.ImgUriString = item.ImgUriString;
         this.Reorder_Lvl = item.Reorder_Lvl;
         this.Excess_LvL = item.Excess_LvL;
     }
