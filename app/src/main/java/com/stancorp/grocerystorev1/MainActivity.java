@@ -259,6 +259,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_SHORT).show();
                         }
                     });
+                }else{
+                    Glide.with(imageView.getContext())
+                            .clear(imageView);
                 }
                 getSupportActionBar().show();
                 ProgressLayout.setVisibility(View.GONE);

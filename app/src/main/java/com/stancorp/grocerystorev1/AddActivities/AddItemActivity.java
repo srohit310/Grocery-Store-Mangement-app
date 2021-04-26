@@ -73,10 +73,8 @@ import com.stancorp.grocerystorev1.SmallRecyclerViewAdapter.CodesLocationRecycle
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class AddItemActivity extends AppCompatActivity {
@@ -211,7 +209,7 @@ public class AddItemActivity extends AppCompatActivity {
                         Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
                     startActivityForResult(new Intent(getApplicationContext(), ScanSkuCodeActivity.class),RC_SKU_CODE_PICKER);
                 }else
-                    requeststoragepermission(Manifest.permission.CAMERA,"In order to scan Barcode" +
+                    requestpermission(Manifest.permission.CAMERA,"In order to scan Barcode" +
                             " permission to use camera is required",CAMERA_PERMISSION_CODE);
             }
         });
@@ -355,12 +353,14 @@ public class AddItemActivity extends AppCompatActivity {
                             .setAspectRatio(1, 1)
                             .start(AddItemActivity.this);
                 } else
-                    requeststoragepermission(Manifest.permission.READ_EXTERNAL_STORAGE,"In order to access gallery permission" +
+                    requestpermission(Manifest.permission.READ_EXTERNAL_STORAGE,"In order to access gallery permission" +
                             " to read external storage is required",STOREAGE_PERMISSION_CODE);
             }
         });
 
     }
+
+
 
     private void Fillviews() {
         SDProgress(true);
@@ -738,11 +738,15 @@ public class AddItemActivity extends AppCompatActivity {
             total_cost += LocBalanceQty * (Float) StockValue.values().toArray()[i];
         }
         Photoexists = (photouri != null);
+        String tempimguri = "";
+        if(!ImageUpdated && checkmode("Edit")){
+            tempimguri = item.ImgUriString;
+        }
         item = new Items(editTexts.get(0).getText().toString().trim(), editTexts.get(1).getText().toString().trim().toLowerCase()
                 , autoeditViews.get(0).getText().toString().trim(), autoeditViews.get(1).getText().toString().trim()
                 , autoeditViews.get(2).getText().toString().trim(), editTexts.get(2).getText().toString().trim()
                 , editTexts.get(3).getText().toString().trim(), editTexts.get(4).getText().toString().trim(), ItemValid
-                , Photoexists,"", editTexts.get(6).getText().toString().trim(), editTexts.get(7).getText().toString().trim());
+                , Photoexists,tempimguri, editTexts.get(6).getText().toString().trim(), editTexts.get(7).getText().toString().trim());
 
         itemStockInfo = new ItemStockInfo(item.ItemCode, item.name,
                 String.valueOf(total_cost), String.valueOf(total_balance), editTexts.get(5).getText().toString().trim(),
@@ -750,7 +754,7 @@ public class AddItemActivity extends AppCompatActivity {
 
         Default_Reorder_qty = editTexts.get(5).getText().toString().trim();
 
-        if (Photoexists) {
+        if (Photoexists && ImageUpdated) {
             photostorage.child(ShopCode).child(item.ItemCode)
                     .putFile(photouri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -880,7 +884,7 @@ public class AddItemActivity extends AppCompatActivity {
 
     }
 
-    private void requeststoragepermission(final String Permission, String Message, final Integer code) {
+    private void requestpermission(final String Permission, String Message, final Integer code) {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Permission)) {
             new AlertDialog.Builder(this)
                     .setTitle("Permission Needed")

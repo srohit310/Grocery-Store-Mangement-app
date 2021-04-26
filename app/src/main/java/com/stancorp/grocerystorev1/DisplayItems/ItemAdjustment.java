@@ -16,6 +16,7 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.AdapterClasses.AdjustmentAdapter;
 import com.stancorp.grocerystorev1.AdapterClasses.BaseRecyclerAdapter;
@@ -36,6 +37,8 @@ public class ItemAdjustment extends Fragment implements BaseRecyclerAdapter.OnNo
     private Items item;
     private String ShopCode;
     private String UserName;
+
+    ListenerRegistration adjustmentlistener;
 
     Gfunc gfunc;
 
@@ -78,7 +81,7 @@ public class ItemAdjustment extends Fragment implements BaseRecyclerAdapter.OnNo
         View view = inflater.inflate(R.layout.fragment_item_adjustment, container, false);
         gfunc = new Gfunc();
         itemadjustments = new LinkedHashMap<>();
-        adjustmentAdapter = new AdjustmentAdapter(itemadjustments, getContext(),this);
+        adjustmentAdapter = new AdjustmentAdapter(itemadjustments, getContext(), this);
         firebaseFirestore = FirebaseFirestore.getInstance();
         recyclerView = view.findViewById(R.id.recyclerView);
         EmptyLayout = view.findViewById(R.id.EmptyLayout);
@@ -92,29 +95,41 @@ public class ItemAdjustment extends Fragment implements BaseRecyclerAdapter.OnNo
         return view;
     }
 
-    private void attachDatabaseListener() {
+    @Override
+    public void onPause() {
+        adjustmentlistener.remove();
+        super.onPause();
+    }
 
-        firebaseFirestore.collection(ShopCode).document("doc").collection("ItemAdjustments")
-                .whereEqualTo("ItemCode",item.ItemCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                if(value!=null && !value.isEmpty()){
-                    for(DocumentChange doc : value.getDocumentChanges()){
-                        ItemAdjustmentClass adjustment;
-                        switch (doc.getType()){
-                            case ADDED:
-                                adjustment = doc.getDocument().toObject(ItemAdjustmentClass.class);
-                                itemadjustments.put(doc.getDocument().getId(),adjustment);
-                                adjustmentAdapter.notifyDataSetChanged();
-                                break;
+    @Override
+    public void onResume() {
+        super.onResume();
+        attachDatabaseListener();
+    }
+
+    private void attachDatabaseListener() {
+        adjustmentlistener =
+                firebaseFirestore.collection(ShopCode).document("doc").collection("ItemAdjustments")
+                        .whereEqualTo("ItemCode", item.ItemCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (value != null && !value.isEmpty()) {
+                            for (DocumentChange doc : value.getDocumentChanges()) {
+                                ItemAdjustmentClass adjustment;
+                                switch (doc.getType()) {
+                                    case ADDED:
+                                        adjustment = doc.getDocument().toObject(ItemAdjustmentClass.class);
+                                        itemadjustments.put(doc.getDocument().getId(), adjustment);
+                                        adjustmentAdapter.notifyDataSetChanged();
+                                        break;
+                                }
+                            }
+                        }
+                        if (itemadjustments.size() > 0) {
+                            EmptyLayout.setVisibility(View.GONE);
                         }
                     }
-                }
-                if(itemadjustments.size()>0){
-                    EmptyLayout.setVisibility(View.GONE);
-                }
-            }
-        });
+                });
     }
 
     @Override

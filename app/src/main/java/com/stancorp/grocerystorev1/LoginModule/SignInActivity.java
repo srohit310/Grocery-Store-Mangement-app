@@ -172,7 +172,7 @@ public class SignInActivity extends AppCompatActivity {
                                                 finish();
                                             } else {
                                                 Password.getEditText().setText("");
-                                                Password.setHint("Wrong Password entered");
+                                                Password.setError("Wrong Password entered");
                                                 Password.requestFocus();
                                                 SDProgress(false);
                                             }
@@ -203,10 +203,10 @@ public class SignInActivity extends AppCompatActivity {
             Email.getEditText().setText("");
             Password.setVisibility(View.GONE);
             Password.setEnabled(true);
+            Password.setErrorEnabled(false);
             ForgetPassword.setText("Forget Password?");
             ForgetPassword.setEnabled(true);
             ForgetPassword.setVisibility(View.GONE);
-            signInButton.setText(getString(R.string.NextButton));
         }else
             finishAffinity();
     }

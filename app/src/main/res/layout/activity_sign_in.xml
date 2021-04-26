@@ -3,20 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-
     android:layout_height="match_parent"
     android:background="@drawable/signinmenubackground"
     tools:context=".LoginModule.SignInActivity">
 
-    <ScrollView
-        android:layout_width="wrap_content"
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:padding="15dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="15dp"
+            android:layout_height="wrap_content"
             android:background="@color/white"
             android:elevation="10dp"
             app:cardCornerRadius="40dp">
@@ -130,8 +130,8 @@
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="25dp"
                     android:text="Forgot Password?"
-                    android:visibility="gone"
-                    android:textColor="@color/colorAccent" />
+                    android:textColor="@color/colorAccent"
+                    android:visibility="gone" />
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/RegisterCardView"
@@ -178,7 +178,7 @@
                 </LinearLayout>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <RelativeLayout
         android:id="@+id/ProgressLayout"
@@ -186,7 +186,6 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:background="#2f000000"
-        android:orientation="vertical"
         android:visibility="gone">
 
         <ProgressBar

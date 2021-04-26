@@ -66,7 +66,7 @@ public class FragmentsGroupPurchases extends FragmentsGroups {
         transactions = new LinkedHashMap<>();
         searchedittext.setHint("Search for purchase using referenceid");
         firebaseFirestore = FirebaseFirestore.getInstance();
-        transactionAdapter = new TransactionAdapter(transactions, getContext(), this);
+        transactionAdapter = new TransactionAdapter(transactions, getContext(), this,null);
         recyclerView.setAdapter(transactionAdapter);
         pending = true;
     }

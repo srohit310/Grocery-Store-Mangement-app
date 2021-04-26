@@ -15,11 +15,14 @@ public class StoreTransaction {
     public String madeByEmail;
     public String madeByDate;
     public Boolean pending;
+    public DeliveryAddress deliveryAddressfrom;
+    public DeliveryAddress deliveryAddressto;
 
     public StoreTransaction(){ }
 
     public StoreTransaction(String code, long codeno, String type, String reference, String stakeholderCode, String locationCode, float totalPrice, float totalProfit,
-                            String madeByName, String madeByEmail, String madeByDate, Boolean pending){
+                            String madeByName, String madeByEmail, String madeByDate, Boolean pending, DeliveryAddress deliveryAddressfrom,
+                            DeliveryAddress deliveryAddressto){
         this.code = code;
         this.codeno = codeno;
         this.type = type;
@@ -32,6 +35,8 @@ public class StoreTransaction {
         this.madeByEmail = madeByEmail;
         this.madeByDate = madeByDate;
         this.pending = pending;
+        this.deliveryAddressfrom = deliveryAddressfrom;
+        this.deliveryAddressto = deliveryAddressto;
     }
 
 

@@ -49,6 +49,7 @@ public class FragmentsGroupVendors extends FragmentsGroups {
     protected void AddIntent() {
         Intent intent = new Intent(getContext(), AddStakesholdersActivity.class);
         intent.putExtra("ShopCode",user.ShopCode);
+        intent.putExtra("ActivityMode", "Add");
         startActivity(intent);
     }
 
@@ -101,6 +102,8 @@ public class FragmentsGroupVendors extends FragmentsGroups {
         Intent intent = new Intent(getContext(), AgentViewActivity.class);
         Agent agent = (Agent) filteredList.values().toArray()[position];
         intent.putExtra("AgentCode",agent.Code);
+        intent.putExtra("Agent",agent);
+        intent.putExtra("Mode","Vendor");
         intent.putExtra("ShopCode",user.ShopCode);
         startActivity(intent);
     }

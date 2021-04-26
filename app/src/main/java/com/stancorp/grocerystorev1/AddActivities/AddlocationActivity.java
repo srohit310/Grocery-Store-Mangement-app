@@ -17,6 +17,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -79,6 +80,7 @@ public class AddlocationActivity extends AppCompatActivity {
     ArrayList<EditText> editTexts;
     ArrayList<EditText> alertEditTexts;
     ArrayList<String> ItemString;
+    Pair<String,Boolean> itemvalid;
     LinkedHashMap<String, ItemStockInfo> ItemCodes;
     LinkedHashMap<String, ItemStockInfo> items;
     LinkedHashMap<String, Float> StockValue;
@@ -157,8 +159,6 @@ public class AddlocationActivity extends AppCompatActivity {
         scrollview = findViewById(R.id.AddLocationScrollView);
         scrollview.setEnabled(false);
 
-        checkItemsChange();
-
         // Setting up Recycler View
         recyclerView = findViewById(R.id.ItemStockList);
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -216,39 +216,6 @@ public class AddlocationActivity extends AppCompatActivity {
         });
     }
 
-    private void checkItemsChange() {
-        SDProgress(true);
-        firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                        if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                            for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                                ItemStockInfo item;
-                                switch (doc.getType()) {
-                                    case MODIFIED:
-                                        item = doc.getDocument().toObject(ItemStockInfo.class);
-                                        if (!item.valid) {
-                                            if (ItemCodes.containsKey(item.ItemCode)) {
-                                                ItemCodes.remove(item.ItemCode);
-                                                locationStockItems.remove(item.ItemCode);
-                                                StockValue.remove(item.ItemCode);
-                                            }
-                                        } else {
-                                            if (ItemCodes.containsKey(item.ItemCode)) {
-                                                ItemCodes.remove(item.ItemCode);
-                                                ItemCodes.put(item.ItemCode, item);
-                                            }
-                                        }
-                                        break;
-                                }
-                            }
-                        }
-                        SDProgress(false);
-                    }
-                });
-    }
-
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -273,6 +240,11 @@ public class AddlocationActivity extends AppCompatActivity {
 
     private void AddItemOpeningStock() {
         boolean flag = true;
+        if(Itemsearch.getText().toString().length() == 0){
+            flag = false;
+            Itemsearch.requestFocus();
+            Itemsearch.setError("Please enter an item");
+        }
         if (ItemCodes.containsKey(Itemsearch.getText().toString())) {
             flag = false;
             Itemsearch.setText("");
@@ -287,7 +259,7 @@ public class AddlocationActivity extends AppCompatActivity {
                     if (task.getResult().exists()) {
                         ItemStockInfo itemStockInfo = task.getResult().toObject(ItemStockInfo.class);
                         if (itemStockInfo.valid) {
-                            AddItemStockAlert();
+                            AddItemStockAlert(itemStockInfo);
                         } else {
                             Itemsearch.setText("");
                             Itemsearch.requestFocus();
@@ -303,7 +275,7 @@ public class AddlocationActivity extends AppCompatActivity {
         }
     }
 
-    private void AddItemStockAlert() {
+    private void AddItemStockAlert(final ItemStockInfo tempitem) {
         AlertDialog.Builder builder = new AlertDialog.Builder(AddlocationActivity.this, R.style.AlertDialogTheme);
         View view = LayoutInflater.from(getApplicationContext()).inflate(
                 R.layout.alertdialog_additem, (RelativeLayout) findViewById(R.id.additemalertcontainer)
@@ -346,28 +318,14 @@ public class AddlocationActivity extends AppCompatActivity {
                     }
                 }
                 if (flag) {
-                    firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
-                            .document(Itemsearch.getText().toString()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            ItemStockInfo tempitem = task.getResult().toObject(ItemStockInfo.class);
-                            if (tempitem.valid) {
-                                Float tempOpenValue = Float.parseFloat(alertEditTexts.get(1).getText().toString());
-                                LocationStockItem tempLCI = new LocationStockItem(alertEditTexts.get(0).getText().toString()
-                                        , alertEditTexts.get(2).getText().toString(), true, tempitem.ItemCode, "");
-                                locationStockItems.put(tempitem.ItemCode, tempLCI);
-                                ItemCodes.put(tempitem.ItemCode, tempitem);
-                                StockValue.put(tempitem.ItemCode, tempOpenValue);
-                                codesRecyclerAdapter.notifyDataSetChanged();
-                                alertDialog.dismiss();
-                            } else {
-                                Itemsearch.setText("");
-                                Itemsearch.requestFocus();
-                                Itemsearch.setError("Item was invalidated during addition");
-                                alertDialog.dismiss();
-                            }
-                        }
-                    });
+                    Float tempOpenValue = Float.parseFloat(alertEditTexts.get(1).getText().toString());
+                    LocationStockItem tempLCI = new LocationStockItem(alertEditTexts.get(0).getText().toString()
+                            , alertEditTexts.get(2).getText().toString(), true, tempitem.ItemCode, "");
+                    locationStockItems.put(tempitem.ItemCode, tempLCI);
+                    ItemCodes.put(tempitem.ItemCode, tempitem);
+                    StockValue.put(tempitem.ItemCode, tempOpenValue);
+                    codesRecyclerAdapter.notifyDataSetChanged();
+                    alertDialog.dismiss();
                 }
 
             }
@@ -430,6 +388,24 @@ public class AddlocationActivity extends AppCompatActivity {
             @Nullable
             @Override
             public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                ArrayList<ItemStockInfo> newitemstocks = new ArrayList<>();
+                for (int i = 0; i < ItemCodes.size(); i++) {
+                    ItemStockInfo tempstockinfo = new ItemStockInfo((ItemStockInfo) ItemCodes.values().toArray()[i]);
+                    tempstockinfo = transaction.get(firebaseFirestore.collection(Shopcode).document("doc")
+                            .collection("ItemStockInfo").document(tempstockinfo.ItemCode)).toObject(ItemStockInfo.class);
+                    if(!tempstockinfo.valid){
+                        itemvalid = new Pair<>(tempstockinfo.ItemCode,true);
+                        return null;
+                    }
+                    LocationStockItem locationStockItem = locationStockItems.get(tempstockinfo.ItemCode);
+                    Float T_Bqty = Float.parseFloat(tempstockinfo.Total_Balance_Quantity) +
+                            Float.parseFloat(locationStockItem.Balance_Qty);
+                    Float T_price = Float.parseFloat(tempstockinfo.Total_Price) +
+                            (Float.parseFloat(locationStockItem.Balance_Qty) * StockValue.get(tempstockinfo.ItemCode));
+                    tempstockinfo.Total_Balance_Quantity = String.valueOf(T_Bqty);
+                    tempstockinfo.Total_Price = String.valueOf(T_price);
+                    newitemstocks.add(tempstockinfo);
+                }
                 if (transaction.get(firebaseFirestore.collection(Shopcode).document("maxIndex")).exists()) {
                     maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(Shopcode).document("maxIndex"))
                             .toObject(maxindex.class);
@@ -449,17 +425,11 @@ public class AddlocationActivity extends AppCompatActivity {
                         .document(location.code);
                 transaction.set(doc, location);
                 for (int i = 0; i < ItemCodes.size(); i++) {
-                    ItemStockInfo tempstockinfo = new ItemStockInfo((ItemStockInfo) ItemCodes.values().toArray()[i]);
+                    ItemStockInfo tempstockinfo = new ItemStockInfo(newitemstocks.get(i));
                     LocationStockItem locationStockItem = locationStockItems.get(tempstockinfo.ItemCode);
                     locationStockItem.LocationCode = location.code;
                     transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("Location")
                             .document(tempstockinfo.ItemCode+location.code), locationStockItem);
-                    Float T_Bqty = Float.parseFloat(tempstockinfo.Total_Balance_Quantity) +
-                            Float.parseFloat(locationStockItem.Balance_Qty);
-                    Float T_price = Float.parseFloat(tempstockinfo.Total_Price) +
-                            (Float.parseFloat(locationStockItem.Balance_Qty) * StockValue.get(tempstockinfo.ItemCode));
-                    tempstockinfo.Total_Balance_Quantity = String.valueOf(T_Bqty);
-                    tempstockinfo.Total_Price = String.valueOf(T_price);
                     transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
                             .document(tempstockinfo.ItemCode), tempstockinfo);
                 }
@@ -469,12 +439,26 @@ public class AddlocationActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Location entered", Toast.LENGTH_SHORT).show();
+                    if(itemvalid !=null){
+                        locationStockItems.remove(itemvalid.first);
+                        ItemCodes.remove(itemvalid.first);
+                        StockValue.remove(itemvalid.first);
+                        codesRecyclerAdapter.notifyDataSetChanged();
+                        Toast.makeText(getApplicationContext(),"Item " + itemvalid.first + " was made invalid during after addition into list",Toast.LENGTH_SHORT).show();
+                    }
+                    if(itemvalid == null){
+                        Toast.makeText(getApplicationContext(), "Location entered", Toast.LENGTH_SHORT).show();
+                        SDProgress(false);
+                        showLocationCode();
+                    }else{
+                        itemvalid = null;
+                        SDProgress(false);
+                    }
                 } else {
                     Toast.makeText(getApplicationContext(), "failed to enter location", Toast.LENGTH_SHORT).show();
+                    SDProgress(false);
+                    finish();
                 }
-                SDProgress(false);
-                showLocationCode();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

@@ -30,8 +30,11 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 import com.stancorp.grocerystorev1.Classes.AdditionalContact;
 import com.stancorp.grocerystorev1.Classes.Agent;
@@ -50,10 +53,12 @@ public class AddStakesholdersActivity extends AppCompatActivity {
     Agent agent;
     DeliveryAddress deliveryAddress;
     AdditionalContact additionalContact;
+    String Mode;
 
     //Boolean
     Boolean delivery;
     Boolean additionalcontact;
+    Boolean agentValid;
 
     //layouts
     LinearLayout deliveryLayout;
@@ -95,6 +100,11 @@ public class AddStakesholdersActivity extends AppCompatActivity {
 
         gfunc = new Gfunc();
         shopcode = getIntent().getStringExtra("ShopCode");
+        Mode = getIntent().getStringExtra("ActivityMode");
+        if(Mode.compareTo("Edit")==0){
+            agent = (Agent) getIntent().getSerializableExtra("Agent");
+        }
+        agentValid = true;
 
         //supportactionbar
         getSupportActionBar().setTitle("Add Customer / Vendor");
@@ -174,6 +184,67 @@ public class AddStakesholdersActivity extends AppCompatActivity {
 
         //Firebase
         firebaseFirestore = FirebaseFirestore.getInstance();
+
+        if(Mode.compareTo("Edit")==0){
+            setEditTexts();
+        }
+    }
+
+    private void setEditTexts() {
+        customerType = agent.CustomerType;
+        RadioButton Business = findViewById(R.id.radioButton);
+        RadioButton Indivitual = findViewById(R.id.radioButton2);
+        switch (agent.CustomerType){
+            case "Business":
+                agentMainDetails.get(2).setText(agent.Name);
+                Business.setChecked(true);
+                break;
+            case "Individual":
+                String[] name = agent.Name.split(" ");
+                agentMainDetails.get(0).setText(name[0]);
+                agentMainDetails.get(1).setText(name[1]);
+                Indivitual.setChecked(true);
+                break;
+        }
+        Business.setEnabled(false);
+        Indivitual.setEnabled(false);
+
+        agentType = agent.AgentType;
+        switch (agent.AgentType){
+            case "Customer":
+                SelectType.setSelection(0);
+                customertypeLayout.setVisibility(View.VISIBLE);
+                setcheckedLayout();
+                break;
+            case "Vendor":
+                SelectType.setSelection(1);
+                customertypeLayout.setVisibility(View.GONE);
+                setcheckedLayout();
+                break;
+            case "Both":
+                SelectType.setSelection(2);
+                customertypeLayout.setVisibility(View.GONE);
+                setcheckedLayout();
+                break;
+        }
+        SelectType.setEnabled(false);
+        agentMainDetails.get(3).setText(agent.Email);
+        agentMainDetails.get(4).setText(String.valueOf(agent.Phoneno));
+        if(agent.deladdress!=null){
+            deliveryDetails.get(0).setText(agent.deladdress.Street);
+            deliveryDetails.get(1).setText(agent.deladdress.City);
+            deliveryDetails.get(2).setText(agent.deladdress.State);
+            deliveryDetails.get(3).setText(String.valueOf(agent.deladdress.Pincode));
+
+        }
+        if(agent.altcontact!=null){
+            additionalcontactDetails.get(0).setText(agent.altcontact.Name);
+            additionalcontactDetails.get(1).setText(agent.altcontact.Email);
+            additionalcontactDetails.get(2).setText(String.valueOf(agent.altcontact.Phoneno));
+            additionalcontactDetails.get(3).setText(agent.altcontact.Designation);
+            additionalcontactDetails.get(4).setText(agent.altcontact.Department);
+
+        }
     }
 
     private void setcheckedLayout() {
@@ -230,6 +301,22 @@ public class AddStakesholdersActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(AddStakesholdersActivity.this,R.style.MyDialogTheme);
+        if(Mode.compareTo("Add")==0){
+            alertDialog.setTitle("Discard StakeHolder?");
+        }else{
+            alertDialog.setTitle("Discard Changes?");
+        }
+        alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                finish();
+            }
+        }).setNegativeButton("Cancel",null).show();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.add_menu, menu);
         return true;
@@ -240,7 +327,7 @@ public class AddStakesholdersActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.Save:
                 AlertDialog.Builder alert = new AlertDialog.Builder(AddStakesholdersActivity.this, R.style.MyDialogTheme);
-                if (true) {
+                if (Mode.compareTo("Add")==0) {
                     alert.setMessage("Confirm Details");
                 } else {
                     alert.setMessage("Confirm Changes");
@@ -253,16 +340,7 @@ public class AddStakesholdersActivity extends AppCompatActivity {
                 }).setNegativeButton("Cancel", null).show();
                 return true;
             case android.R.id.home:
-                new AlertDialog.Builder(AddStakesholdersActivity.this,R.style.MyDialogTheme)
-                        .setTitle("Discard Stakeholder")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                onBackPressed();
-                            }
-                        })
-                        .setNegativeButton("Cancel",null)
-                        .show();
+                onBackPressed();
                 return true;
         }
         return false;
@@ -365,9 +443,13 @@ public class AddStakesholdersActivity extends AppCompatActivity {
         } else if (customerType.compareTo("Individual") == 0) {
             Name = agentMainDetails.get(0).getText().toString().trim() + " " + agentMainDetails.get(1).getText().toString().trim();
         }
+        String code = "";
+        if(Mode.compareTo("Edit")==0){
+               code = agent.Code;
+        }
         agent = new Agent(Name.toLowerCase(),agentType,customerType,agentMainDetails.get(3).getText().toString().trim(),
                 Long.parseLong(agentMainDetails.get(4).getText().toString().trim()),deliveryAddress,additionalContact,true);
-
+        agent.Code = code;
         savetodb();
     }
 
@@ -377,50 +459,73 @@ public class AddStakesholdersActivity extends AppCompatActivity {
             @Nullable
             @Override
             public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-                if (transaction.get(firebaseFirestore.collection(shopcode).document("maxIndex")).exists()) {
-                    maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(shopcode).document("maxIndex"))
-                            .toObject(maxindex.class);
-                    if(agentType.compareTo("Vendor")==0) {
-                        agent.Code = "VEN-" + String.valueOf(max.vendorCode + 1);
-                        max.vendorCode = max.vendorCode + 1;
-                    }else if(agentType.compareTo("Customer")==0){
-                        agent.Code = "CUS-" + String.valueOf(max.customerCode + 1);
-                        max.customerCode = max.customerCode + 1;
-                    }else if(agentType.compareTo("Both")==0){
-                        agent.Code = "AGENT-" + String.valueOf(max.agentCode + 1);
-                        max.agentCode = max.agentCode + 1;
+                if(Mode.compareTo("Add")==0) {
+                    if (transaction.get(firebaseFirestore.collection(shopcode).document("maxIndex")).exists()) {
+                        maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(shopcode).document("maxIndex"))
+                                .toObject(maxindex.class);
+                        if (agentType.compareTo("Vendor") == 0) {
+                            agent.Code = "VEN-" + String.valueOf(max.vendorCode + 1);
+                            max.vendorCode = max.vendorCode + 1;
+                        } else if (agentType.compareTo("Customer") == 0) {
+                            agent.Code = "CUS-" + String.valueOf(max.customerCode + 1);
+                            max.customerCode = max.customerCode + 1;
+                        } else if (agentType.compareTo("Both") == 0) {
+                            agent.Code = "AGENT-" + String.valueOf(max.agentCode + 1);
+                            max.agentCode = max.agentCode + 1;
+                        }
+                        agent.codeno = max.vendorCode + max.customerCode + max.agentCode;
+                        transaction.set(firebaseFirestore.collection(shopcode).document("maxIndex"), max);
+                    } else {
+                        maxindex max = new maxindex();
+                        if (agentType.compareTo("Vendor") == 0) {
+                            agent.Code = "VEN-1";
+                            max = new maxindex(0, 0, 0, 0, 0, 1);
+                        } else if (agentType.compareTo("Customer") == 0) {
+                            agent.Code = "CUS-1";
+                            max = new maxindex(0, 0, 0, 0, 1, 0);
+                        } else if (agentType.compareTo("Both") == 0) {
+                            agent.Code = "AGENT-1";
+                            max = new maxindex(1, 0, 0, 0, 0, 0);
+                        }
+                        agent.codeno = 1;
+                        transaction.set(firebaseFirestore.collection(shopcode).document("maxIndex"), max);
                     }
-                    agent.codeno = max.vendorCode + max.customerCode + max.agentCode;
-                    transaction.set(firebaseFirestore.collection(shopcode).document("maxIndex"), max);
-                } else {
-                    maxindex max = new maxindex();
-                    if(agentType.compareTo("Vendor")==0) {
-                        agent.Code = "VEN-1";
-                        max = new maxindex(0,0,0,0,0,1);
-                    }else if(agentType.compareTo("Customer")==0){
-                        agent.Code = "CUS-1";
-                        max = new maxindex(0,0,0,0,1,0);
-                    }else if(agentType.compareTo("Both")==0){
-                        agent.Code = "AGENT-1";
-                        max = new maxindex(1,0,0,0,0,0);
+                }else{
+                    Boolean valid = transaction.get(firebaseFirestore.collection(shopcode).document("doc")
+                            .collection("StakeHolders").document(agent.Code)).exists();
+                    if(!valid){
+                        agentValid = false;
+                        return null;
                     }
-                    agent.codeno = 1;
-                    transaction.set(firebaseFirestore.collection(shopcode).document("maxIndex"), max);
                 }
                 transaction.set(firebaseFirestore.collection(shopcode).document("doc")
-                        .collection("StakeHolders").document(),agent);
+                        .collection("StakeHolders").document(agent.Code),agent);
                 return null;
             }
+
         }).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    Toast.makeText(getApplicationContext(),"Agent added to database",Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getApplicationContext(),"Failed to add to database",Toast.LENGTH_SHORT).show();
-                }
                 SDProgress(false);
-                displaycodegenerated();
+                if(Mode.compareTo("Edit")==0){
+                    if(task.isSuccessful() && agentValid){
+                        Toast.makeText(getApplicationContext(),"Agent data updated to database",Toast.LENGTH_SHORT).show();
+                    }else{
+                        if(agentValid) {
+                            Toast.makeText(getApplicationContext(), "Failed to update details", Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(getApplicationContext(), "Agent Deleted by another user", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    finish();
+                }else {
+                    if(task.isSuccessful()){
+                        Toast.makeText(getApplicationContext(),"Agent added to database",Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getApplicationContext(),"Failed to add to database",Toast.LENGTH_SHORT).show();
+                    }
+                    displaycodegenerated();
+                }
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

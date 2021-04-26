@@ -8,7 +8,9 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import com.stancorp.grocerystorev1.Classes.ItemStockInfo;
 import com.stancorp.grocerystorev1.Classes.Items;
 import com.stancorp.grocerystorev1.DisplayItems.ItemAdjustment;
 import com.stancorp.grocerystorev1.DisplayItems.ItemDetails;
@@ -19,21 +21,23 @@ import com.stancorp.grocerystorev1.R;
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-public class ItemSectionsPagerAdapter extends FragmentPagerAdapter {
+public class ItemSectionsPagerAdapter extends FragmentStatePagerAdapter {
 
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.tab_text_1, R.string.tab_text_2, R.string.tab_text_3};
     private final Context mContext;
     private Items Item;
+    private ItemStockInfo itemStockInfo;
     private String ShopCode;
     private String Username;
 
-    public ItemSectionsPagerAdapter(Context context, FragmentManager fm, Items Item, String Shopcode, String Username) {
+    public ItemSectionsPagerAdapter(Context context, FragmentManager fm, Items Item, String Shopcode, String Username,ItemStockInfo itemStockInfo) {
         super(fm);
         mContext = context;
         this.Item = new Items(Item);
         this.ShopCode = Shopcode;
         this.Username = Username;
+        this.itemStockInfo = itemStockInfo;
     }
 
     @Override
@@ -43,7 +47,7 @@ public class ItemSectionsPagerAdapter extends FragmentPagerAdapter {
         Fragment fragment = null;
         switch (position){
             case 0 :
-                fragment = ItemDetails.newInstance(Item,ShopCode);
+                fragment = ItemDetails.newInstance(Item,ShopCode,itemStockInfo);
                 break;
             case 1:
                 fragment = ItemAdjustment.newInstance(Item,ShopCode,Username);

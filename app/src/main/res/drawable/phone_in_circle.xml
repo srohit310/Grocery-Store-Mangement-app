@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <layer-list>
+            <item>
+                <shape>
+                    <size
+                        android:width="40dp"
+                        android:height="40dp"/>
+                    <solid android:color="@color/colorPrimary"/>
+                    <corners
+                        android:radius="20dp"/>
+                </shape>
+            </item>
+            <item
+                android:width="20dp"
+                android:height="20dp"
+                android:gravity="center"
+                android:drawable="@drawable/ic_baseline_local_phone_24"
+                />
+        </layer-list>
+    </item>
+</selector>

@@ -439,7 +439,16 @@ public class RegisterActivity extends AppCompatActivity {
                             }
                             if (ShopCode.getText().toString().compareTo(tempUser.ShopCode) == 0 && permission.compareTo(tempUser.PermissionLevel) == 0) {
                                 tempUser.PhotoUri = Photoexists;
-                                RegisterUser(tempUser, key);
+                                if(!tempUser.Registeredflag) {
+                                    RegisterUser(tempUser, key);
+                                }else{
+                                    Snackbar registered = Snackbar.make(RegisterLayout, "User is already Registered!", BaseTransientBottomBar.LENGTH_SHORT);
+                                    registered.setDuration(5000);
+                                    SDProgress(false,"");
+                                    ShopCode.setText("");
+                                    UserEmail.getEditText().setText("");
+                                    registered.show();
+                                }
                             } else {
                                 SDProgress(false, "");
                                 snackbar.show();
@@ -524,6 +533,11 @@ public class RegisterActivity extends AppCompatActivity {
                                     SDProgress(false, "");
                                     if (RegisterType == 1) {
                                         showshopcodeassigned();
+                                    }else{
+                                        Toast.makeText(getApplicationContext(), "Registered account", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent();
+                                        setResult(RESULT_OK, intent);
+                                        finish();
                                     }
                                 }
                             });

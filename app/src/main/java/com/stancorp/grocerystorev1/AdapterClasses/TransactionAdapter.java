@@ -1,7 +1,9 @@
 package com.stancorp.grocerystorev1.AdapterClasses;
 
 import android.content.Context;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -10,6 +12,8 @@ import com.stancorp.grocerystorev1.Classes.StoreTransaction;
 import com.stancorp.grocerystorev1.R;
 
 import java.util.LinkedHashMap;
+
+import javax.annotation.Nullable;
 
 public class TransactionAdapter extends BaseRecyclerAdapter {
 
@@ -21,16 +25,20 @@ public class TransactionAdapter extends BaseRecyclerAdapter {
     TextView fromcode,fromtype;
     TextView tocode,totype;
     TextView totalPrice;
+    LinearLayout transactionExchange;
     ImageView approved;
     Context context;
+    String contentSize;
 
-    public TransactionAdapter(LinkedHashMap<String,StoreTransaction> transactions,Context context, OnNoteListner onNoteListner) {
+    public TransactionAdapter(LinkedHashMap<String,StoreTransaction> transactions,Context context, OnNoteListner onNoteListner,
+                              @Nullable String contentSize) {
         super(context, onNoteListner);
         dataList = transactions;
         this.context = context;
         transactionsArrayList = transactions;
         this.mOnNoteListner = onNoteListner;
         layout_id = R.layout.transaction_layout;
+        this.contentSize = contentSize;
     }
 
     @Override
@@ -45,6 +53,7 @@ public class TransactionAdapter extends BaseRecyclerAdapter {
         fromtype = holder.itemView.findViewById(R.id.fromtype);
         tocode = holder.itemView.findViewById(R.id.tocode);
         totype = holder.itemView.findViewById(R.id.totype);
+        transactionExchange = holder.itemView.findViewById(R.id.transactionexchange);
 
         if(transaction!=null){
             transactionCode.setText(transaction.code);
@@ -55,16 +64,22 @@ public class TransactionAdapter extends BaseRecyclerAdapter {
             } else {
                 approved.setBackground(ContextCompat.getDrawable(context, R.drawable.circle_green));
             }
-            if(transaction.type.compareTo("Purchase")==0){
-                fromcode.setText(transaction.stakeholderCode);
-                fromtype.setText("Vendor");
-                tocode.setText(transaction.locationCode);
-                totype.setText("Store Location");
+            if(contentSize == null) {
+                if (transaction.type.compareTo("Purchase") == 0) {
+                    fromcode.setText(transaction.stakeholderCode);
+                    fromtype.setText("Vendor");
+                    tocode.setText(transaction.locationCode);
+                    totype.setText("Store Location");
+                } else {
+                    fromcode.setText(transaction.locationCode);
+                    fromtype.setText("Store Location");
+                    tocode.setText(transaction.stakeholderCode);
+                    totype.setText("Customer");
+                }
             }else{
-                fromcode.setText(transaction.locationCode);
-                fromtype.setText("Store Location");
-                tocode.setText(transaction.stakeholderCode);
-                totype.setText("Customer");
+                if(contentSize.compareTo("Small")==0){
+                    transactionExchange.setVisibility(View.GONE);
+                }
             }
         }
     }

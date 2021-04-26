@@ -29,6 +29,7 @@ public class ItemDetails extends Fragment {
     Items item;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM3 = "param3";
     TextView ItemName;
     TextView ItemCode;
     TextView ItemCategory;
@@ -41,6 +42,7 @@ public class ItemDetails extends Fragment {
 
     private Items mParam1;
     private String mParam2;
+    private ItemStockInfo mParam3;
     private ItemStockInfo itemStockInfo;
 
     public ItemDetails() {
@@ -49,11 +51,12 @@ public class ItemDetails extends Fragment {
 
 
     // TODO: Rename and change types and number of parameters
-    public static ItemDetails newInstance(Items param1, String param2) {
+    public static ItemDetails newInstance(Items item, String shopcode,ItemStockInfo itemStockInfo) {
         ItemDetails fragment = new ItemDetails();
         Bundle args = new Bundle();
-        args.putSerializable(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putSerializable(ARG_PARAM1, item);
+        args.putString(ARG_PARAM2, shopcode);
+        args.putSerializable(ARG_PARAM3,itemStockInfo);
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,6 +67,7 @@ public class ItemDetails extends Fragment {
         if (getArguments() != null) {
             mParam1 = (Items) getArguments().getSerializable(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+            mParam3 = (ItemStockInfo) getArguments().getSerializable(ARG_PARAM3);
         }
         firebaseFirestore = FirebaseFirestore.getInstance();
     }
@@ -86,8 +90,7 @@ public class ItemDetails extends Fragment {
         item = new Items(mParam1);
 
         SetTextViews();
-
-        attachdatabaseListener();
+        setitemstockinfo(mParam3);
 
         return view;
     }
@@ -101,54 +104,15 @@ public class ItemDetails extends Fragment {
         StockType.setText(item.Stock_Type);
         if(item.Valid) {
             Validity.setText("Valid");
-            Validity.setTextColor(ContextCompat.getColor(getContext(),R.color.green));
+            Validity.setTextColor(ContextCompat.getColor(getActivity(),R.color.green));
         }else{
             Validity.setText("Invalid");
-            Validity.setTextColor(ContextCompat.getColor(getContext(),R.color.Red));
+            Validity.setTextColor(ContextCompat.getColor(getActivity(),R.color.Red));
         }
         ItemSellingPrice.setText(String.valueOf(item.Selling_Price) + " INR\n" + "per " + item.Unit);
     }
 
-    private void attachdatabaseListener() {
-
-        firebaseFirestore.collection(mParam2).document("doc").collection("ItemStockInfo")
-                .whereEqualTo("ItemCode",mParam1.ItemCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                if(value!=null && !value.isEmpty()){
-                    for (DocumentChange doc : value.getDocumentChanges()){
-                        switch (doc.getType()){
-                            case ADDED:
-                                setitemstockinfo(doc.getDocument());
-                                break;
-                            case MODIFIED:
-                                setitemstockinfo(doc.getDocument());
-                                break;
-                        }
-                    }
-                }
-            }
-        });
-        firebaseFirestore.collection(mParam2).document("doc").collection("Items")
-                .whereEqualTo("ItemCode",mParam1.ItemCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                if(value!=null && !value.isEmpty()){
-                    for (DocumentChange doc : value.getDocumentChanges()){
-                        switch (doc.getType()){
-                            case MODIFIED:
-                                item = doc.getDocument().toObject(Items.class);
-                                SetTextViews();
-                                break;
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    private void setitemstockinfo(DocumentSnapshot snapshot) {
-        itemStockInfo = snapshot.toObject(ItemStockInfo.class);
+    private void setitemstockinfo(ItemStockInfo itemStockInfo) {
         if (itemStockInfo != null) {
             BalanceQtyText.setText(itemStockInfo.Total_Balance_Quantity + " " + item.Unit + " (All Locations)");
             Float T_bal = Float.parseFloat(itemStockInfo.Total_Balance_Quantity);

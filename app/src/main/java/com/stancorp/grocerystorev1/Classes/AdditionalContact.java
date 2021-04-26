@@ -1,6 +1,8 @@
 package com.stancorp.grocerystorev1.Classes;
 
-public class AdditionalContact {
+import java.io.Serializable;
+
+public class AdditionalContact implements Serializable {
     public String Name;
     public String Email;
     public long Phoneno;

@@ -1,8 +1,10 @@
 package com.stancorp.grocerystorev1.Classes;
 
+import java.io.Serializable;
+
 import javax.annotation.Nullable;
 
-public class Agent {
+public class Agent implements Serializable {
     public String Code;
     public long codeno;
     public String Name;

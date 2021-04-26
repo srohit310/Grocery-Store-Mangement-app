@@ -1,5 +1,6 @@
 package com.stancorp.grocerystorev1.DisplayItems;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -52,6 +53,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
@@ -83,7 +86,8 @@ public class ItemViewActivity extends AppCompatActivity {
     TextView Category;
     RelativeLayout ProgressLayout;
     FirebaseFirestore firebaseFirestore;
-
+    ListenerRegistration itemlistenerRegistration;
+    ListenerRegistration itemstocklistenerRegisteration;
     Gfunc gfunc;
 
     Button add;
@@ -108,7 +112,7 @@ public class ItemViewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_item_view);
+        setContentView(R.layout.activity_view);
         gfunc = new Gfunc();
         locations = new LinkedHashMap<>();
         locationAdapter = new AutoCompleteLocationAdapter(getApplicationContext(), locations);
@@ -127,7 +131,6 @@ public class ItemViewActivity extends AppCompatActivity {
         iteminfo = (Items) intent.getSerializableExtra("Item");
         UserName = intent.getStringExtra("UserName");
 
-        itemchildlistener();
         addItemStockInfo();
 
         if(iteminfo.Valid){
@@ -158,9 +161,11 @@ public class ItemViewActivity extends AppCompatActivity {
         toolbar.setTitle(gfunc.capitalize(iteminfo.ItemCode));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
+    private void setPagerAdapter(){
         ItemSectionsPagerAdapter itemSectionsPagerAdapter = new ItemSectionsPagerAdapter(this, getSupportFragmentManager(),
-                iteminfo, Shopcode, UserName);
+                iteminfo, Shopcode, UserName,itemStockInfo);
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(itemSectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
@@ -218,12 +223,27 @@ public class ItemViewActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onPause() {
+        itemlistenerRegistration.remove();
+        itemstocklistenerRegisteration.remove();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        addItemStockInfo();
+    }
+
     private void addItemStockInfo() {
-        firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
-                .whereEqualTo("ItemCode", iteminfo.ItemCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
+        SDProgress(true);
+        Query query = firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
+                .whereEqualTo("ItemCode", iteminfo.ItemCode);
+        itemlistenerRegistration =
+                query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                SDProgress(true);
                 if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
                     for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
                         ItemStockInfo temp;
@@ -240,16 +260,20 @@ public class ItemViewActivity extends AppCompatActivity {
                     }
                 }
                 SDProgress(false);
+                itemchildlistener();
             }
         });
     }
 
+
+
     private void itemchildlistener() {
+        SDProgress(true);
+        itemstocklistenerRegisteration =
         firebaseFirestore.collection(Shopcode).document("doc").collection("Items")
                 .whereEqualTo("ItemCode", iteminfo.ItemCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                SDProgress(true);
                 if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
                     for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
                         switch (doc.getType()) {
@@ -262,6 +286,7 @@ public class ItemViewActivity extends AppCompatActivity {
                     }
                 }
                 SDProgress(false);
+                setPagerAdapter();
             }
         });
     }
@@ -318,7 +343,7 @@ public class ItemViewActivity extends AppCompatActivity {
         batch.update(firebaseFirestore.collection(Shopcode).document("doc").collection("Items")
                 .document(iteminfo.ItemCode), "Valid", false);
         batch.update(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
-                .document(iteminfo.ItemCode), "Valid", false);
+                .document(iteminfo.ItemCode), "valid", false);
         batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
