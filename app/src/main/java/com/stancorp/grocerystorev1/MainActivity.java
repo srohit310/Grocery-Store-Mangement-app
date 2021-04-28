@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -300,59 +301,64 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.dash:
-                getSupportActionBar().setTitle("Main menu");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                        new MainFragment()).commit();
-                break;
-            case R.id.item_menu:
-                getSupportActionBar().setTitle("Items");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                        new FragmentGroupItems()).commit();
-                break;
-            case R.id.customers_menu:
-                getSupportActionBar().setTitle("Customers");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                        new FragmentsGroupCustomers()).commit();
-                break;
-            case R.id.purchase_menu:
-                getSupportActionBar().setTitle("Purchases");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                        new FragmentsGroupPurchases()).commit();
-                break;
-            case R.id.sales_menu:
-                getSupportActionBar().setTitle("Sales");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                        new FragmentsGroupSales()).commit();
-                break;
-            case R.id.vendors_menu:
-                getSupportActionBar().setTitle("Vendors");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                        new FragmentsGroupVendors()).commit();
-                break;
-            case R.id.Locations_menu:
-                getSupportActionBar().setTitle("Locations");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                        new FragmentGroupsLocations()).commit();
-                break;
-            case R.id.manage_users_menu:
-                getSupportActionBar().setTitle("Users");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                        new FragmentGroupUsers()).commit();
-                break;
+    public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                switch (item.getItemId()) {
+                    case R.id.dash:
+                        getSupportActionBar().setTitle("Main menu");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
+                                new MainFragment()).commit();
+                        break;
+                    case R.id.item_menu:
+                        getSupportActionBar().setTitle("Items");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
+                                new FragmentGroupItems()).commit();
+                        break;
+                    case R.id.customers_menu:
+                        getSupportActionBar().setTitle("Customers");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
+                                new FragmentsGroupCustomers()).commit();
+                        break;
+                    case R.id.purchase_menu:
+                        getSupportActionBar().setTitle("Purchases");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
+                                new FragmentsGroupPurchases()).commit();
+                        break;
+                    case R.id.sales_menu:
+                        getSupportActionBar().setTitle("Sales");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
+                                new FragmentsGroupSales()).commit();
+                        break;
+                    case R.id.vendors_menu:
+                        getSupportActionBar().setTitle("Vendors");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
+                                new FragmentsGroupVendors()).commit();
+                        break;
+                    case R.id.Locations_menu:
+                        getSupportActionBar().setTitle("Locations");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
+                                new FragmentGroupsLocations()).commit();
+                        break;
+                    case R.id.manage_users_menu:
+                        getSupportActionBar().setTitle("Users");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
+                                new FragmentGroupUsers()).commit();
+                        break;
 
-            case R.id.settings_change_menu:
-                Intent intent = new Intent(this,UserSettingsActivity.class);
-                intent.putExtra("UserData",User);
-                startActivity(intent);
-                break;
-            case R.id.sign_out_menu:
-                User = null;
-                FirebaseAuth.getInstance().signOut();
-                break;
-        }
+                    case R.id.settings_change_menu:
+                        Intent intent = new Intent(MainActivity.this,UserSettingsActivity.class);
+                        intent.putExtra("UserData",User);
+                        startActivity(intent);
+                        break;
+                    case R.id.sign_out_menu:
+                        User = null;
+                        FirebaseAuth.getInstance().signOut();
+                        break;
+                }
+            }
+        },250);
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
