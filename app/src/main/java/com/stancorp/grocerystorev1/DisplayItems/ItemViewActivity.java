@@ -80,6 +80,8 @@ public class ItemViewActivity extends AppCompatActivity {
     Items iteminfo;
     String Shopcode;
     String UserName;
+    String UserPermission;
+    String UserLocation;
     private StorageReference photostorageReference;
     ImageView imageView;
     TextView Name;
@@ -131,6 +133,8 @@ public class ItemViewActivity extends AppCompatActivity {
         Shopcode = intent.getStringExtra("ShopCode");
         iteminfo = (Items) intent.getSerializableExtra("Item");
         UserName = intent.getStringExtra("UserName");
+        UserPermission = intent.getStringExtra("UserPermission");
+        UserLocation = intent.getStringExtra("UserLocation");
 
         addItemStockInfo();
 
@@ -166,7 +170,7 @@ public class ItemViewActivity extends AppCompatActivity {
 
     private void setPagerAdapter(){
         ItemSectionsPagerAdapter itemSectionsPagerAdapter = new ItemSectionsPagerAdapter(this, getSupportFragmentManager(),
-                iteminfo, Shopcode, UserName,itemStockInfo);
+                iteminfo, Shopcode, UserName,itemStockInfo, UserPermission);
         ViewPager viewPager = findViewById(R.id.view_pager);
         if(iteminfo.Valid) {
             viewPager.setOffscreenPageLimit(3);
@@ -188,20 +192,22 @@ public class ItemViewActivity extends AppCompatActivity {
         locations.clear();
         String strFrontCode="",strEndCode="",startcode="",endcode="";
         int strlength = search.length();
-
+        int limit;
         if(search.compareTo("")!=0) {
             strFrontCode = search.substring(0, strlength - 1);
             strEndCode = search.substring(strlength - 1, search.length());
             startcode = search;
+            limit = 10;
             endcode = strFrontCode + Character.toString((char) (strEndCode.charAt(0) + 1));
         }else{
+            limit = 1;
             startcode = "a";
             endcode = "{";
         }
 
         firebaseFirestore.collection(Shopcode).document("doc")
                 .collection("LocationDetails").whereGreaterThanOrEqualTo("name",startcode)
-                .whereLessThan("name",endcode).limit(10).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .whereLessThan("name",endcode).limit(limit).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 AutoProgress.setVisibility(View.GONE);
@@ -301,7 +307,12 @@ public class ItemViewActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.itemdetialsmenu, menu);
-
+        MenuItem target = menu.findItem(R.id.Invalid);
+        MenuItem Edit = menu.findItem(R.id.Edit);
+        if(UserPermission.compareTo("Employee")==0) {
+            target.setVisible(false);
+            Edit.setVisible(false);
+        }
         return true;
     }
 
@@ -376,62 +387,66 @@ public class ItemViewActivity extends AppCompatActivity {
         builder.setView(alertview);
         adjustmentamount = alertview.findViewById(R.id.AmountAdjusted);
         adjustmentamount.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-
-        locationsearch = alertview.findViewById(R.id.getLocation);
-        locationsearch.setAdapter(locationAdapter);
-        locationsearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(final Editable editable) {
-                locationsearch.dismissDropDown();
-                if(editable.toString().length()>0) {
-                    AutoProgress.setVisibility(View.VISIBLE);
-                    if(locations.containsKey(editable.toString())){
-                        AutoProgress.setVisibility(View.GONE);
-                        return;
-                    }
-                }
-                else
-                    AutoProgress.setVisibility(View.GONE);
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(editable.toString().length() > 0){
-                            addLocations(editable.toString());
-                        }
-                    }
-                }, 1500);
-            }
-        });
-        locationsearch.setThreshold(0);
-        locationsearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                locationsearch.showDropDown();
-            }
-        });
         Locationtext = alertview.findViewById(R.id.Locationtextview);
+        locationsearch = alertview.findViewById(R.id.getLocation);
+        AutoProgress = alertview.findViewById(R.id.autoprogress);
+        RadioButton price = imageView.findViewById(R.id.radioButton2);
+
+        if(UserPermission.compareTo("Admin")==0) {
+            locationsearch.setAdapter(locationAdapter);
+            locationsearch.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(final Editable editable) {
+                    locationsearch.dismissDropDown();
+                    if (editable.toString().length() > 0) {
+                        AutoProgress.setVisibility(View.VISIBLE);
+                        if (locations.containsKey(editable.toString())) {
+                            AutoProgress.setVisibility(View.GONE);
+                            return;
+                        }
+                    } else
+                        AutoProgress.setVisibility(View.GONE);
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (editable.toString().length() > 0) {
+                                addLocations(editable.toString());
+                            }
+                        }
+                    }, 1500);
+                }
+            });
+            locationsearch.setThreshold(0);
+            locationsearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View view, boolean b) {
+                    locationsearch.showDropDown();
+                }
+            });
+            addLocations("");
+        }else{
+            Locationtext.setVisibility(View.GONE);
+            locationsearch.setText(UserLocation);
+            price.setEnabled(false);
+        }
+
         Spinner reasonspinner = alertview.findViewById(R.id.Reason);
         setupspinner(reasonspinner);
 
-        AutoProgress = alertview.findViewById(R.id.autoprogress);
-
         Mode = alertview.findViewById(R.id.radioGroup);
         modeselected = "Quantity";
-
         add = findViewById(R.id.ConfirmAdjustmentButton);
-
-        addLocations("");
 
         Mode.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -440,8 +455,10 @@ public class ItemViewActivity extends AppCompatActivity {
                 SelectedMode = (RadioButton) alertview.findViewById(selectedId);
                 if (SelectedMode.getText().toString().compareTo("Quantity") == 0) {
                     modeselected = "Quantity";
-                    locationsearch.setVisibility(View.VISIBLE);
-                    Locationtext.setVisibility(View.VISIBLE);
+                    if(UserPermission.compareTo("Admin")==0) {
+                        locationsearch.setVisibility(View.VISIBLE);
+                        Locationtext.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     modeselected = "Price";
                     locationsearch.setVisibility(View.GONE);
@@ -533,6 +550,8 @@ public class ItemViewActivity extends AppCompatActivity {
                 DocumentReference doc = firebaseFirestore.collection(Shopcode).document("doc").collection("Location")
                         .document(iteminfo.ItemCode+LocationCode);
                 LocationStockItem locationStockItem = transaction.get(doc).toObject(LocationStockItem.class);
+                ItemStockInfo itemStockInfo = transaction.get(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
+                    .document(iteminfo.ItemCode)).toObject(ItemStockInfo.class);
                 Float Bal = Float.valueOf(locationStockItem.Balance_Qty);
                 locationStockItem.Balance_Qty = String.valueOf(adjustedamount);
                 adjustedamount = adjustedamount - Bal;

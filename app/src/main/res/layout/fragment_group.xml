@@ -6,9 +6,11 @@
     android:layout_height="match_parent">
 
     <RelativeLayout
+        android:id="@+id/RootLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="5dp">
+        android:layout_margin="5dp"
+        android:animateLayoutChanges="true">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -16,7 +18,8 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/SearchText"
             android:layout_margin="8dp"
-            android:layout_marginHorizontal="10dp" />
+            android:layout_marginHorizontal="10dp"
+            android:layoutAnimation="@anim/layout_animation" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/floatingActionButton"

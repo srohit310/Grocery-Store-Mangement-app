@@ -1046,17 +1046,31 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
             @Override
             public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
                 float TotalProfit = 0.0f;
-                int pending = 0;
-                TransactionProperties prop = (TransactionProperties) transaction.get(firebaseFirestore.collection(ShopCode).document("TransactionDetails"))
+                int overallpending = 0;
+                int locationpending = 0;
+                TransactionProperties overallprop = (TransactionProperties) transaction.get(firebaseFirestore.collection(ShopCode)
+                        .document("doc").collection("Pending").document("Overall"))
                         .toObject(TransactionProperties.class);
-                if(prop != null){
-                    if(Mode.compareTo("Vendor")==0) {
-                        pending = prop.pendingPurchases;
-                    }else{
-                        pending = prop.pendingSales;
+                if (overallprop != null) {
+                    if (Mode.compareTo("Vendor") == 0) {
+                        overallpending = overallprop.pendingPurchases;
+                    } else {
+                        overallpending = overallprop.pendingSales;
                     }
-                }else {
-                    prop = new TransactionProperties(0,0);
+                } else {
+                    overallprop = new TransactionProperties(0, 0);
+                }
+                TransactionProperties locationprop = (TransactionProperties) transaction.get(firebaseFirestore.collection(ShopCode)
+                        .document("doc").collection("Pending").document(storeTransaction.locationCode))
+                        .toObject(TransactionProperties.class);
+                if (locationprop != null) {
+                    if (Mode.compareTo("Vendor") == 0) {
+                        locationpending = locationprop.pendingPurchases;
+                    } else {
+                        locationpending = locationprop.pendingSales;
+                    }
+                } else {
+                    locationprop = new TransactionProperties(0, 0);
                 }
                 ArrayList<ItemStockInfo> itemStockInfoArrayList = new ArrayList<>();
                 ArrayList<LocationStockItem> locationStockItems = new ArrayList<>();
@@ -1139,13 +1153,19 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                 TransactionItemList transactionitems = new TransactionItemList(itemspartoftransaction);
                 transaction.set(firebaseFirestore.collection(ShopCode).document("doc")
                         .collection("TransactionItems").document(storeTransaction.code), transactionitems);
-                pending += 1;
-                if(Mode.compareTo("Vendor")==0) {
-                    prop.pendingPurchases = pending;
-                }else{
-                    prop.pendingSales = pending;
+                overallpending += 1;
+                locationpending += 1;
+                if (Mode.compareTo("Vendor") == 0) {
+                    overallprop.pendingPurchases = overallpending;
+                    locationprop.pendingPurchases = locationpending;
+                } else {
+                    overallprop.pendingSales = overallpending;
+                    locationprop.pendingPurchases = locationpending;
                 }
-                transaction.set(firebaseFirestore.collection(ShopCode).document("TransactionDetails"),prop);
+                transaction.set(firebaseFirestore.collection(ShopCode).document("doc").collection("Pending")
+                        .document("Overall"), overallprop);
+                transaction.set(firebaseFirestore.collection(ShopCode).document("doc").collection("Pending")
+                        .document(storeTransaction.locationCode),locationprop);
                 return null;
             }
         }).addOnCompleteListener(new OnCompleteListener<Void>() {

@@ -1,5 +1,8 @@
 package com.stancorp.grocerystorev1.ViewFragments;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.LayoutTransition;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -59,6 +62,7 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
     public Query.Direction direction;
     public EditText searchBox;
     public Spinner toolbarspinner;
+    public boolean Flag;
 
     @Nullable
     @Override
@@ -86,6 +90,9 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
         searchBox = view.findViewById(R.id.SearchText);
         startcode = "!";
         endcode = "{";
+        Flag = true;
+
+        user = ((MainActivity)getActivity()).User;
         mfloat = view.findViewById(R.id.floatingActionButton);
         mfloat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,28 +106,14 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
         recyclerView = view.findViewById(R.id.recyclerView);
         mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
-        fetchUserData();
+        mfloat.setVisibility(View.VISIBLE);
+        toolbarspinnersetup(toolbarspinner);
     }
 
     protected abstract void toolbarspinnersetup(Spinner toolbarspinner);
 
     protected abstract void initialize();
 
-    private void fetchUserData() {
-        SDProgress(true);
-            firebaseFirestore.collection("UserDetails").whereEqualTo("Email",FirebaseAuth.getInstance().getCurrentUser().getEmail())
-                    .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    for(DocumentSnapshot snapshot1: task.getResult()){
-                        user = snapshot1.toObject(StoreUser.class);
-                    }
-                    initialize();
-                    toolbarspinnersetup(toolbarspinner);
-                    mfloat.setVisibility(View.VISIBLE);
-                }
-            });
-    }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -134,6 +127,7 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
             @Override
             public boolean onQueryTextSubmit(String search) {
                 if(search.length()>0){
+                    Flag = false;
                     int strlength = search.length();
                     String strFrontCode = search.substring(0, strlength - 1);
                     String strEndCode = search.substring(strlength - 1, search.length());
@@ -146,14 +140,16 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
 
             @Override
             public boolean onQueryTextChange(String s) {
-                if(s.length() == 0){
+                if(s.length() == 0 && !Flag){
                     startcode = "!";
+                    Flag = true;
                     endcode = "{";
                     attachListData(startcode,endcode);
                 }
                 return false;
             }
         });
+        initialize();
         super.onCreateOptionsMenu(menu,inflater);
     }
 
@@ -170,9 +166,27 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
 
     public void SDProgress(boolean show){
         if(show){
-            progressLayout.setVisibility(View.VISIBLE);
+            progressLayout.animate()
+                    .alpha(1.0f)
+                    .setDuration(300)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            progressLayout.setVisibility(View.VISIBLE);
+                        }
+                    });
         }else{
-            progressLayout.setVisibility(View.GONE);
+            progressLayout.animate()
+                    .alpha(0.0f)
+                    .setDuration(300)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            progressLayout.setVisibility(View.GONE);
+                        }
+                    });
         }
     }
 }

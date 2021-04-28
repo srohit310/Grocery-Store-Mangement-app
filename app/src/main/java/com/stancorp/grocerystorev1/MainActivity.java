@@ -158,10 +158,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         };
         if(savedInstanceState == null && User!=null) {
-            navigationView.setCheckedItem(R.id.item_menu);
-            getSupportActionBar().setTitle("Items");
+            navigationView.setCheckedItem(R.id.dash);
+            getSupportActionBar().setTitle("Main Menu");
             getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                    new FragmentGroupItems()).commit();
+                    new MainFragment()).commit();
         }
     }
 
@@ -180,11 +180,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else if(getSupportActionBar().getTitle() != "Items"){
-            getSupportActionBar().setTitle("Items");
-            navigationView.setCheckedItem(R.id.item_menu);
+        } else if(getSupportActionBar().getTitle() != "Main Menu"){
+            getSupportActionBar().setTitle("Main Menu");
+            navigationView.setCheckedItem(R.id.dash);
             getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                    new FragmentGroupItems()).commit();
+                    new MainFragment()).commit();
         } else
             super.onBackPressed();
     }
@@ -215,10 +215,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
-                getSupportActionBar().setTitle("Items");
-                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                        new FragmentGroupItems()).commit();
-                navigationView.setCheckedItem(R.id.item_menu);
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(getApplicationContext(), "signed-out", Toast.LENGTH_LONG).show();
                 finish();
@@ -282,14 +278,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     ProgressLayout.setVisibility(View.GONE);
                     actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
                     relativeLayout.setEnabled(true);
-                    navigationView.setCheckedItem(R.id.item_menu);
-                    getSupportActionBar().setTitle("Items");
+                    navigationView.setCheckedItem(R.id.dash);
+                    getSupportActionBar().setTitle("Main Menu");
                     getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-                            new FragmentGroupItems()).commit();
+                            new MainFragment()).commit();
                     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 }
             });
         }else{
+            textViewemail.setText(gfunc.capitalize(User.Email));
+            textViewname.setText(gfunc.capitalize(User.Name));
+            textViewpermission.setText(gfunc.capitalize(User.PermissionLevel));
             getSupportActionBar().show();
             ProgressLayout.setVisibility(View.GONE);
             actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
@@ -303,11 +302,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-//            case R.id.dash:
-//                getSupportActionBar().setTitle("Main menu");
-//                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
-//                        new MainFragment()).commit();
-//                break;
+            case R.id.dash:
+                getSupportActionBar().setTitle("Main menu");
+                getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
+                        new MainFragment()).commit();
+                break;
             case R.id.item_menu:
                 getSupportActionBar().setTitle("Items");
                 getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
@@ -350,6 +349,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intent);
                 break;
             case R.id.sign_out_menu:
+                User = null;
                 FirebaseAuth.getInstance().signOut();
                 break;
         }

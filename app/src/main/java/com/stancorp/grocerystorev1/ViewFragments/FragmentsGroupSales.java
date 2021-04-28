@@ -140,6 +140,7 @@ public class FragmentsGroupSales extends FragmentsGroups {
                                 transactionAdapter.notifyDataSetChanged();
                                 break;
                         }
+                        recyclerView.scheduleLayoutAnimation();
                     }
                     SDProgress(false);
                 } else {

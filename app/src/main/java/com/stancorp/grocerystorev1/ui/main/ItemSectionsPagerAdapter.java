@@ -30,14 +30,17 @@ public class ItemSectionsPagerAdapter extends FragmentStatePagerAdapter {
     private ItemStockInfo itemStockInfo;
     private String ShopCode;
     private String Username;
+    private String UserPermission;
 
-    public ItemSectionsPagerAdapter(Context context, FragmentManager fm, Items Item, String Shopcode, String Username,ItemStockInfo itemStockInfo) {
+    public ItemSectionsPagerAdapter(Context context, FragmentManager fm, Items Item, String Shopcode, String Username,ItemStockInfo itemStockInfo,
+                                    String userPermission) {
         super(fm);
         mContext = context;
         this.Item = new Items(Item);
         this.ShopCode = Shopcode;
         this.Username = Username;
         this.itemStockInfo = itemStockInfo;
+        this.UserPermission = userPermission;
     }
 
     @Override
@@ -67,6 +70,9 @@ public class ItemSectionsPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
+        if(UserPermission.compareTo("Employee")==0){
+            return 2;
+        }
         return 3;
     }
 }

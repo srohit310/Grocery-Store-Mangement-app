@@ -37,7 +37,6 @@ public class FragmentGroupItems extends FragmentsGroups {
     ItemAdaptor itemAdaptor;
     ListenerRegistration itemlistener;
     Boolean valid;
-    LinkedHashMap<String, Items> filteredList;
 
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
@@ -71,11 +70,15 @@ public class FragmentGroupItems extends FragmentsGroups {
     @Override
     protected void initialize() {
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        items = new LinkedHashMap<>();
+        if (items == null) {
+            items = new LinkedHashMap<>();
+            itemAdaptor = new ItemAdaptor(items, getContext(), this, user.ShopCode);
+        }
         searchedittext.setHint("Search for item using name");
         firebaseFirestore = FirebaseFirestore.getInstance();
-        filteredList = new LinkedHashMap<>();
-        itemAdaptor = new ItemAdaptor(items, getContext(), this, user.ShopCode);
+        if (user.PermissionLevel.compareTo("Employee") == 0) {
+            mfloat.setVisibility(View.GONE);
+        }
         recyclerView.setAdapter(itemAdaptor);
         valid = true;
     }
@@ -97,9 +100,9 @@ public class FragmentGroupItems extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
-        startcode = "!";
+        startcode = "#";
         endcode = "{";
-        if(items!=null) {
+        if (items != null) {
             attachListData(startcode, endcode);
         }
     }
@@ -107,9 +110,10 @@ public class FragmentGroupItems extends FragmentsGroups {
     @Override
     protected void attachListData(String startcode, String endcode) {
         SDProgress(true);
-        items.clear();
-        filteredList.clear();
-        itemAdaptor.notifyDataSetChanged();
+        if (startcode.compareTo("#") != 0) {
+            items.clear();
+            itemAdaptor.notifyDataSetChanged();
+        }
         itemlistener =
                 firebaseFirestore.collection(user.ShopCode).document("doc").collection("Items")
                         .whereEqualTo("Valid", valid).whereGreaterThanOrEqualTo("name", startcode)
@@ -125,26 +129,23 @@ public class FragmentGroupItems extends FragmentsGroups {
                                         Items item;
                                         switch (doc.getType()) {
                                             case ADDED:
+                                                Toast.makeText(getContext(), String.valueOf(items.size()), Toast.LENGTH_SHORT).show();
                                                 item = doc.getDocument().toObject(Items.class);
                                                 items.put(item.ItemCode, item);
-                                                filteredList.put(item.ItemCode, item);
                                                 itemAdaptor.notifyDataSetChanged();
                                                 break;
                                             case MODIFIED:
                                                 item = doc.getDocument().toObject(Items.class);
-                                                items.remove(item.ItemCode);
-                                                filteredList.remove(item.ItemCode);
                                                 items.put(item.ItemCode, item);
-                                                filteredList.put(item.ItemCode, item);
                                                 itemAdaptor.notifyDataSetChanged();
                                                 break;
                                             case REMOVED:
                                                 item = doc.getDocument().toObject(Items.class);
                                                 items.remove(item.ItemCode);
-                                                filteredList.remove(item.ItemCode);
                                                 itemAdaptor.notifyDataSetChanged();
                                                 break;
                                         }
+                                        recyclerView.scheduleLayoutAnimation();
                                     }
                                     SDProgress(false);
                                 } else {
@@ -167,10 +168,12 @@ public class FragmentGroupItems extends FragmentsGroups {
     @Override
     protected void displayIntent(int position) {
         Intent intent = new Intent(getContext(), ItemViewActivity.class);
-        Items item = (Items) filteredList.values().toArray()[position];
+        Items item = (Items) items.values().toArray()[position];
         intent.putExtra("Item", item);
         intent.putExtra("ShopCode", user.ShopCode);
         intent.putExtra("UserName", user.Name);
+        intent.putExtra("UserPermission", user.PermissionLevel);
+        intent.putExtra("UserLocation", user.Location);
         startActivity(intent);
     }
 }

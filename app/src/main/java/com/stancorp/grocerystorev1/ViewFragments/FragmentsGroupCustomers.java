@@ -27,19 +27,19 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
 
     LinkedHashMap<String, Agent> agents;
     AgentAdapter agentAdaptor;
-    LinkedHashMap<String, Agent> filteredList;
     ListenerRegistration agentListener;
 
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
         toolbarspinner.setVisibility(View.GONE);
+        agents = new LinkedHashMap<>();
+        agentAdaptor = new AgentAdapter(agents, getContext(), this, "Customer");
         attachListData(startcode, endcode);
     }
 
     @Override
     protected void initialize() {
         agents = new LinkedHashMap<>();
-        filteredList = new LinkedHashMap<>();
         searchedittext.setHint("Search for Customer using name");
         agentAdaptor = new AgentAdapter(agents, getContext(), this, "Customer");
         recyclerView.setAdapter(agentAdaptor);
@@ -73,7 +73,6 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
     protected void attachListData(String startcode, String endcode) {
         SDProgress(true);
         agents.clear();
-        filteredList.clear();
         agentListener =
                 firebaseFirestore.collection(user.ShopCode).document("doc").collection("StakeHolders")
                         .whereGreaterThanOrEqualTo("Name", startcode).whereLessThan("Name", endcode)
@@ -88,22 +87,20 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
                                             case ADDED:
                                                 agent = doc.getDocument().toObject(Agent.class);
                                                 agents.put(agent.Code, agent);
-                                                filteredList.put(agent.Code, agent);
                                                 agentAdaptor.notifyDataSetChanged();
                                                 break;
                                             case MODIFIED:
                                                 agent = doc.getDocument().toObject(Agent.class);
                                                 agents.put(agent.Code, agent);
-                                                filteredList.put(agent.Code, agent);
                                                 agentAdaptor.notifyDataSetChanged();
                                                 break;
                                             case REMOVED:
                                                 agent = doc.getDocument().toObject(Agent.class);
                                                 agents.remove(agent.Code);
-                                                filteredList.remove(agent.Code);
                                                 agentAdaptor.notifyDataSetChanged();
                                                 break;
                                         }
+                                        recyclerView.scheduleLayoutAnimation();
                                     }
                                     SDProgress(false);
                                 } else {
@@ -116,7 +113,7 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
     @Override
     protected void displayIntent(int position) {
         Intent intent = new Intent(getContext(), AgentViewActivity.class);
-        Agent agent = (Agent) filteredList.values().toArray()[position];
+        Agent agent = (Agent) agents.values().toArray()[position];
         intent.putExtra("AgentCode", agent.Code);
         intent.putExtra("Agent", agent);
         intent.putExtra("Mode", "Customer");

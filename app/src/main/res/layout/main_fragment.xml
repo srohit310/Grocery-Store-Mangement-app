@@ -18,7 +18,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="30dp"
+        android:layout_marginHorizontal="10dp"
         android:layout_marginVertical="5dp"
         app:cardCornerRadius="10dp">
 
@@ -31,32 +31,33 @@
                 android:id="@+id/truckimg"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginVertical="40dp"
+                android:layout_marginHorizontal="15dp"
+                android:layout_marginVertical="30dp"
                 android:background="@drawable/transaction_pending" />
 
             <LinearLayout
                 android:id="@+id/PurchasePending"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="20dp"
                 android:layout_toRightOf="@+id/truckimg"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="7"
                     android:layout_height="wrap_content"
-                    android:text="Purchases Pending : "
+                    android:text="Purchases Pending    : "
                     android:layout_gravity="center_vertical"
                     android:textColor="@color/colorAccent"
-                    android:textSize="19sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/PurchasesPendingNotext"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
                     android:text="0"
                     android:layout_gravity="center_vertical"
                     android:textColor="@color/Red"
@@ -65,15 +66,17 @@
 
                 <ImageView
                     android:id="@+id/purchases_fragment"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical"
                     android:background="@drawable/ic_baseline_arrow_right_24" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/SalesPending"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/PurchasePending"
                 android:layout_marginTop="15dp"
@@ -81,20 +84,21 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="7"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:text="Sales Pending : "
+                    android:text="Sales Pending             : "
                     android:textColor="@color/colorAccent"
-                    android:textSize="19sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/SalesPendingNotext"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="15dp"
                     android:text="0"
                     android:textColor="@color/Red"
                     android:textSize="20sp"
@@ -102,8 +106,10 @@
 
                 <ImageView
                     android:id="@+id/sales_fragment"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:layout_height="20dp"
                     android:background="@drawable/ic_baseline_arrow_right_24" />
             </LinearLayout>
         </RelativeLayout>
