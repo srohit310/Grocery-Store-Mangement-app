@@ -128,7 +128,6 @@ public class AgentDetails extends Fragment {
         intentaltPhone = view.findViewById(R.id.intentaltphone);
 
         setupTextviews();
-        setupTextviews();
     }
 
     private void setupTextviews(){

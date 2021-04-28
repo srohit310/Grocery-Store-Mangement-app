@@ -23,6 +23,14 @@ public class ItemTransactionRecyclerAdapter extends BaseRecyclerAdapter {
     AddTransactionActivity addTransactionActivity;
     HashMap<String,String> itemreorderqty;
 
+    public ItemTransactionRecyclerAdapter(Context context, OnNoteListner onNoteListner, LinkedHashMap<String, Itemtransaction> transactionitemlist){
+        super(context,onNoteListner);
+        this.transactionitemlist = transactionitemlist;
+        this.dataList = transactionitemlist;
+        this.BASE_CONTEXT = context;
+        layout_id = R.layout.itembill_layout;
+    }
+
     public ItemTransactionRecyclerAdapter(AddTransactionActivity activity , Context context, OnNoteListner onNoteListner,
                                           LinkedHashMap<String, Itemtransaction> transactionitemlist, HashMap<String,String> itemreorderqty) {
         super(context, onNoteListner);
@@ -34,26 +42,30 @@ public class ItemTransactionRecyclerAdapter extends BaseRecyclerAdapter {
         this.itemreorderqty = itemreorderqty;
     }
 
+
     @Override
     public void onBindViewHold(final int position, MyViewHolder holder) {
         Delete = holder.itemView.findViewById(R.id.DeleteButton);
-
-        Delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Itemtransaction items = (Itemtransaction) transactionitemlist.values().toArray()[position];
-                float Totalcostitem = items.quantity * items.Price;
-                transactionitemlist.remove(items.itemCode);
-                itemreorderqty.remove(items.itemCode);
-                addTransactionActivity.totalcost -= Totalcostitem;
-                addTransactionActivity.TotalCostText.setText(String.valueOf(addTransactionActivity.totalcost)+"  "+"INR");
-                if(transactionitemlist.size() == 0 ){
-                    addTransactionActivity.BillTop.setVisibility(View.GONE);
-                    addTransactionActivity.TotalPriceLayout.setVisibility(View.GONE);
+        if(itemreorderqty!=null) {
+            Delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Itemtransaction items = (Itemtransaction) transactionitemlist.values().toArray()[position];
+                    float Totalcostitem = items.quantity * items.Price;
+                    transactionitemlist.remove(items.itemCode);
+                    itemreorderqty.remove(items.itemCode);
+                    addTransactionActivity.totalcost -= Totalcostitem;
+                    addTransactionActivity.TotalCostText.setText(String.valueOf(addTransactionActivity.totalcost) + "  " + "INR");
+                    if (transactionitemlist.size() == 0) {
+                        addTransactionActivity.BillTop.setVisibility(View.GONE);
+                        addTransactionActivity.TotalPriceLayout.setVisibility(View.GONE);
+                    }
+                    notifyDataSetChanged();
                 }
-                notifyDataSetChanged();
-            }
-        });
+            });
+        }else{
+            Delete.setVisibility(View.GONE);
+        }
 
         Code = holder.itemView.findViewById(R.id.Code);
         Quantity = holder.itemView.findViewById(R.id.Quantity);

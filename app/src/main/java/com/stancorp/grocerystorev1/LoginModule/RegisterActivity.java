@@ -481,7 +481,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void makeobjects() {
         info = new StoreInfo(ShopName.getText().toString(), "");
-        user = new StoreUser(UserName.getEditText().getText().toString().trim(), UserEmail.getEditText().getText().toString().trim(),
+        user = new StoreUser(UserName.getEditText().getText().toString().trim().toLowerCase(), UserEmail.getEditText().getText().toString().trim().toLowerCase(),
                 UserPhone.getEditText().getText().toString(), photoUri != null, permission, "",
                 "All", true);
         RegisterUser(user, null);

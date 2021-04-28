@@ -81,7 +81,8 @@ public class AgentPending extends Fragment implements BaseRecyclerAdapter.OnNote
     @Override
     public void onResume() {
         super.onResume();
-        attachDatabaseListener();
+        if (transactions != null)
+            attachDatabaseListener();
     }
 
     @Override

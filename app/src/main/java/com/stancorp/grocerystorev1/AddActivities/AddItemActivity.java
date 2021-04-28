@@ -89,6 +89,7 @@ public class AddItemActivity extends AppCompatActivity {
     Button HelpInitialStock;
 
     Button LocationAdd;
+    Boolean itemcodeexists = false;
     Button Debug;
     String ShopCode;
     String Mode;
@@ -521,9 +522,11 @@ public class AddItemActivity extends AppCompatActivity {
             endcode = "{";
         }
 
+        int limit = search.compareTo("")==0? 1 : 10;
+
         firebaseFirestore.collection(ShopCode).document("doc")
                 .collection("LocationDetails").whereGreaterThanOrEqualTo("name", startcode)
-                .whereLessThan("name", endcode).limit(10).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .whereLessThan("name", endcode).limit(limit).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 AutoProgress.setVisibility(View.GONE);
@@ -777,8 +780,6 @@ public class AddItemActivity extends AppCompatActivity {
         } else {
             executetransaction();
         }
-
-        executetransaction();
     }
 
     private void executetransaction() {
@@ -789,13 +790,8 @@ public class AddItemActivity extends AppCompatActivity {
             @Override
             public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
                 if (transaction.get(doc).exists() && checkmode("Add")) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            editTexts.get(0).setText("");
-                            editTexts.get(0).setError("Item Code already exists");
-                        }
-                    });
+                    itemcodeexists = true;
+                    return null;
                 } else {
                     save(transaction);
                 }
@@ -807,7 +803,12 @@ public class AddItemActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     if (checkmode("Add")) {
-                        Toast.makeText(getApplicationContext(), "Item Added", Toast.LENGTH_SHORT).show();
+                        if(itemcodeexists){
+                            editTexts.get(0).setText("");
+                            editTexts.get(0).requestFocus();
+                            editTexts.get(0).setError("Item Code Already Exists");
+                        }else
+                            Toast.makeText(getApplicationContext(), "Item Added", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getApplicationContext(), "Item Updated", Toast.LENGTH_SHORT).show();
                     }

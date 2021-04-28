@@ -21,6 +21,7 @@
     <string name="tab_text_1">Details</string>
     <string name="tab_text_2">Adjustments</string>
     <string name="tab_text_3">Stock</string>
+    <string name="tab_text_4">Items</string>
     <string name="tab_text_pending">Trans. Pending</string>
     <string name="title_activity_item_view_adaptor">ItemViewAdaptor</string>
     <string name="title_activity_item_view">ItemViewActivity</string>

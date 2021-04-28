@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="2dp"
+        android:layout_marginVertical="@dimen/spacingbetweenlistitems"
         android:elevation="10dp"
         android:foreground="?android:attr/selectableItemBackground"
         app:cardCornerRadius="10dp">

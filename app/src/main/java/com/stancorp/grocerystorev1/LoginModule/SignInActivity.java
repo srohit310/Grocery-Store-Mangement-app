@@ -223,7 +223,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private void Authenticate() {
         SDProgress(true);
-        Query query = firebaseFirestore.collection("UserDetails").whereEqualTo("Email",Email.getEditText().getText().toString())
+        Query query = firebaseFirestore.collection("UserDetails").whereEqualTo("Email",Email.getEditText().getText().toString().toLowerCase())
                 .whereEqualTo("ShopCode",Shop.getEditText().getText().toString());
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override

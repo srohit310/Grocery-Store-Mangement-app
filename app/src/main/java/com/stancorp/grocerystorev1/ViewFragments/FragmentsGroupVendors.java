@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.AdapterClasses.AgentAdapter;
 import com.stancorp.grocerystorev1.AddActivities.AddStakesholdersActivity;
@@ -27,12 +28,13 @@ public class FragmentsGroupVendors extends FragmentsGroups {
     public FragmentsGroupCustomers customerFragment;
     LinkedHashMap<String, Agent> agents;
     AgentAdapter agentAdaptor;
-    LinkedHashMap<String,Agent> filteredList;
+    LinkedHashMap<String, Agent> filteredList;
+    ListenerRegistration agentListener;
 
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
         toolbarspinner.setVisibility(View.GONE);
-        attachListData(startcode,endcode);
+        attachListData(startcode, endcode);
 
     }
 
@@ -41,70 +43,86 @@ public class FragmentsGroupVendors extends FragmentsGroups {
         agents = new LinkedHashMap<>();
         filteredList = new LinkedHashMap<>();
         searchedittext.setHint("Search for vendor using name");
-        agentAdaptor = new AgentAdapter(agents,getContext(),this,"Vendor");
+        agentAdaptor = new AgentAdapter(agents, getContext(), this, "Vendor");
         recyclerView.setAdapter(agentAdaptor);
     }
 
     @Override
     protected void AddIntent() {
         Intent intent = new Intent(getContext(), AddStakesholdersActivity.class);
-        intent.putExtra("ShopCode",user.ShopCode);
+        intent.putExtra("ShopCode", user.ShopCode);
         intent.putExtra("ActivityMode", "Add");
         startActivity(intent);
     }
 
     @Override
-    protected void attachListData(String startcode,String endcode) {
+    public void onResume() {
+        super.onResume();
+        startcode = "!";
+        endcode = "{";
+        if(agents!=null) {
+            attachListData(startcode, endcode);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        agentListener.remove();
+        super.onPause();
+    }
+
+    @Override
+    protected void attachListData(String startcode, String endcode) {
         SDProgress(true);
         agents.clear();
         filteredList.clear();
-
-        firebaseFirestore.collection(user.ShopCode).document("doc").collection("StakeHolders")
-                .whereGreaterThanOrEqualTo("Name", startcode).whereLessThan("Name", endcode)
-                .whereIn("AgentType", Arrays.asList("Both","Vendor")).orderBy("Name", direction)
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                        if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                            for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()){
-                                Agent agent;
-                                switch (doc.getType()){
-                                    case ADDED:
-                                        agent =  doc.getDocument().toObject(Agent.class);
-                                        agents.put(agent.Code,agent);
-                                        filteredList.put(agent.Code,agent);
-                                        agentAdaptor.notifyDataSetChanged();
-                                        break;
-                                    case MODIFIED:
-                                        agent =  doc.getDocument().toObject(Agent.class);
-                                        agents.put(agent.Code,agent);
-                                        filteredList.put(agent.Code,agent);
-                                        agentAdaptor.notifyDataSetChanged();
-                                        break;
-                                    case REMOVED:
-                                        agent =  doc.getDocument().toObject(Agent.class);
-                                        agents.remove(agent.Code);
-                                        filteredList.remove(agent.Code);
-                                        agentAdaptor.notifyDataSetChanged();
-                                        break;
+        agentListener =
+                firebaseFirestore.collection(user.ShopCode).document("doc").collection("StakeHolders")
+                        .whereGreaterThanOrEqualTo("Name", startcode).whereLessThan("Name", endcode)
+                        .whereIn("AgentType", Arrays.asList("Both", "Vendor")).orderBy("Name", direction)
+                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+                                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                                        Agent agent;
+                                        switch (doc.getType()) {
+                                            case ADDED:
+                                                agent = doc.getDocument().toObject(Agent.class);
+                                                agents.put(agent.Code, agent);
+                                                filteredList.put(agent.Code, agent);
+                                                agentAdaptor.notifyDataSetChanged();
+                                                break;
+                                            case MODIFIED:
+                                                agent = doc.getDocument().toObject(Agent.class);
+                                                agents.put(agent.Code, agent);
+                                                filteredList.put(agent.Code, agent);
+                                                agentAdaptor.notifyDataSetChanged();
+                                                break;
+                                            case REMOVED:
+                                                agent = doc.getDocument().toObject(Agent.class);
+                                                agents.remove(agent.Code);
+                                                filteredList.remove(agent.Code);
+                                                agentAdaptor.notifyDataSetChanged();
+                                                break;
+                                        }
+                                    }
+                                    SDProgress(false);
+                                } else {
+                                    SDProgress(false);
                                 }
                             }
-                            SDProgress(false);
-                        }else{
-                            SDProgress(false);
-                        }
-                    }
-                });
+                        });
     }
 
     @Override
     protected void displayIntent(int position) {
         Intent intent = new Intent(getContext(), AgentViewActivity.class);
         Agent agent = (Agent) filteredList.values().toArray()[position];
-        intent.putExtra("AgentCode",agent.Code);
-        intent.putExtra("Agent",agent);
-        intent.putExtra("Mode","Vendor");
-        intent.putExtra("ShopCode",user.ShopCode);
+        intent.putExtra("AgentCode", agent.Code);
+        intent.putExtra("Agent", agent);
+        intent.putExtra("Mode", "Vendor");
+        intent.putExtra("ShopCode", user.ShopCode);
         startActivity(intent);
     }
 }

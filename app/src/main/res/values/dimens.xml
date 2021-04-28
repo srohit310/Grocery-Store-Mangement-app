@@ -19,4 +19,6 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="AddLocationEditTextMargin">13dp</dimen>
+    <dimen name="tabspacingend">10dp</dimen>
+    <dimen name="spacingbetweenlistitems">3dp</dimen>
 </resources>

@@ -34,6 +34,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.AdapterClasses.BaseRecyclerAdapter;
@@ -51,12 +52,12 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
     private static final int RC_ADD = 251;
     public StoreUser user;
     public EditText searchedittext;
+    public ListenerRegistration registration;
     public SearchView searchbarView;
     public String filterby;
     public String startcode,endcode;
     public Query.Direction direction;
     public EditText searchBox;
-    public Spinner sortSpinner;
     public Spinner toolbarspinner;
 
     @Nullable
@@ -71,6 +72,12 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
             toolbarspinner.setVisibility(View.VISIBLE);
         }
         return view;
+    }
+
+    @Override
+    public void onPause() {
+
+        super.onPause();
     }
 
     @Override

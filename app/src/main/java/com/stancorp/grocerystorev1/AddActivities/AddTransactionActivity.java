@@ -4,13 +4,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -60,7 +65,11 @@ import com.stancorp.grocerystorev1.Classes.Itemtransaction;
 import com.stancorp.grocerystorev1.Classes.Location;
 import com.stancorp.grocerystorev1.Classes.LocationStockItem;
 import com.stancorp.grocerystorev1.Classes.StoreTransaction;
+import com.stancorp.grocerystorev1.Classes.TransactionItemList;
+import com.stancorp.grocerystorev1.Classes.TransactionProperties;
 import com.stancorp.grocerystorev1.Classes.maxindex;
+import com.stancorp.grocerystorev1.DisplayItems.ScanSkuCodeActivity;
+import com.stancorp.grocerystorev1.DisplayTransactions.TransactionDetails;
 import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 
@@ -73,7 +82,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AddTransactionActivity extends AppCompatActivity implements BaseRecyclerAdapter.OnNoteListner {
 
@@ -84,6 +92,8 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
     RelativeLayout ProgressLayout;
     String CurrentDate;
     String type;
+    String PermissionLevel;
+    String EmployeeLocationCode;
 
     Boolean Deliveryboolcheck;
 
@@ -98,21 +108,22 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
     LinearLayout DeliveryCheck;
     CheckBox delcheckbox;
     EditText ReferenceCode;
-    Pair<String,Float> itemvalidfloat;
-    Pair<String,Boolean> itemvalid;
+    Pair<String, Float> itemvalidfloat;
+    Pair<String, Boolean> itemvalid;
 
     FirebaseFirestore firebaseFirestore;
 
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
     LinkedHashMap<String, Itemtransaction> transactionitemlist;
-    HashMap<String,String> itemreqorderqty;
+    HashMap<String, String> itemreqorderqty;
     public float totalcost;
     List<String> Units;
     ItemTransactionRecyclerAdapter transactionitemAdapter;
     public TextView TotalCostText;
     public RelativeLayout BillTop;
     public LinearLayout TotalPriceLayout;
+    TextView StakeholderTitle;
 
     AutoCompleteTextView AgentSearch;
     ProgressBar agentprogress;
@@ -134,6 +145,7 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
     AutoCompleteItemAdapter itemAdapter;
     LinkedHashMap<String, ItemStockInfo> items;
     Handler itemhandler = new Handler();
+    Button SKUCODE;
 
     final Calendar myCalendar = Calendar.getInstance();
     EditText transactionDate;
@@ -143,6 +155,9 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
     ArrayList<Itemtransaction> itemtransactions;
     StoreTransaction storeTransaction;
     private boolean agentValid;
+
+    private static final int RC_SKU_CODE_PICKER = 6;
+    public static final int CAMERA_PERMISSION_CODE = 22;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,12 +171,18 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
 
         gfunc = new Gfunc();
 
+        LinearLayout locationLayout = findViewById(R.id.LocationLayout);
+
         Mode = getIntent().getStringExtra("Mode");
         ShopCode = getIntent().getStringExtra("ShopCode");
         Username = getIntent().getStringExtra("Username");
         Useremail = getIntent().getStringExtra("Useremail");
+        PermissionLevel = getIntent().getStringExtra("UserPermission");
+
         CurrentDate = "";
         ProgressLayout = findViewById(R.id.ProgressLayout);
+        StakeholderTitle = findViewById(R.id.stakeholderTitle);
+        StakeholderTitle.setText(Mode + " *");
 
         if (Mode.compareTo("Vendor") == 0)
             getSupportActionBar().setTitle("Make Purchase");
@@ -187,16 +208,16 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
         delcheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(Mode.compareTo("Customer")==0) {
+                if (Mode.compareTo("Customer") == 0) {
                     if (b) {
                         Deliveryboolcheck = true;
-                        if(Selectedagentfromdropdown) {
+                        if (Selectedagentfromdropdown) {
                             LocationLayoutFrom.setVisibility(View.VISIBLE);
                             LocationLayoutTo.setVisibility(View.VISIBLE);
                         }
                     } else {
                         Deliveryboolcheck = false;
-                        if(Selectedagentfromdropdown) {
+                        if (Selectedagentfromdropdown) {
                             LocationLayoutFrom.setVisibility(View.GONE);
                             LocationLayoutTo.setVisibility(View.GONE);
                         }
@@ -221,7 +242,7 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
         TotalCostText = findViewById(R.id.TotalCostText);
         TotalCostText.setText(String.valueOf(totalcost) + " INR");
         transactionitemAdapter = new ItemTransactionRecyclerAdapter(this, getApplicationContext(), this,
-                transactionitemlist,itemreqorderqty);
+                transactionitemlist, itemreqorderqty);
         recyclerView.setAdapter(transactionitemAdapter);
         recyclerView.setLayoutManager(layoutManager);
         BillTop = findViewById(R.id.billtop);
@@ -268,65 +289,67 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
         //Autocomplete Location - {Setting up the autocompletelistene}//
         //                                                            //
         ////////////////////////////////////////////////////////////////
+
         locationAdapter = new AutoCompleteLocationAdapter(getApplicationContext(), locations);
         LocationSearch = findViewById(R.id.LocationsearchAuto);
         LocationSearch.setThreshold(0);
         LocationSearch.setAdapter(locationAdapter);
         locationprogress = findViewById(R.id.autolocationprogress);
-        addLocations("");
-        LocationSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                locationhandler.removeCallbacksAndMessages(null);
-                Selectedlocationfromdropdown = false;
-                if (Mode.compareTo("Vendor") == 0) {
-                    setLocationtexts(null, false,false);
-                }else{
-                    setLocationtexts(null, false,true);
+        if (PermissionLevel.compareTo("Admin") == 0) {
+            addLocations("");
+            LocationSearch.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 }
-            }
 
-            @Override
-            public void afterTextChanged(final Editable editable) {
-                LocationSearch.dismissDropDown();
-                if (editable.toString().length() > 0) {
-                    locationprogress.setVisibility(View.VISIBLE);
-                    if (locations.containsKey(editable.toString())) {
-                        locationprogress.setVisibility(View.GONE);
-                        return;
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    locationhandler.removeCallbacksAndMessages(null);
+                    Selectedlocationfromdropdown = false;
+                    if (Mode.compareTo("Vendor") == 0) {
+                        setLocationtexts(null, false, false);
+                    } else {
+                        setLocationtexts(null, false, true);
                     }
-                } else
-                    locationprogress.setVisibility(View.GONE);
+                }
 
-                locationhandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (editable.toString().length() > 0) {
-                            addLocations(editable.toString());
+                @Override
+                public void afterTextChanged(final Editable editable) {
+                    LocationSearch.dismissDropDown();
+                    if (editable.toString().length() > 0) {
+                        locationprogress.setVisibility(View.VISIBLE);
+                        if (locations.containsKey(editable.toString())) {
+                            locationprogress.setVisibility(View.GONE);
+                            return;
                         }
-                    }
-                }, 1500);
-            }
-        });
-        LocationSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Selectedlocationfromdropdown = true;
-                Location location = (Location) locationAdapter.getItem(i);
-                Locationcancel.setVisibility(View.VISIBLE);
-                LocationSearch.setEnabled(false);
-                if (Mode.compareTo("Vendor") == 0)
-                    setLocationtexts(location.address, true,false);
-                else{
-                    setLocationtexts(location.address, true,true);
-                }
-            }
-        });
+                    } else
+                        locationprogress.setVisibility(View.GONE);
 
+                    locationhandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (editable.toString().length() > 0) {
+                                addLocations(editable.toString());
+                            }
+                        }
+                    }, 1500);
+                }
+            });
+            LocationSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Selectedlocationfromdropdown = true;
+                    Location location = (Location) locationAdapter.getItem(i);
+                    Locationcancel.setVisibility(View.VISIBLE);
+                    LocationSearch.setEnabled(false);
+                    if (Mode.compareTo("Vendor") == 0)
+                        setLocationtexts(location.address, true, false);
+                    else {
+                        setLocationtexts(location.address, true, true);
+                    }
+                }
+            });
+        }
         //Autocomplete Location - {Setting up the autocompletelistene}//
         //                                                            //
         ////////////////////////////////////////////////////////////////
@@ -351,9 +374,15 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                 customerhandler.removeCallbacksAndMessages(null);
                 Selectedagentfromdropdown = false;
                 if (Mode.compareTo("Customer") == 0)
-                    setLocationtexts(null, false,false);
-                else{
-                    setLocationtexts(null,false,true);
+                    if (PermissionLevel.compareTo("Employee") == 0) {
+                        Deliveryboolcheck = true;
+                        LocationLayoutFrom.setVisibility(View.VISIBLE);
+                    } else {
+                        setLocationtexts(null, false, false);
+                    }
+                else {
+                    if (PermissionLevel.compareTo("Admin") == 0)
+                        setLocationtexts(null, false, true);
                 }
                 Deliveryboolcheck = true;
                 delcheckbox.setChecked(true);
@@ -394,9 +423,9 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                     DeliveryCheck.setVisibility(View.VISIBLE);
                 }
                 if (Mode.compareTo("Customer") == 0) {
-                    setLocationtexts(agent.deladdress, true,false);
-                }else{
-                    setLocationtexts(agent.deladdress, true,true);
+                    setLocationtexts(agent.deladdress, true, false);
+                } else {
+                    setLocationtexts(agent.deladdress, true, true);
                 }
             }
         });
@@ -411,6 +440,24 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
         itemAdapter = new AutoCompleteItemAdapter(getApplicationContext(), items);
         ItemSearch = findViewById(R.id.ItemsearchAuto);
         ItemSearch.setThreshold(0);
+        SKUCODE = findViewById(R.id.ScanSku);
+        SKUCODE.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContextCompat.checkSelfPermission(AddTransactionActivity.this,
+                        Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    if (Selectedlocationfromdropdown) {
+                        startActivityForResult(new Intent(getApplicationContext(), ScanSkuCodeActivity.class), RC_SKU_CODE_PICKER);
+                    } else {
+                        LocationSearch.setError("Please 'Select' Location Code");
+                        LocationSearch.requestFocus();
+                    }
+                } else
+                    requestpermission(Manifest.permission.CAMERA, "In order to scan Barcode" +
+                            " permission to use camera is required", CAMERA_PERMISSION_CODE);
+            }
+        });
+
         ItemSearch.setAdapter(itemAdapter);
         itemprogress = findViewById(R.id.autoitemprogress);
         addItems("");
@@ -466,6 +513,55 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
         //                                                                  //
         //////////////////////////////////////////////////////////////////////
 
+        if (PermissionLevel.compareTo("Employee") == 0) {
+            SDProgress(true);
+            EmployeeLocationCode = getIntent().getStringExtra("UserLocation");
+            LocationSearch.setText(EmployeeLocationCode);
+            Selectedlocationfromdropdown = true;
+            fetchlocationdetails();
+            locationLayout.setVisibility(View.GONE);
+        }
+
+    }
+
+    private void fetchItemStockInfoSKU(String ItemCode) {
+        SDProgress(true);
+        firebaseFirestore.collection(ShopCode).document("doc").collection("ItemStockInfo")
+                .document(ItemCode).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.getResult().exists()) {
+                    ItemStockInfo itemStockInfo = task.getResult().toObject(ItemStockInfo.class);
+                    fetchlocationbalancestock(itemStockInfo);
+                } else {
+                    Toast.makeText(getApplicationContext(), "SKU code dosen't exist", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
+
+    private void fetchlocationdetails() {
+        firebaseFirestore.collection(ShopCode).document("doc").collection("LocationDetails")
+                .document(EmployeeLocationCode).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.getResult().exists()) {
+                    Location location = task.getResult().toObject(Location.class);
+                    if (Mode.compareTo("Vendor") == 0) {
+                        LocationLayoutTo.setVisibility(View.VISIBLE);
+                        setLocationtexts(location.address, true, false);
+                    } else {
+                        LocationLayoutFrom.setVisibility(View.VISIBLE);
+                        setLocationtexts(location.address, true, true);
+                    }
+                    SDProgress(false);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Could Not Retrieve Location Data! Try again Later", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+        });
     }
 
     private void fetchlocationbalancestock(final ItemStockInfo itemStockInfo) {
@@ -475,14 +571,14 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         SDProgress(false);
-                        if (task.getResult().exists() || Mode.compareTo("Vendor")==0) {
+                        if (task.getResult().exists() || Mode.compareTo("Vendor") == 0) {
                             LocationStockItem locationStockItem = task.getResult().toObject(LocationStockItem.class);
                             if (transactionitemlist.containsKey(ItemSearch.getText().toString())) {
                                 ItemSearch.setText("");
                                 ItemSearch.setError("Item already added");
                                 ItemSearch.requestFocus();
                             } else
-                                alertitemadd(locationStockItem != null?locationStockItem.Balance_Qty:"nothing", itemStockInfo);
+                                alertitemadd(locationStockItem != null ? locationStockItem.Balance_Qty : "nothing", itemStockInfo);
                         } else {
                             ItemSearch.setText("");
                             ItemSearch.setError("Item Balance is 0 at location");
@@ -491,8 +587,21 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                 });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SKU_CODE_PICKER) {
+            if (resultCode == RESULT_OK) {
+                if (data == null) {
+                    Toast.makeText(getApplicationContext(), "Could not fetch Code", Toast.LENGTH_SHORT).show();
+                } else {
+                    fetchItemStockInfoSKU(data.getStringExtra("SKUCODE"));
+                }
+            }
+        }
+    }
 
-    private void alertitemadd(final String balance_Qty, ItemStockInfo itemStockInfo) {
+    private void alertitemadd(final String balance_Qty, final ItemStockInfo itemStockInfo) {
         AlertDialog.Builder builder = new AlertDialog.Builder(AddTransactionActivity.this, R.style.AlertDialogTheme);
         View view = LayoutInflater.from(getApplicationContext()).inflate(
                 R.layout.alertdialog_additemtotransaction, (RelativeLayout) findViewById(R.id.additemalertcontainer)
@@ -514,16 +623,16 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
             alertEditTexts.get(i).setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         }
 
-        if(Mode.compareTo("Customer")==0) {
+        if (Mode.compareTo("Customer") == 0) {
             alertEditTexts.get(1).setText(itemStockInfo.Selling_Price);
             alertEditTexts.get(2).setText(balance_Qty);
-        }else{
+        } else {
             alertEditTexts.get(1).setHint("Purchase Price / Unit");
-            if(balance_Qty.compareTo("nothing") ==0 ){
+            if (balance_Qty.compareTo("nothing") == 0) {
                 Balance.setText("Change\nReorder lvl");
                 alertEditTexts.get(2).setText(itemStockInfo.Default_Reorder_Quantity);
                 alertEditTexts.get(2).setEnabled(true);
-            }else {
+            } else {
                 Balance.setVisibility(View.GONE);
                 alertEditTexts.get(2).setText(balance_Qty);
                 alertEditTexts.get(2).setVisibility(View.GONE);
@@ -543,7 +652,7 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                         break;
                     }
                 }
-                if (Mode.compareTo("Customer")==0 &&
+                if (Mode.compareTo("Customer") == 0 &&
                         Float.parseFloat(alertEditTexts.get(0).getText().toString()) > Float.parseFloat(alertEditTexts.get(2).getText().toString())) {
                     alertEditTexts.get(0).setText("");
                     alertEditTexts.get(0).requestFocus();
@@ -551,11 +660,11 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                     flag = false;
                 }
                 if (flag) {
-                    Itemtransaction itemtransaction = new Itemtransaction(ItemSearch.getText().toString(), alertEditTexts.get(1).getText().toString(),
+                    Itemtransaction itemtransaction = new Itemtransaction(itemStockInfo.ItemCode, alertEditTexts.get(1).getText().toString(),
                             alertEditTexts.get(0).getText().toString());
-                    transactionitemlist.put(ItemSearch.getText().toString(), itemtransaction);
-                    if(balance_Qty.compareTo("nothing") ==0 ){
-                        itemreqorderqty.put(itemtransaction.itemCode,alertEditTexts.get(2).getText().toString());
+                    transactionitemlist.put(itemStockInfo.ItemCode, itemtransaction);
+                    if (balance_Qty.compareTo("nothing") == 0) {
+                        itemreqorderqty.put(itemtransaction.itemCode, alertEditTexts.get(2).getText().toString());
                     }
                     totalcost += itemtransaction.Price * itemtransaction.quantity;
                     TotalCostText.setText(String.valueOf(totalcost) + " INR");
@@ -589,10 +698,12 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
             endcode = "{";
         }
 
+        int limit = search.compareTo("") == 0 ? 1 : 10;
+
         firebaseFirestore.collection(ShopCode).document("doc")
                 .collection("ItemStockInfo").whereGreaterThanOrEqualTo("name", startcode)
                 .whereLessThan("name", endcode).whereEqualTo("valid", true)
-                .limit(10).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .limit(limit).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 itemprogress.setVisibility(View.GONE);
@@ -638,10 +749,12 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
             endcode = "{";
         }
 
+        int limit = search.compareTo("") == 0 ? 1 : 10;
+
         firebaseFirestore.collection(ShopCode).document("doc")
                 .collection("LocationDetails").whereGreaterThanOrEqualTo("name", startcode)
                 .whereLessThan("name", endcode)
-                .limit(10).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .limit(limit).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 locationprogress.setVisibility(View.GONE);
@@ -674,27 +787,27 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
 
     private void setLocationtexts(DeliveryAddress address, Boolean visible, Boolean from) {
         if (!visible) {
-            if(from) {
+            if (from) {
                 LocationLayoutFrom.setVisibility(View.GONE);
-            }else{
+            } else {
                 LocationLayoutTo.setVisibility(View.GONE);
             }
         } else {
-            if(from) {
+            if (from) {
                 LocationLayoutFrom.setVisibility(View.VISIBLE);
-            }else{
+            } else {
                 LocationLayoutTo.setVisibility(View.VISIBLE);
             }
         }
         if (address == null) {
             address = new DeliveryAddress("", "", "", 0);
         }
-        if(from) {
+        if (from) {
             textInputLayoutsfrom.get(1).getEditText().setText(address.City);
             textInputLayoutsfrom.get(2).getEditText().setText(address.Street);
             textInputLayoutsfrom.get(0).getEditText().setText(address.State);
             textInputLayoutsfrom.get(3).getEditText().setText(String.valueOf(address.Pincode));
-        }else{
+        } else {
             textInputLayoutsto.get(1).getEditText().setText(address.City);
             textInputLayoutsto.get(2).getEditText().setText(address.Street);
             textInputLayoutsto.get(0).getEditText().setText(address.State);
@@ -717,10 +830,12 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
             endcode = "{";
         }
 
+        int limit = search.compareTo("") == 0 ? 1 : 10;
+
         firebaseFirestore.collection(ShopCode).document("doc")
                 .collection("StakeHolders").whereGreaterThanOrEqualTo("Name", startcode)
                 .whereLessThan("Name", endcode).whereIn("AgentType", Arrays.asList("Both", Mode))
-                .limit(10).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .limit(limit).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 agentprogress.setVisibility(View.GONE);
@@ -898,18 +1013,29 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
 
         itemtransactions = new ArrayList<>();
         itemtransactions.addAll(transactionitemlist.values());
-        DeliveryAddress deliveryAddressfrom = new DeliveryAddress(textInputLayoutsfrom.get(2).getEditText().getText().toString(),
-                textInputLayoutsfrom.get(1).getEditText().getText().toString(),textInputLayoutsfrom.get(0).getEditText().getText().toString(),
-                Long.parseLong(textInputLayoutsfrom.get(3).getEditText().getText().toString()));
-        DeliveryAddress deliveryAddressto = new DeliveryAddress(textInputLayoutsto.get(2).getEditText().getText().toString(),
-                textInputLayoutsto.get(1).getEditText().getText().toString(),textInputLayoutsto.get(0).getEditText().getText().toString(),
-                Long.parseLong(textInputLayoutsto.get(3).getEditText().getText().toString()));
+        DeliveryAddress deliveryAddressfrom = null;
+        DeliveryAddress deliveryAddressto = null;
+        String DeliveryDate;
+        if (deliveryDate.getText().toString().length() == 0) {
+            DeliveryDate = "";
+        } else {
+            DeliveryDate = deliveryDate.getText().toString();
+        }
+        if (Deliveryboolcheck) {
+            deliveryAddressfrom = new DeliveryAddress(textInputLayoutsfrom.get(2).getEditText().getText().toString(),
+                    textInputLayoutsfrom.get(1).getEditText().getText().toString(), textInputLayoutsfrom.get(0).getEditText().getText().toString(),
+                    Long.parseLong(textInputLayoutsfrom.get(3).getEditText().getText().toString()));
+            deliveryAddressto = new DeliveryAddress(textInputLayoutsto.get(2).getEditText().getText().toString(),
+                    textInputLayoutsto.get(1).getEditText().getText().toString(), textInputLayoutsto.get(0).getEditText().getText().toString(),
+                    Long.parseLong(textInputLayoutsto.get(3).getEditText().getText().toString()));
+        }
         if (Mode.compareTo("Vendor") == 0)
             type = "Purchase";
         else
             type = "Sale";
         storeTransaction = new StoreTransaction("", 0L, type, ReferenceCode.getText().toString().trim().toLowerCase(), AgentSearch.getText().toString(),
-                LocationSearch.getText().toString(), totalcost, 0.0f, Username, Useremail, gfunc.getCurrentDate(),true,deliveryAddressfrom,deliveryAddressto);
+                LocationSearch.getText().toString(), totalcost, 0.0f, Username, Useremail, gfunc.getCurrentDate(), true, deliveryAddressfrom, deliveryAddressto,
+                DeliveryDate, transactionDate.getText().toString());
 
         initiatetransaction();
     }
@@ -920,11 +1046,23 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
             @Override
             public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
                 float TotalProfit = 0.0f;
+                int pending = 0;
+                TransactionProperties prop = (TransactionProperties) transaction.get(firebaseFirestore.collection(ShopCode).document("TransactionDetails"))
+                        .toObject(TransactionProperties.class);
+                if(prop != null){
+                    if(Mode.compareTo("Vendor")==0) {
+                        pending = prop.pendingPurchases;
+                    }else{
+                        pending = prop.pendingSales;
+                    }
+                }else {
+                    prop = new TransactionProperties(0,0);
+                }
                 ArrayList<ItemStockInfo> itemStockInfoArrayList = new ArrayList<>();
                 ArrayList<LocationStockItem> locationStockItems = new ArrayList<>();
                 Boolean valid = transaction.get(firebaseFirestore.collection(ShopCode).document("doc")
                         .collection("StakeHolders").document(storeTransaction.stakeholderCode)).exists();
-                if(!valid){
+                if (!valid) {
                     agentValid = false;
                     return null;
                 }
@@ -934,43 +1072,42 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                     ItemStockInfo itemStockInfo = transaction.get(firebaseFirestore.collection(ShopCode).document("doc")
                             .collection("ItemStockInfo").document(itemcode)).toObject(ItemStockInfo.class);
                     LocationStockItem locationStockItem = transaction.get(firebaseFirestore.collection(ShopCode).document("doc")
-                            .collection("Location").document(itemcode+storeTransaction.locationCode)).toObject(LocationStockItem.class);
-                    if(locationStockItem == null){
-                        locationStockItem = new LocationStockItem("0.0",itemreqorderqty.get(itemcode),true,
+                            .collection("Location").document(itemcode + storeTransaction.locationCode)).toObject(LocationStockItem.class);
+                    if (locationStockItem == null) {
+                        locationStockItem = new LocationStockItem("0.0", itemreqorderqty.get(itemcode), true,
                                 itemStockInfo.ItemCode, storeTransaction.locationCode);
                     }
-                    if(!itemStockInfo.valid){
-                        itemvalidfloat = new Pair<>(itemStockInfo.ItemCode,itemtransaction.quantity * itemtransaction.Price);
-                        itemvalid = new Pair<>(itemStockInfo.ItemCode,false);
+                    if (!itemStockInfo.valid) {
+                        itemvalidfloat = new Pair<>(itemStockInfo.ItemCode, itemtransaction.quantity * itemtransaction.Price);
+                        itemvalid = new Pair<>(itemStockInfo.ItemCode, false);
                         return null;
-                    }else{
-                        if(Mode.compareTo("Customer")==0 && itemtransaction.quantity > Float.parseFloat(locationStockItem.Balance_Qty)){
-                            itemvalidfloat = new Pair<>(itemStockInfo.ItemCode,itemtransaction.quantity * itemtransaction.Price);
-                            itemvalid = new Pair<>(itemStockInfo.ItemCode,true);
+                    } else {
+                        if (Mode.compareTo("Customer") == 0 && itemtransaction.quantity > Float.parseFloat(locationStockItem.Balance_Qty)) {
+                            itemvalidfloat = new Pair<>(itemStockInfo.ItemCode, itemtransaction.quantity * itemtransaction.Price);
+                            itemvalid = new Pair<>(itemStockInfo.ItemCode, true);
                             return null;
                         }
                     }
                     itemStockInfoArrayList.add(itemStockInfo);
                     locationStockItems.add(locationStockItem);
                 }
-                if (transaction.get(firebaseFirestore.collection(ShopCode).document("maxIndex")).exists()) {
-                    maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(ShopCode).document("maxIndex"))
-                            .toObject(maxindex.class);
-                    if(Mode.compareTo("Vendor")==0) {
-                        storeTransaction.code = "PO-" + String.valueOf(max.purchaseCode + 1);
-                        max.purchaseCode = max.purchaseCode + 1;
-                    }else {
-                        storeTransaction.code = "SO-" + String.valueOf(max.salesCode + 1);
-                        max.salesCode = max.salesCode + 1;
-                    }
-                    storeTransaction.codeno = max.salesCode + max.purchaseCode ;
-                    transaction.set(firebaseFirestore.collection(ShopCode).document("maxIndex"), max);
+
+                maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(ShopCode).document("maxIndex"))
+                        .toObject(maxindex.class);
+                if (Mode.compareTo("Vendor") == 0) {
+                    storeTransaction.code = "PO-" + String.valueOf(max.purchaseCode + 1);
+                    max.purchaseCode = max.purchaseCode + 1;
+                } else {
+                    storeTransaction.code = "SO-" + String.valueOf(max.salesCode + 1);
+                    max.salesCode = max.salesCode + 1;
                 }
-                for(int i=0; i<transactionitemlist.size();i++){
+                storeTransaction.codeno = max.salesCode + max.purchaseCode;
+                transaction.set(firebaseFirestore.collection(ShopCode).document("maxIndex"), max);
+                for (int i = 0; i < transactionitemlist.size(); i++) {
                     ItemStockInfo itemStockInfo = itemStockInfoArrayList.get(i);
                     Itemtransaction itemtransaction = (Itemtransaction) transactionitemlist.values().toArray()[i];
                     LocationStockItem locationStockItem = locationStockItems.get(i);
-                    if(Mode.compareTo("Customer")==0) {
+                    if (Mode.compareTo("Customer") == 0) {
                         Float Purchaseprice = (Float.parseFloat(itemStockInfo.Total_Price) / Float.parseFloat(itemStockInfo.Total_Balance_Quantity));
                         Float Totalpurchasecost = Purchaseprice * itemtransaction.quantity;
                         Float totalpriceleft = Float.parseFloat(itemStockInfo.Total_Price) - Totalpurchasecost;
@@ -980,7 +1117,7 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                         locationStockItem.Balance_Qty = String.valueOf(balanceleftatlocation);
                         itemStockInfo.Total_Balance_Quantity = String.valueOf(totalbalanceleft);
                         TotalProfit += (itemtransaction.Price * itemtransaction.quantity) - Totalpurchasecost;
-                    }else if(Mode.compareTo("Vendor")==0){
+                    } else if (Mode.compareTo("Vendor") == 0) {
                         Float totalpriceleft = Float.parseFloat(itemStockInfo.Total_Price) + (itemtransaction.Price * itemtransaction.quantity);
                         Float totalbalanceleft = Float.parseFloat(itemStockInfo.Total_Balance_Quantity) + itemtransaction.quantity;
                         Float balanceleftatlocation = Float.parseFloat(locationStockItem.Balance_Qty) + itemtransaction.quantity;
@@ -989,32 +1126,38 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                         itemStockInfo.Total_Balance_Quantity = String.valueOf(totalbalanceleft);
                     }
                     transaction.set(firebaseFirestore.collection(ShopCode).document("doc")
-                            .collection("ItemStockInfo").document(itemStockInfo.ItemCode),itemStockInfo);
+                            .collection("ItemStockInfo").document(itemStockInfo.ItemCode), itemStockInfo);
                     transaction.set(firebaseFirestore.collection(ShopCode).document("doc")
                             .collection("Location")
-                            .document(locationStockItem.ItemCode + storeTransaction.locationCode),locationStockItem);
+                            .document(locationStockItem.ItemCode + storeTransaction.locationCode), locationStockItem);
                 }
                 storeTransaction.totalProfit = TotalProfit;
                 transaction.set(firebaseFirestore.collection(ShopCode).document("doc")
-                        .collection("TransactionDetails").document(storeTransaction.code),storeTransaction);
-                Map<String, List<Itemtransaction>> listMap = new HashMap<>();
+                        .collection("TransactionDetails").document(storeTransaction.code), storeTransaction);
                 Collection<Itemtransaction> tempitemsstore = transactionitemlist.values();
-                List<Itemtransaction> itemspartoftransaction = new ArrayList<>(tempitemsstore);
-                listMap.put("ItemsList",itemspartoftransaction);
+                ArrayList<Itemtransaction> itemspartoftransaction = new ArrayList<>(tempitemsstore);
+                TransactionItemList transactionitems = new TransactionItemList(itemspartoftransaction);
                 transaction.set(firebaseFirestore.collection(ShopCode).document("doc")
-                        .collection("TransactionItems").document(storeTransaction.code),listMap);
+                        .collection("TransactionItems").document(storeTransaction.code), transactionitems);
+                pending += 1;
+                if(Mode.compareTo("Vendor")==0) {
+                    prop.pendingPurchases = pending;
+                }else{
+                    prop.pendingSales = pending;
+                }
+                transaction.set(firebaseFirestore.collection(ShopCode).document("TransactionDetails"),prop);
                 return null;
             }
         }).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    if(!agentValid){
+                if (task.isSuccessful()) {
+                    if (!agentValid) {
                         AgentSearch.setText("");
                         AgentSearch.requestFocus();
-                        Toast.makeText(getApplicationContext(),"Agent was deleted during transaction",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Agent was deleted during transaction", Toast.LENGTH_SHORT).show();
                     }
-                    if (itemvalidfloat !=null){
+                    if (itemvalidfloat != null) {
                         transactionitemlist.remove(itemvalidfloat.first);
                         itemreqorderqty.remove(itemvalidfloat.first);
                         totalcost -= itemvalidfloat.second;
@@ -1024,38 +1167,64 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                             TotalPriceLayout.setVisibility(View.GONE);
                         }
                         transactionitemAdapter.notifyDataSetChanged();
-                        if(itemvalid.second) {
-                            Toast.makeText(getApplicationContext(),"Item "+ itemvalidfloat.first+" has been removed from list due to change in value",
+                        if (itemvalid.second) {
+                            Toast.makeText(getApplicationContext(), "Item " + itemvalidfloat.first + " has been removed from list due to change in value",
                                     Toast.LENGTH_SHORT).show();
-                        }else {
-                            Toast.makeText(getApplicationContext(),"Item "+ itemvalidfloat.first+" has been removed from list becasue it was made invalid",
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Item " + itemvalidfloat.first + " has been removed from list becasue it was made invalid",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
-                    if(agentValid && itemvalidfloat == null){
+                    if (agentValid && itemvalidfloat == null) {
                         Toast.makeText(getApplicationContext(), type + " order added to database", Toast.LENGTH_SHORT).show();
                         displaycodegenerated();
-                    }else{
+                    } else {
                         agentValid = true;
                         itemvalid = null;
                         itemvalidfloat = null;
                     }
-                }else{
-                    Toast.makeText(getApplicationContext(),"Failed to add to database",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Failed to add to database", Toast.LENGTH_SHORT).show();
                 }
                 SDProgress(false);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.i("failaddstakeholer",e.getMessage());
+                Log.i("failaddstakeholer", e.getMessage());
             }
         });
     }
 
+    private void requestpermission(final String Permission, String Message, final Integer code) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Permission)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Permission Needed")
+                    .setMessage(Message)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ActivityCompat.requestPermissions(AddTransactionActivity.this,
+                                    new String[]{Permission}, code);
+                        }
+                    })
+                    .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .create().show();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Permission},
+                    code);
+        }
+    }
+
     private void displaycodegenerated() {
         AlertDialog.Builder alert = new AlertDialog.Builder(AddTransactionActivity.this, R.style.MyDialogTheme);
-        alert.setMessage("Code assigned to "+ type + " order is "+ storeTransaction.code);
+        alert.setMessage("Code assigned to " + type + " order is " + storeTransaction.code);
         alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {

@@ -136,55 +136,61 @@
                         android:hint="Enter Date" />
 
                     <LinearLayout
+                        android:id="@+id/LocationLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:paddingVertical="5dp"
-                            android:paddingLeft="20dp"
-                            android:text="Location *"
-                            android:textColor="@color/colorAccent" />
+                            android:orientation="horizontal">
 
-                        <Button
-                            android:id="@+id/cancelLocation"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_marginLeft="10dp"
-                            android:background="@drawable/ic_baseline_cancel_24"
-                            android:visibility="gone" />
-                    </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingVertical="5dp"
+                                android:paddingLeft="20dp"
+                                android:text="Location *"
+                                android:textColor="@color/colorAccent" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
-                        android:orientation="horizontal">
+                            <Button
+                                android:id="@+id/cancelLocation"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/ic_baseline_cancel_24"
+                                android:visibility="gone" />
+                        </LinearLayout>
 
-                        <AutoCompleteTextView
-                            android:id="@+id/LocationsearchAuto"
-                            android:layout_width="0dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="6"
-                            android:hint="Search for Location using name"
-                            android:imeOptions="actionNext"
-                            android:inputType="text"
-                            android:padding="10dp"
-                            android:popupBackground="@drawable/rectangular_border"
-                            android:textSize="15sp" />
+                            android:layout_marginHorizontal="20dp"
+                            android:orientation="horizontal">
 
-                        <ProgressBar
-                            android:id="@+id/autolocationprogress"
-                            android:layout_width="0dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center"
-                            android:layout_marginLeft="15dp"
-                            android:layout_weight="1"
-                            android:visibility="gone" />
+                            <AutoCompleteTextView
+                                android:id="@+id/LocationsearchAuto"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="6"
+                                android:hint="Search for Location using name"
+                                android:imeOptions="actionNext"
+                                android:inputType="text"
+                                android:padding="10dp"
+                                android:popupBackground="@drawable/rectangular_border"
+                                android:textSize="15sp" />
+
+                            <ProgressBar
+                                android:id="@+id/autolocationprogress"
+                                android:layout_width="0dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="center"
+                                android:layout_marginLeft="15dp"
+                                android:layout_weight="1"
+                                android:visibility="gone" />
+                        </LinearLayout>
                     </LinearLayout>
-
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -479,6 +485,20 @@
                             android:layout_weight="1"
                             android:visibility="gone" />
                     </LinearLayout>
+
+
+                    <Button
+                        android:id="@+id/ScanSku"
+                        android:layout_width="100dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="right"
+                        android:layout_marginVertical="15dp"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/curved_accend_border"
+                        android:text="Scan SKU Code"
+                        android:layout_marginRight="20dp"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="10sp" />
 
                     <RelativeLayout
                         android:id="@+id/billtop"

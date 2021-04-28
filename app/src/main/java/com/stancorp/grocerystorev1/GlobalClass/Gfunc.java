@@ -8,10 +8,21 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.stancorp.grocerystorev1.R;
 
+import java.text.DateFormatSymbols;
 import java.util.Date;
 import java.util.regex.Pattern;
 
 public class Gfunc {
+
+    public String getMonth(int month) {
+        return new DateFormatSymbols().getMonths()[month-1];
+    }
+
+    public float roundof(float digit,int numberofplaces){
+        long no_of_places = (long) Math.pow(10,numberofplaces);
+        float roundOff = (float) (Math.round(digit * no_of_places) / no_of_places);
+        return roundOff;
+    }
 
     public String getCurrentDate(){
         Date date= new Date();

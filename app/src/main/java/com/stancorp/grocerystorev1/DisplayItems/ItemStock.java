@@ -68,6 +68,9 @@ public class ItemStock extends Fragment implements BaseRecyclerAdapter.OnNoteLis
             item = (Items) getArguments().getSerializable(ARG_PARAM1);
             ShopCode = getArguments().getString(ARG_PARAM3);
         }
+        if(locationStockItems == null) {
+            locationStockItems = new LinkedHashMap<>();
+        }
         firebaseFirestore = FirebaseFirestore.getInstance();
     }
 
@@ -80,7 +83,6 @@ public class ItemStock extends Fragment implements BaseRecyclerAdapter.OnNoteLis
         debug = view.findViewById(R.id.debug);
         mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
-        locationStockItems = new LinkedHashMap<>();
         itemStockAdapter = new ItemStockAdapter(getContext(),this,locationStockItems,
                 Float.parseFloat(item.Reorder_Lvl),Float.parseFloat(item.Excess_LvL),item.Unit);
         recyclerView.setAdapter(itemStockAdapter);
@@ -99,15 +101,9 @@ public class ItemStock extends Fragment implements BaseRecyclerAdapter.OnNoteLis
     }
 
     @Override
-    public void onPause() {
+    public void onStop() {
         stocklistener.remove();
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        attachDatabaseListener();
+        super.onStop();
     }
 
     private void attachDatabaseListener() {

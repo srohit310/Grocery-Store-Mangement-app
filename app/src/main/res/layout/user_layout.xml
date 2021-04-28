@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_marginHorizontal="2dp"
+        android:layout_marginVertical="@dimen/spacingbetweenlistitems"
         android:elevation="5dp"
         app:cardCornerRadius="15dp">
 

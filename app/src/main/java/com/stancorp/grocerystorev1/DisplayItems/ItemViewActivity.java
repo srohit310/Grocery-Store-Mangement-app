@@ -1,5 +1,6 @@
 package com.stancorp.grocerystorev1.DisplayItems;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -167,6 +168,11 @@ public class ItemViewActivity extends AppCompatActivity {
         ItemSectionsPagerAdapter itemSectionsPagerAdapter = new ItemSectionsPagerAdapter(this, getSupportFragmentManager(),
                 iteminfo, Shopcode, UserName,itemStockInfo);
         ViewPager viewPager = findViewById(R.id.view_pager);
+        if(iteminfo.Valid) {
+            viewPager.setOffscreenPageLimit(3);
+        }else{
+            viewPager.setOffscreenPageLimit(2);
+        }
         viewPager.setAdapter(itemSectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);

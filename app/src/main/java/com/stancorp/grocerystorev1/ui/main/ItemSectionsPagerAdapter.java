@@ -67,9 +67,6 @@ public class ItemSectionsPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        if(Item.Valid)
-            return 3;
-        else
-            return 2;
+        return 3;
     }
 }

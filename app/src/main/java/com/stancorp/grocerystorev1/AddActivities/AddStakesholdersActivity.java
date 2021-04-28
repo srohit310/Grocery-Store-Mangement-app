@@ -460,9 +460,9 @@ public class AddStakesholdersActivity extends AppCompatActivity {
             @Override
             public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
                 if(Mode.compareTo("Add")==0) {
-                    if (transaction.get(firebaseFirestore.collection(shopcode).document("maxIndex")).exists()) {
-                        maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(shopcode).document("maxIndex"))
-                                .toObject(maxindex.class);
+                    maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(shopcode).document("maxIndex"))
+                            .toObject(maxindex.class);
+                    if (max != null) {
                         if (agentType.compareTo("Vendor") == 0) {
                             agent.Code = "VEN-" + String.valueOf(max.vendorCode + 1);
                             max.vendorCode = max.vendorCode + 1;
@@ -476,7 +476,7 @@ public class AddStakesholdersActivity extends AppCompatActivity {
                         agent.codeno = max.vendorCode + max.customerCode + max.agentCode;
                         transaction.set(firebaseFirestore.collection(shopcode).document("maxIndex"), max);
                     } else {
-                        maxindex max = new maxindex();
+                        max = new maxindex();
                         if (agentType.compareTo("Vendor") == 0) {
                             agent.Code = "VEN-1";
                             max = new maxindex(0, 0, 0, 0, 0, 1);

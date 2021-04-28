@@ -14,6 +14,7 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.Classes.Location;
 import com.stancorp.grocerystorev1.AddActivities.AddlocationActivity;
@@ -28,6 +29,7 @@ public class FragmentGroupsLocations extends FragmentsGroups {
     LinkedHashMap<String, Location> locations;
     LocationAdapter locationAdapter;
     LinkedHashMap<String, Location> filteredList;
+    ListenerRegistration locationlistener;
 
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
@@ -53,9 +55,26 @@ public class FragmentGroupsLocations extends FragmentsGroups {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        startcode = "!";
+        endcode = "{";
+        if(locations!=null) {
+            attachListData(startcode, endcode);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        locationlistener.remove();
+        super.onPause();
+    }
+
+    @Override
     protected void attachListData(String startcode, String endcode) {
         locations.clear();
         filteredList.clear();
+        locationlistener =
         firebaseFirestore.collection(user.ShopCode).document("doc").collection("LocationDetails")
                 .whereGreaterThanOrEqualTo("name", startcode).whereLessThan("name", endcode)
                 .orderBy("name", direction).limit(20).addSnapshotListener(new EventListener<QuerySnapshot>() {

@@ -19,6 +19,7 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.AddActivities.AddItemActivity;
@@ -34,6 +35,7 @@ public class FragmentGroupItems extends FragmentsGroups {
     LinkedHashMap<String, Items> items;
     FirebaseFirestore firebaseFirestore;
     ItemAdaptor itemAdaptor;
+    ListenerRegistration itemlistener;
     Boolean valid;
     LinkedHashMap<String, Items> filteredList;
 
@@ -51,10 +53,10 @@ public class FragmentGroupItems extends FragmentsGroups {
                 if (!TextUtils.isEmpty(selection)) {
                     if (selection.equals(getString(R.string.valid_items))) {
                         valid = true;
-                        attachListData(startcode,endcode);
+                        attachListData(startcode, endcode);
                     } else if (selection.equals(getString(R.string.invalid_items))) {
                         valid = false;
-                        attachListData(startcode,endcode);
+                        attachListData(startcode, endcode);
                     }
                 }
             }
@@ -73,7 +75,7 @@ public class FragmentGroupItems extends FragmentsGroups {
         searchedittext.setHint("Search for item using name");
         firebaseFirestore = FirebaseFirestore.getInstance();
         filteredList = new LinkedHashMap<>();
-        itemAdaptor = new ItemAdaptor(items, getContext(), this , user.ShopCode);
+        itemAdaptor = new ItemAdaptor(items, getContext(), this, user.ShopCode);
         recyclerView.setAdapter(itemAdaptor);
         valid = true;
     }
@@ -87,52 +89,69 @@ public class FragmentGroupItems extends FragmentsGroups {
     }
 
     @Override
+    public void onPause() {
+        itemlistener.remove();
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        startcode = "!";
+        endcode = "{";
+        if(items!=null) {
+            attachListData(startcode, endcode);
+        }
+    }
+
+    @Override
     protected void attachListData(String startcode, String endcode) {
         SDProgress(true);
         items.clear();
         filteredList.clear();
         itemAdaptor.notifyDataSetChanged();
-        Query query = firebaseFirestore.collection(user.ShopCode).document("doc").collection("Items")
-                .whereEqualTo("Valid", valid).whereGreaterThanOrEqualTo("name", startcode)
-                .whereLessThan("name", endcode).orderBy("name", direction).limit(50);
-        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                if (error != null) {
-                    Log.i("failfirestore", error.getMessage());
-                }
-                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                        Items item;
-                        switch (doc.getType()) {
-                            case ADDED:
-                                item = doc.getDocument().toObject(Items.class);
-                                items.put(item.ItemCode, item);
-                                filteredList.put(item.ItemCode, item);
-                                itemAdaptor.notifyDataSetChanged();
-                                break;
-                            case MODIFIED:
-                                item = doc.getDocument().toObject(Items.class);
-                                items.remove(item.ItemCode);
-                                filteredList.remove(item.ItemCode);
-                                items.put(item.ItemCode, item);
-                                filteredList.put(item.ItemCode, item);
-                                itemAdaptor.notifyDataSetChanged();
-                                break;
-                            case REMOVED:
-                                item = doc.getDocument().toObject(Items.class);
-                                items.remove(item.ItemCode);
-                                filteredList.remove(item.ItemCode);
-                                itemAdaptor.notifyDataSetChanged();
-                                break;
-                        }
-                    }
-                    SDProgress(false);
-                } else {
-                    SDProgress(false);
-                }
-            }
-        });
+        itemlistener =
+                firebaseFirestore.collection(user.ShopCode).document("doc").collection("Items")
+                        .whereEqualTo("Valid", valid).whereGreaterThanOrEqualTo("name", startcode)
+                        .whereLessThan("name", endcode).orderBy("name", direction).limit(50)
+                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+                                if (error != null) {
+                                    Log.i("failfirestore", error.getMessage());
+                                }
+                                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                                        Items item;
+                                        switch (doc.getType()) {
+                                            case ADDED:
+                                                item = doc.getDocument().toObject(Items.class);
+                                                items.put(item.ItemCode, item);
+                                                filteredList.put(item.ItemCode, item);
+                                                itemAdaptor.notifyDataSetChanged();
+                                                break;
+                                            case MODIFIED:
+                                                item = doc.getDocument().toObject(Items.class);
+                                                items.remove(item.ItemCode);
+                                                filteredList.remove(item.ItemCode);
+                                                items.put(item.ItemCode, item);
+                                                filteredList.put(item.ItemCode, item);
+                                                itemAdaptor.notifyDataSetChanged();
+                                                break;
+                                            case REMOVED:
+                                                item = doc.getDocument().toObject(Items.class);
+                                                items.remove(item.ItemCode);
+                                                filteredList.remove(item.ItemCode);
+                                                itemAdaptor.notifyDataSetChanged();
+                                                break;
+                                        }
+                                    }
+                                    SDProgress(false);
+                                } else {
+                                    SDProgress(false);
+                                }
+                            }
+                        });
     }
 
     @Override

@@ -1,31 +1,27 @@
 package com.stancorp.grocerystorev1.ViewFragments;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.AdapterClasses.TransactionAdapter;
-import com.stancorp.grocerystorev1.AddActivities.AddItemActivity;
 import com.stancorp.grocerystorev1.AddActivities.AddTransactionActivity;
 import com.stancorp.grocerystorev1.Classes.StoreTransaction;
+import com.stancorp.grocerystorev1.DisplayTransactions.TransactionViewActivity;
 import com.stancorp.grocerystorev1.R;
 
 import java.util.LinkedHashMap;
@@ -36,6 +32,7 @@ public class FragmentsGroupSales extends FragmentsGroups {
     FirebaseFirestore firebaseFirestore;
     TransactionAdapter transactionAdapter;
     Boolean pending;
+    ListenerRegistration transactionListener;
 
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
@@ -51,10 +48,10 @@ public class FragmentsGroupSales extends FragmentsGroups {
                 if (!TextUtils.isEmpty(selection)) {
                     if (selection.equals(getString(R.string.pending))) {
                         pending = true;
-                        attachListData(startcode,endcode);
+                        attachListData(startcode, endcode);
                     } else if (selection.equals(getString(R.string.completed))) {
                         pending = false;
-                        attachListData(startcode,endcode);
+                        attachListData(startcode, endcode);
                     }
                 }
             }
@@ -71,7 +68,7 @@ public class FragmentsGroupSales extends FragmentsGroups {
         transactions = new LinkedHashMap<>();
         firebaseFirestore = FirebaseFirestore.getInstance();
         searchedittext.setHint("Search for sales using referenceid");
-        transactionAdapter = new TransactionAdapter(transactions, getContext(), this,null);
+        transactionAdapter = new TransactionAdapter(transactions, getContext(), this, null);
         recyclerView.setAdapter(transactionAdapter);
         pending = true;
     }
@@ -79,22 +76,45 @@ public class FragmentsGroupSales extends FragmentsGroups {
     @Override
     protected void AddIntent() {
         Intent intent = new Intent(getContext(), AddTransactionActivity.class);
-        intent.putExtra("ShopCode",user.ShopCode);
-        intent.putExtra("Username",user.Name);
-        intent.putExtra("Useremail",user.Email);
-        intent.putExtra("Mode","Customer");
+        intent.putExtra("ShopCode", user.ShopCode);
+        intent.putExtra("Username", user.Name);
+        intent.putExtra("UserPermission", user.PermissionLevel);
+        intent.putExtra("UserLocation", user.Location);
+        intent.putExtra("Useremail", user.Email);
+        intent.putExtra("Mode", "Customer");
         startActivity(intent);
     }
 
     @Override
-    protected void attachListData(String startcode,String endcode) {
+    public void onResume() {
+        super.onResume();
+        startcode = "!";
+        endcode = "{";
+        if (transactions != null) {
+            attachListData(startcode, endcode);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        transactionListener.remove();
+        super.onPause();
+    }
+
+    @Override
+    protected void attachListData(String startcode, String endcode) {
         SDProgress(true);
         transactions.clear();
         transactionAdapter.notifyDataSetChanged();
         Query query = firebaseFirestore.collection(user.ShopCode).document("doc").collection("TransactionDetails")
                 .whereEqualTo("pending", pending).whereGreaterThanOrEqualTo("reference", startcode)
-                .whereLessThan("reference", endcode).whereEqualTo("type","Sale").limit(50);
-        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                .whereLessThan("reference", endcode).whereEqualTo("type", "Sale");
+        if(user.PermissionLevel.compareTo("Employee")==0){
+            query =  query.whereEqualTo("locationCode",user.Location).limit(20);
+        }else{
+           query =  query.limit(20);
+        }
+        transactionListener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
                 if (error != null) {
@@ -130,7 +150,12 @@ public class FragmentsGroupSales extends FragmentsGroups {
     }
 
     @Override
-    protected void displayIntent(int posiiton) {
-
+    protected void displayIntent(int position) {
+        Intent intent = new Intent(getContext(), TransactionViewActivity.class);
+        StoreTransaction transaction = (StoreTransaction) transactions.values().toArray()[position];
+        intent.putExtra("Transaction", transaction);
+        intent.putExtra("Mode", "Sale");
+        intent.putExtra("ShopCode", user.ShopCode);
+        startActivity(intent);
     }
 }

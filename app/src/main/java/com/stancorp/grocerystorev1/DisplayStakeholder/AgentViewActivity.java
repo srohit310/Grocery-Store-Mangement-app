@@ -89,6 +89,7 @@ public class AgentViewActivity extends AppCompatActivity {
         StakeholderSectionsPagerAdapter stakeholderSectionsPagerAdapter = new StakeholderSectionsPagerAdapter(this,
                 getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, AgentCode, ShopCode, agent);
         ViewPager viewPager = findViewById(R.id.view_pager);
+        viewPager.setOffscreenPageLimit(2);
         viewPager.setAdapter(stakeholderSectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);

@@ -4,11 +4,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -47,6 +52,7 @@ import com.stancorp.grocerystorev1.Classes.ItemStockInfo;
 import com.stancorp.grocerystorev1.Classes.Location;
 import com.stancorp.grocerystorev1.Classes.LocationStockItem;
 import com.stancorp.grocerystorev1.Classes.maxindex;
+import com.stancorp.grocerystorev1.DisplayItems.ScanSkuCodeActivity;
 import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 import com.stancorp.grocerystorev1.SmallRecyclerViewAdapter.CodesItemRecyclerAdapter;
@@ -70,6 +76,7 @@ public class AddlocationActivity extends AppCompatActivity {
     FirebaseFirestore firebaseFirestore;
     RelativeLayout ProgressLayout;
     NestedScrollView scrollview;
+    Button SKU;
 
     Gfunc gfunc;
 
@@ -80,11 +87,14 @@ public class AddlocationActivity extends AppCompatActivity {
     ArrayList<EditText> editTexts;
     ArrayList<EditText> alertEditTexts;
     ArrayList<String> ItemString;
-    Pair<String,Boolean> itemvalid;
+    Pair<String, Boolean> itemvalid;
     LinkedHashMap<String, ItemStockInfo> ItemCodes;
     LinkedHashMap<String, ItemStockInfo> items;
     LinkedHashMap<String, Float> StockValue;
     LinkedHashMap<String, LocationStockItem> locationStockItems;
+
+    private static final int RC_SKU_CODE_PICKER = 6;
+    public static final int CAMERA_PERMISSION_CODE = 22;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,13 +110,26 @@ public class AddlocationActivity extends AppCompatActivity {
         //Arraylists initialization
         editTexts = new ArrayList<>(Arrays.<EditText>asList((EditText) findViewById(R.id.AddLocationEditText2)
                 , (EditText) findViewById(R.id.AddLocationEditText3), (EditText) findViewById(R.id.AddLocationEditText4),
-                (EditText) findViewById(R.id.AddLocationEditText5),(EditText) findViewById(R.id.AddLocationEditText6)));
+                (EditText) findViewById(R.id.AddLocationEditText5), (EditText) findViewById(R.id.AddLocationEditText6)));
         ItemString = new ArrayList<>(Arrays.asList("Location Code", "Location Name", "State, Location is in"
-                , "City, Location is in","Streey, Location is in", "Pincode of Location"));
+                , "City, Location is in", "Streey, Location is in", "Pincode of Location"));
         items = new LinkedHashMap<>();
         locationStockItems = new LinkedHashMap<>();
         StockValue = new LinkedHashMap<>();
         ItemCodes = new LinkedHashMap<>();
+
+        SKU = findViewById(R.id.ScanSku);
+        SKU.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContextCompat.checkSelfPermission(AddlocationActivity.this,
+                        Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    startActivityForResult(new Intent(getApplicationContext(), ScanSkuCodeActivity.class), RC_SKU_CODE_PICKER);
+                } else
+                    requestpermission(Manifest.permission.CAMERA, "In order to scan Barcode" +
+                            " permission to use camera is required", CAMERA_PERMISSION_CODE);
+            }
+        });
 
         Itemsearch = findViewById(R.id.ItemsearchAuto);
         AutoProgress = findViewById(R.id.autoprogress);
@@ -131,8 +154,7 @@ public class AddlocationActivity extends AppCompatActivity {
                         AutoProgress.setVisibility(View.GONE);
                         return;
                     }
-                }
-                else
+                } else
                     AutoProgress.setVisibility(View.GONE);
 
                 itemhandler.postDelayed(new Runnable() {
@@ -169,7 +191,7 @@ public class AddlocationActivity extends AppCompatActivity {
         ItemAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AddItemOpeningStock();
+                AddItemOpeningStock(Itemsearch.getText().toString());
             }
         });
     }
@@ -189,9 +211,11 @@ public class AddlocationActivity extends AppCompatActivity {
             endcode = "{";
         }
 
+        int limit = search.compareTo("") == 0 ? 1 : 10;
+
         firebaseFirestore.collection(Shopcode).document("doc")
                 .collection("ItemStockInfo").whereGreaterThanOrEqualTo("name", startcode)
-                .whereLessThan("name", endcode).whereEqualTo("valid", true).limit(10).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .whereLessThan("name", endcode).whereEqualTo("valid", true).limit(limit).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 AutoProgress.setVisibility(View.GONE);
@@ -238,14 +262,14 @@ public class AddlocationActivity extends AppCompatActivity {
         }).setNegativeButton("Cancel", null).show();
     }
 
-    private void AddItemOpeningStock() {
+    private void AddItemOpeningStock(String ItemCode) {
         boolean flag = true;
-        if(Itemsearch.getText().toString().length() == 0){
+        if (ItemCode.length() == 0) {
             flag = false;
             Itemsearch.requestFocus();
             Itemsearch.setError("Please enter an item");
         }
-        if (ItemCodes.containsKey(Itemsearch.getText().toString())) {
+        if (ItemCodes.containsKey(ItemCode.toString())) {
             flag = false;
             Itemsearch.setText("");
             Itemsearch.requestFocus();
@@ -253,7 +277,7 @@ public class AddlocationActivity extends AppCompatActivity {
         }
         if (flag) {
             firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
-                    .document(Itemsearch.getText().toString()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    .document(ItemCode).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.getResult().exists()) {
@@ -343,6 +367,20 @@ public class AddlocationActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SKU_CODE_PICKER) {
+            if (resultCode == RESULT_OK) {
+                if (data == null) {
+                    Toast.makeText(getApplicationContext(), "Could not fetch Code", Toast.LENGTH_SHORT).show();
+                } else {
+                    AddItemOpeningStock(data.getStringExtra("SKUCODE"));
+                }
+            }
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -381,8 +419,8 @@ public class AddlocationActivity extends AppCompatActivity {
     private void initiatetransaction() {
         SDProgress(true);
         String Name = editTexts.get(0).getText().toString().trim().toLowerCase();
-        DeliveryAddress address = new DeliveryAddress(editTexts.get(3).getText().toString().trim().toLowerCase(),editTexts.get(2).getText().toString().trim().toLowerCase()
-                ,editTexts.get(1).getText().toString().trim().toLowerCase(),Long.parseLong(editTexts.get(4).getText().toString().trim().toLowerCase()));
+        DeliveryAddress address = new DeliveryAddress(editTexts.get(3).getText().toString().trim().toLowerCase(), editTexts.get(2).getText().toString().trim().toLowerCase()
+                , editTexts.get(1).getText().toString().trim().toLowerCase(), Long.parseLong(editTexts.get(4).getText().toString().trim().toLowerCase()));
         final Location location = new Location("", Name, address, 0);
         firebaseFirestore.runTransaction(new Transaction.Function<Void>() {
             @Nullable
@@ -393,8 +431,8 @@ public class AddlocationActivity extends AppCompatActivity {
                     ItemStockInfo tempstockinfo = new ItemStockInfo((ItemStockInfo) ItemCodes.values().toArray()[i]);
                     tempstockinfo = transaction.get(firebaseFirestore.collection(Shopcode).document("doc")
                             .collection("ItemStockInfo").document(tempstockinfo.ItemCode)).toObject(ItemStockInfo.class);
-                    if(!tempstockinfo.valid){
-                        itemvalid = new Pair<>(tempstockinfo.ItemCode,true);
+                    if (!tempstockinfo.valid) {
+                        itemvalid = new Pair<>(tempstockinfo.ItemCode, true);
                         return null;
                     }
                     LocationStockItem locationStockItem = locationStockItems.get(tempstockinfo.ItemCode);
@@ -406,9 +444,9 @@ public class AddlocationActivity extends AppCompatActivity {
                     tempstockinfo.Total_Price = String.valueOf(T_price);
                     newitemstocks.add(tempstockinfo);
                 }
-                if (transaction.get(firebaseFirestore.collection(Shopcode).document("maxIndex")).exists()) {
-                    maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(Shopcode).document("maxIndex"))
-                            .toObject(maxindex.class);
+                maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(Shopcode).document("maxIndex"))
+                        .toObject(maxindex.class);
+                if (max != null) {
                     location.code = "LOC-" + String.valueOf(max.locationCode + 1);
                     LocationCode = location.code;
                     location.codeno = max.locationCode + 1;
@@ -418,7 +456,7 @@ public class AddlocationActivity extends AppCompatActivity {
                     location.code = "LOC-1";
                     LocationCode = location.code;
                     location.codeno = 1L;
-                    maxindex max = new maxindex(0, 1, 0, 0, 0, 0);
+                    max = new maxindex(0, 1, 0, 0, 0, 0);
                     transaction.set(firebaseFirestore.collection(Shopcode).document("maxIndex"), max);
                 }
                 DocumentReference doc = firebaseFirestore.collection(Shopcode).document("doc").collection("LocationDetails")
@@ -429,7 +467,7 @@ public class AddlocationActivity extends AppCompatActivity {
                     LocationStockItem locationStockItem = locationStockItems.get(tempstockinfo.ItemCode);
                     locationStockItem.LocationCode = location.code;
                     transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("Location")
-                            .document(tempstockinfo.ItemCode+location.code), locationStockItem);
+                            .document(tempstockinfo.ItemCode + location.code), locationStockItem);
                     transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
                             .document(tempstockinfo.ItemCode), tempstockinfo);
                 }
@@ -439,18 +477,18 @@ public class AddlocationActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    if(itemvalid !=null){
+                    if (itemvalid != null) {
                         locationStockItems.remove(itemvalid.first);
                         ItemCodes.remove(itemvalid.first);
                         StockValue.remove(itemvalid.first);
                         codesRecyclerAdapter.notifyDataSetChanged();
-                        Toast.makeText(getApplicationContext(),"Item " + itemvalid.first + " was made invalid during after addition into list",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Item " + itemvalid.first + " was made invalid during after addition into list", Toast.LENGTH_SHORT).show();
                     }
-                    if(itemvalid == null){
+                    if (itemvalid == null) {
                         Toast.makeText(getApplicationContext(), "Location entered", Toast.LENGTH_SHORT).show();
                         SDProgress(false);
                         showLocationCode();
-                    }else{
+                    } else {
                         itemvalid = null;
                         SDProgress(false);
                     }
@@ -479,6 +517,33 @@ public class AddlocationActivity extends AppCompatActivity {
             }
         }).setCancelable(false).show();
     }
+
+    private void requestpermission(final String Permission, String Message, final Integer code) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Permission)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Permission Needed")
+                    .setMessage(Message)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ActivityCompat.requestPermissions(AddlocationActivity.this,
+                                    new String[]{Permission}, code);
+                        }
+                    })
+                    .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .create().show();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Permission},
+                    code);
+        }
+    }
+
 
     public void SDProgress(boolean show) {
         if (show) {

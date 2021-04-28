@@ -96,15 +96,9 @@ public class ItemAdjustment extends Fragment implements BaseRecyclerAdapter.OnNo
     }
 
     @Override
-    public void onPause() {
+    public void onStop() {
         adjustmentlistener.remove();
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        attachDatabaseListener();
+        super.onStop();
     }
 
     private void attachDatabaseListener() {
