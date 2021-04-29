@@ -57,6 +57,7 @@ public class ManageUserAdapter extends BaseRecyclerAdapter {
         if (user.PermissionLevel.compareTo("Admin") == 0) {
             LocationLayout.setVisibility(View.GONE);
         } else {
+            LocationLayout.setVisibility(View.VISIBLE);
             UserLCode.setText(user.Location);
         }
 

@@ -46,6 +46,8 @@ public class FragmentGroupUsers extends FragmentsGroups {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selection = parent.getItemAtPosition(position).toString();
+                startcode = "!";
+                endcode = "{";
                 if (!TextUtils.isEmpty(selection)) {
                     if (selection.equals(getString(R.string.permission_admin))) {
                         Permission = "Admin";

@@ -128,6 +128,7 @@ public class AddUsersActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                locationhandler.removeCallbacksAndMessages(null);
                 Selectedlocationfromdropdown = false;
             }
 
