@@ -28,12 +28,14 @@ public class FragmentGroupsLocations extends FragmentsGroups {
 
     LinkedHashMap<String, Location> locations;
     LocationAdapter locationAdapter;
-    LinkedHashMap<String, Location> filteredList;
     ListenerRegistration locationlistener;
 
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
         toolbarspinner.setVisibility(View.GONE);
+        locations = new LinkedHashMap<>();
+        startcode = "!";
+        endcode = "{";
         attachListData(startcode,endcode);
     }
 
@@ -42,7 +44,6 @@ public class FragmentGroupsLocations extends FragmentsGroups {
         locations = new LinkedHashMap<>();
         searchedittext.setHint("Search for location using name");
         firebaseFirestore = FirebaseFirestore.getInstance();
-        filteredList = new LinkedHashMap<>();
         locationAdapter = new LocationAdapter(locations, this, getContext());
         recyclerView.setAdapter(locationAdapter);
     }
@@ -57,8 +58,6 @@ public class FragmentGroupsLocations extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
-        startcode = "!";
-        endcode = "{";
         if(locations!=null) {
             attachListData(startcode, endcode);
         }
@@ -73,7 +72,6 @@ public class FragmentGroupsLocations extends FragmentsGroups {
     @Override
     protected void attachListData(String startcode, String endcode) {
         locations.clear();
-        filteredList.clear();
         locationlistener =
         firebaseFirestore.collection(user.ShopCode).document("doc").collection("LocationDetails")
                 .whereGreaterThanOrEqualTo("name", startcode).whereLessThan("name", endcode)
@@ -90,24 +88,20 @@ public class FragmentGroupsLocations extends FragmentsGroups {
                             case ADDED:
                                 location = doc.getDocument().toObject(Location.class);
                                 locations.put(location.code, location);
-                                filteredList.put(location.code, location);
                                 locationAdapter.notifyDataSetChanged();
                                 break;
                             case MODIFIED:
                                 location = doc.getDocument().toObject(Location.class);
-                                locations.remove(location.code);
                                 locations.put(location.code, location);
-                                filteredList.remove(location.code);
-                                filteredList.put(location.code, location);
                                 locationAdapter.notifyDataSetChanged();
                                 break;
                             case REMOVED:
                                 location = doc.getDocument().toObject(Location.class);
                                 locations.remove(location.code);
-                                filteredList.remove(location.code);
                                 locationAdapter.notifyDataSetChanged();
                                 break;
                         }
+                        recyclerView.scheduleLayoutAnimation();
                     }
                 }
                 SDProgress(false);

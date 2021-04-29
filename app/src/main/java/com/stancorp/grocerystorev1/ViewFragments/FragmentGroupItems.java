@@ -50,6 +50,8 @@ public class FragmentGroupItems extends FragmentsGroups {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selection = parent.getItemAtPosition(position).toString();
                 if (!TextUtils.isEmpty(selection)) {
+                    startcode = "!";
+                    endcode = "{";
                     if (selection.equals(getString(R.string.valid_items))) {
                         valid = true;
                         attachListData(startcode, endcode);
@@ -73,6 +75,7 @@ public class FragmentGroupItems extends FragmentsGroups {
         if (items == null) {
             items = new LinkedHashMap<>();
             itemAdaptor = new ItemAdaptor(items, getContext(), this, user.ShopCode);
+            valid = true;
         }
         searchedittext.setHint("Search for item using name");
         firebaseFirestore = FirebaseFirestore.getInstance();
@@ -80,7 +83,6 @@ public class FragmentGroupItems extends FragmentsGroups {
             mfloat.setVisibility(View.GONE);
         }
         recyclerView.setAdapter(itemAdaptor);
-        valid = true;
     }
 
     @Override
@@ -100,8 +102,6 @@ public class FragmentGroupItems extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
-        startcode = "#";
-        endcode = "{";
         if (items != null) {
             attachListData(startcode, endcode);
         }
@@ -110,10 +110,8 @@ public class FragmentGroupItems extends FragmentsGroups {
     @Override
     protected void attachListData(String startcode, String endcode) {
         SDProgress(true);
-        if (startcode.compareTo("#") != 0) {
-            items.clear();
-            itemAdaptor.notifyDataSetChanged();
-        }
+        items.clear();
+        itemAdaptor.notifyDataSetChanged();
         itemlistener =
                 firebaseFirestore.collection(user.ShopCode).document("doc").collection("Items")
                         .whereEqualTo("Valid", valid).whereGreaterThanOrEqualTo("name", startcode)
@@ -129,7 +127,6 @@ public class FragmentGroupItems extends FragmentsGroups {
                                         Items item;
                                         switch (doc.getType()) {
                                             case ADDED:
-                                                Toast.makeText(getContext(), String.valueOf(items.size()), Toast.LENGTH_SHORT).show();
                                                 item = doc.getDocument().toObject(Items.class);
                                                 items.put(item.ItemCode, item);
                                                 itemAdaptor.notifyDataSetChanged();

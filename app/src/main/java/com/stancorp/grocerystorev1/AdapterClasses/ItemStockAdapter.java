@@ -54,11 +54,10 @@ public class ItemStockAdapter extends BaseRecyclerAdapter{
     public void onBindViewHold(int position, MyViewHolder holder) {
         LocationStockItem locationStockItem = (LocationStockItem) dataList.values().toArray()[position];
 
-        LocationCode = holder.itemView.findViewById(R.id.LocationCode);
-        Reorderquantity = holder.itemView.findViewById(R.id.ReorderQuantity);
-
         Balance = Float.valueOf(locationStockItem.Balance_Qty);
 
+        LocationCode = holder.itemView.findViewById(R.id.LocationCode);
+        Reorderquantity = holder.itemView.findViewById(R.id.ReorderQuantity);
         rlvl = holder.itemView.findViewById(R.id.Reorderlvl);
         elvl = holder.itemView.findViewById(R.id.Excesslvl);
         blvl = holder.itemView.findViewById(R.id.Balancelvl);

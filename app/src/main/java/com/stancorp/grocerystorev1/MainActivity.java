@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String mEmail;
     private String UID;
     public StoreUser User;
-    NavigationView navigationView;
+    public NavigationView navigationView;
     Gfunc gfunc;
 
     private FirebaseFirestore firebaseFirestore;

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,8 +31,8 @@ public class MainFragment extends Fragment {
     TransactionProperties transactionProperties;
     TextView purchasependingText;
     TextView salespendingText;
-    ImageView PurchasesFragment;
-    ImageView SalesFragment;
+    LinearLayout PurchasesFragment;
+    LinearLayout SalesFragment;
 
     @Nullable
     @Override
@@ -57,7 +58,6 @@ public class MainFragment extends Fragment {
         PurchasesFragment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getActivity().getActionBar().setTitle("Purchases");
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
                         new FragmentsGroupPurchases()).commit();
             }
@@ -65,7 +65,6 @@ public class MainFragment extends Fragment {
         SalesFragment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getActivity().getActionBar().setTitle("Sales");
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
                         new FragmentsGroupSales()).commit();
             }

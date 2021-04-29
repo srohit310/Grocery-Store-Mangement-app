@@ -84,8 +84,6 @@ public class FragmentGroupUsers extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
-        startcode = "!";
-        endcode = "{";
         if(users!=null){
             attachListData(startcode,endcode);
         }
@@ -132,6 +130,7 @@ public class FragmentGroupUsers extends FragmentsGroups {
                                                 manageUserAdapter.notifyDataSetChanged();
                                                 break;
                                         }
+                                        recyclerView.scheduleLayoutAnimation();
                                     }
                                 }
                                 SDProgress(false);

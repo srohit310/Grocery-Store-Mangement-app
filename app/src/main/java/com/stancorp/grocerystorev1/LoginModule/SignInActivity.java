@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -65,6 +66,7 @@ public class SignInActivity extends AppCompatActivity {
     Button HomeButton;
     Gfunc gfunc;
     TextView Wrongcredential;
+    ImageView rootLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +79,7 @@ public class SignInActivity extends AppCompatActivity {
         ProgressLayout = findViewById(R.id.ProgressLayout);
         RegisterIntentText = findViewById(R.id.Registerintenttext);
         firebaseFirestore = FirebaseFirestore.getInstance();
+        rootLayout = findViewById(R.id.rootlayout);
 
         Wrongcredential = findViewById(R.id.incorrectTextView);
 
@@ -215,9 +218,9 @@ public class SignInActivity extends AppCompatActivity {
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-
+            rootLayout.setBackground(null);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-
+            rootLayout.setBackground(ContextCompat.getDrawable(getApplicationContext(),R.drawable.signinmenubackground));
         }
     }
 

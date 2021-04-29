@@ -40,9 +40,10 @@ import com.stancorp.grocerystorev1.ui.main.StakeholderSectionsPagerAdapter;
 
 public class AgentViewActivity extends AppCompatActivity {
 
-    String AgentCode;
     String ShopCode;
     String Mode;
+    String UserPermission;
+    String UserLocation;
     Agent agent;
     Gfunc gfunc;
     FirebaseFirestore firebaseFirestore;
@@ -60,16 +61,18 @@ public class AgentViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view);
-        AgentCode = getIntent().getStringExtra("AgentCode");
         ShopCode = getIntent().getStringExtra("ShopCode");
         Mode = getIntent().getStringExtra("Mode");
         agent = (Agent) getIntent().getSerializableExtra("Agent");
+        UserPermission = getIntent().getStringExtra("UserPermission");
+        UserLocation = getIntent().getStringExtra("UserLocation");
+
         gfunc = new Gfunc();
         firebaseFirestore = FirebaseFirestore.getInstance();
         ProgressLayout = findViewById(R.id.ProgressLayout);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(gfunc.capitalize(AgentCode));
+        toolbar.setTitle(gfunc.capitalize(agent.Code));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -87,7 +90,8 @@ public class AgentViewActivity extends AppCompatActivity {
 
     private void setPageAdapter() {
         StakeholderSectionsPagerAdapter stakeholderSectionsPagerAdapter = new StakeholderSectionsPagerAdapter(this,
-                getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, AgentCode, ShopCode, agent);
+                getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, ShopCode, agent,
+                UserPermission, UserLocation);
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setOffscreenPageLimit(2);
         viewPager.setAdapter(stakeholderSectionsPagerAdapter);

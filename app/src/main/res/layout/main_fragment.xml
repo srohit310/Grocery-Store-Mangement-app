@@ -36,7 +36,7 @@
                 android:background="@drawable/transaction_pending" />
 
             <LinearLayout
-                android:id="@+id/PurchasePending"
+                android:id="@+id/purchases_fragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
@@ -65,7 +65,6 @@
                     android:textStyle="bold" />
 
                 <ImageView
-                    android:id="@+id/purchases_fragment"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="20dp"
@@ -75,10 +74,10 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/SalesPending"
+                android:id="@+id/sales_fragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/PurchasePending"
+                android:layout_below="@+id/purchases_fragment"
                 android:layout_marginTop="15dp"
                 android:layout_toRightOf="@+id/truckimg"
                 android:orientation="horizontal">
@@ -105,7 +104,6 @@
                     android:textStyle="bold" />
 
                 <ImageView
-                    android:id="@+id/sales_fragment"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_gravity="center_vertical"

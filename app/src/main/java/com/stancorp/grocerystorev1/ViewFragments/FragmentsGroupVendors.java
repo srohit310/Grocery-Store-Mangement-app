@@ -62,8 +62,6 @@ public class FragmentsGroupVendors extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
-        startcode = "!";
-        endcode = "{";
         if(agents!=null) {
             attachListData(startcode, endcode);
         }
@@ -123,6 +121,8 @@ public class FragmentsGroupVendors extends FragmentsGroups {
         intent.putExtra("AgentCode", agent.Code);
         intent.putExtra("Agent", agent);
         intent.putExtra("Mode", "Vendor");
+        intent.putExtra("UserPermission",user.PermissionLevel);
+        intent.putExtra("UserLocation",user.Location);
         intent.putExtra("ShopCode", user.ShopCode);
         startActivity(intent);
     }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DisplayItems.ItemViewActivity">
+    tools:context=".UserSettings.UserSettingsActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -119,19 +119,22 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:animateLayoutChanges="true"
+                    android:layout_marginBottom="10dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="10dp"
-                        android:background="@drawable/button_simple_border">
+                        android:layout_marginHorizontal="10dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:padding="10dp"
+                            android:layout_weight="1"
+                            android:paddingVertical="20dp"
+                            android:paddingHorizontal="10dp"
                             android:text="Change Name : "
                             android:textColor="@color/colorAccent"
                             android:textSize="15sp"
@@ -139,74 +142,135 @@
 
                         <EditText
                             android:id="@+id/UpdateName"
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
                             android:background="@null"
+                            android:gravity="center"
                             android:hint="Enter Name"
-                            android:padding="10dp"
+                            android:paddingVertical="20dp"
+                            android:paddingHorizontal="10dp"
                             android:textSize="15sp" />
+
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="10dp"
-                        android:background="@drawable/button_simple_border">
+                        android:layout_marginHorizontal="10dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:padding="10dp"
-                            android:text="Permission Level : "
+                            android:paddingVertical="20dp"
+                            android:paddingHorizontal="10dp"
+                            android:text="Access Level  : "
                             android:textColor="@color/colorAccent"
                             android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/PermissionLvl"
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:text="permission"
-                            android:textColor="@color/colorAccent"
-                            android:textSize="15sp" />
-                    </LinearLayout>
-
-                    <Button
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="10dp"
-                        android:drawableLeft="@drawable/ic_baseline_vpn_key_24"
-                        android:text="Change Password" />
-
-                    <Button
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="10dp"
-                        android:drawableLeft="@drawable/ic_baseline_store_24"
-                        android:text="Shop Information" />
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="10dp"
-                        android:background="@drawable/button_simple_border">
-
-                        <TextView
-                            android:layout_width="200dp"
-                            android:layout_height="wrap_content"
-                            android:padding="10dp"
-                            android:text="Push Notfications "
+                            android:paddingVertical="20dp"
+                            android:paddingHorizontal="10dp"
+                            android:gravity="center_horizontal"
                             android:textColor="@color/colorAccent"
                             android:textSize="15sp"
                             android:textStyle="bold" />
+                    </LinearLayout>
 
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/NotificationSwitch"
-                            android:layout_width="wrap_content"
+                    <Button
+                        android:id="@+id/changePassword"
+                        style="@style/ButtonSettingsStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="10dp"
+                        android:background="@color/white"
+                        android:drawableLeft="@drawable/ic_baseline_vpn_key_24"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="20dp"
+                        android:stateListAnimator="@null"
+                        android:text="Change Password" />
+
+                    <Button
+                        android:id="@+id/shopinfoPush"
+                        style="@style/ButtonSettingsStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="10dp"
+                        android:background="@color/white"
+                        android:drawableLeft="@drawable/ic_baseline_store_24"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="20dp"
+                        android:stateListAnimator="@null"
+                        android:text="Shop Information" />
+
+                    <LinearLayout
+                        android:id="@+id/shopinfoLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical|right" />
-                    </FrameLayout>
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="20dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:alpha="0.5"
+                                android:text="ShopCode"
+                                android:textColor="@color/black"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/ShopCode"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Code"
+                                android:textColor="@color/colorAccent"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="20dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:alpha="0.5"
+                                android:text="Shop Name"
+                                android:textColor="@color/black"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/ShopName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Name"
+                                android:textColor="@color/colorAccent"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="200dp"
@@ -219,29 +283,29 @@
                         android:textSize="15sp" />
 
                     <Button
+                        android:id="@+id/Feedbackintent"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="10dp"
+                        style="@style/ButtonSettingsStyle"
+                        android:paddingVertical="20dp"
+                        android:background="@color/white"
                         android:drawableLeft="@drawable/ic_baseline_feedback_24"
+                        android:paddingHorizontal="10dp"
+                        android:stateListAnimator="@null"
                         android:text="Feedback" />
-
-                    <Button
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="10dp"
-                        android:drawableLeft="@drawable/ic_baseline_star_24"
-                        android:text="Rate Our App" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
         </FrameLayout>
+
     </ScrollView>
 
     <RelativeLayout
         android:id="@+id/ProgressLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#2f000000">
+        android:background="#2f000000"
+        android:visibility="gone">
 
         <ProgressBar
             style="?android:attr/progressBarStyle"

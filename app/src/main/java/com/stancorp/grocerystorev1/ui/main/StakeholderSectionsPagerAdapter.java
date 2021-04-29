@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import com.stancorp.grocerystorev1.Classes.Agent;
@@ -20,17 +19,19 @@ public class StakeholderSectionsPagerAdapter extends FragmentStatePagerAdapter {
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.tab_text_1,R.string.tab_text_pending};
     private final Context mContext;
-    private String agentCode;
     private Agent agent;
     private String ShopCode;
+    private String UserPermission;
+    private String UserLocation;
 
-    public StakeholderSectionsPagerAdapter(Context context, @NonNull FragmentManager fm, int behavior, String agentCode,
-                                           String Shopcode, Agent agent) {
+    public StakeholderSectionsPagerAdapter(Context context, @NonNull FragmentManager fm, int behavior,
+                                           String Shopcode, Agent agent, String userPermission, String userLocation) {
         super(fm, behavior);
         mContext = context;
-        this.agentCode = agentCode;
         this.ShopCode = Shopcode;
         this.agent = agent;
+        UserPermission = userPermission;
+        UserLocation = userLocation;
     }
 
     @NonNull
@@ -42,7 +43,7 @@ public class StakeholderSectionsPagerAdapter extends FragmentStatePagerAdapter {
                 fragment = AgentDetails.newInstance(ShopCode,agent);
                 break;
             case 1:
-                fragment = AgentPending.newInstance(ShopCode,agent.Code);
+                fragment = AgentPending.newInstance(ShopCode,agent.Code,UserPermission,UserLocation);
                 break;
         }
         return fragment;

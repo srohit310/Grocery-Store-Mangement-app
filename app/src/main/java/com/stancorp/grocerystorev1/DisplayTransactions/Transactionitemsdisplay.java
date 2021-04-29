@@ -22,6 +22,7 @@ import com.stancorp.grocerystorev1.AdapterClasses.BaseRecyclerAdapter;
 import com.stancorp.grocerystorev1.AdapterClasses.ItemTransactionRecyclerAdapter;
 import com.stancorp.grocerystorev1.Classes.Itemtransaction;
 import com.stancorp.grocerystorev1.Classes.TransactionItemList;
+import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 
 import java.util.ArrayList;
@@ -44,6 +45,8 @@ public class Transactionitemsdisplay extends Fragment implements BaseRecyclerAda
     TextView totalpricetext;
     TextView totalprofittext;
     LinearLayout totalprofitlayout;
+
+    Gfunc gfunc;
 
     FirebaseFirestore firebaseFirestore;
     ListenerRegistration pendinglistener;
@@ -72,6 +75,7 @@ public class Transactionitemsdisplay extends Fragment implements BaseRecyclerAda
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         firebaseFirestore = FirebaseFirestore.getInstance();
+        gfunc = new Gfunc();
         if (getArguments() != null) {
             ShopCode = getArguments().getString(ARG_PARAM1);
             TransactionCode = getArguments().getString(ARG_PARAM2);
@@ -89,11 +93,11 @@ public class Transactionitemsdisplay extends Fragment implements BaseRecyclerAda
         mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
         totalpricetext = view.findViewById(R.id.TotalCostText);
-        totalpricetext.setText(String.valueOf(totalprice));
+        totalpricetext.setText(String.valueOf(gfunc.roundof(totalprice,2))+" INR");
         totalprofittext = view.findViewById(R.id.TotalProfit);
         totalprofitlayout = view.findViewById(R.id.SaleProfit);
         if(Mode.compareTo("Sale")==0) {
-            totalprofittext.setText(String.valueOf(totalprofit));
+            totalprofittext.setText(String.valueOf(gfunc.roundof(totalprofit,2))+ " INR");
         }else{
             totalprofitlayout.setVisibility(View.GONE);
         }

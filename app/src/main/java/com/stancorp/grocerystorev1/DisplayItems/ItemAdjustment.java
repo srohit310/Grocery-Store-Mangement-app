@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.AdapterClasses.AdjustmentAdapter;
 import com.stancorp.grocerystorev1.AdapterClasses.BaseRecyclerAdapter;
@@ -33,10 +35,14 @@ public class ItemAdjustment extends Fragment implements BaseRecyclerAdapter.OnNo
     private static final String ARG_1 = "param1";
     private static final String ARG_2 = "param2";
     private static final String ARG_3 = "param3";
+    private static final String ARG_4 = "param4";
+    private static final String ARG_5 = "param5";
 
     private Items item;
     private String ShopCode;
     private String UserName;
+    private String UserPermission;
+    private String UserLocation;
 
     ListenerRegistration adjustmentlistener;
 
@@ -54,12 +60,14 @@ public class ItemAdjustment extends Fragment implements BaseRecyclerAdapter.OnNo
         // Required empty public constructor
     }
 
-    public static ItemAdjustment newInstance(Items param1, String param2, String param3) {
+    public static ItemAdjustment newInstance(Items param1, String param2, String param3, String param4, String param5) {
         ItemAdjustment fragment = new ItemAdjustment();
         Bundle args = new Bundle();
         args.putSerializable(ARG_1, param1);
         args.putString(ARG_2, param2);
         args.putString(ARG_3, param3);
+        args.putString(ARG_4, param4);
+        args.putString(ARG_5, param5);
         fragment.setArguments(args);
         return fragment;
     }
@@ -71,6 +79,8 @@ public class ItemAdjustment extends Fragment implements BaseRecyclerAdapter.OnNo
             item = (Items) getArguments().getSerializable(ARG_1);
             ShopCode = getArguments().getString(ARG_2);
             UserName = getArguments().getString(ARG_3);
+            UserPermission = getArguments().getString(ARG_4);
+            UserLocation = getArguments().getString(ARG_5);
         }
     }
 
@@ -102,28 +112,36 @@ public class ItemAdjustment extends Fragment implements BaseRecyclerAdapter.OnNo
     }
 
     private void attachDatabaseListener() {
-        adjustmentlistener =
+        Query query =
                 firebaseFirestore.collection(ShopCode).document("doc").collection("ItemAdjustments")
-                        .whereEqualTo("ItemCode", item.ItemCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                        if (value != null && !value.isEmpty()) {
-                            for (DocumentChange doc : value.getDocumentChanges()) {
-                                ItemAdjustmentClass adjustment;
-                                switch (doc.getType()) {
-                                    case ADDED:
-                                        adjustment = doc.getDocument().toObject(ItemAdjustmentClass.class);
-                                        itemadjustments.put(doc.getDocument().getId(), adjustment);
-                                        adjustmentAdapter.notifyDataSetChanged();
-                                        break;
-                                }
-                            }
-                        }
-                        if (itemadjustments.size() > 0) {
-                            EmptyLayout.setVisibility(View.GONE);
+                        .whereEqualTo("ItemCode", item.ItemCode);
+        if(UserPermission.compareTo("Employee")==0){
+            query = query.whereEqualTo("LocationCode",UserLocation);
+        }
+        query = query.limit(30);
+        adjustmentlistener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(error!=null){
+                    Log.i("firebaseadjustments",error.getMessage());
+                }
+                if (value != null && !value.isEmpty()) {
+                    for (DocumentChange doc : value.getDocumentChanges()) {
+                        ItemAdjustmentClass adjustment;
+                        switch (doc.getType()) {
+                            case ADDED:
+                                adjustment = doc.getDocument().toObject(ItemAdjustmentClass.class);
+                                itemadjustments.put(doc.getDocument().getId(), adjustment);
+                                adjustmentAdapter.notifyDataSetChanged();
+                                break;
                         }
                     }
-                });
+                }
+                if (itemadjustments.size() > 0) {
+                    EmptyLayout.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     @Override

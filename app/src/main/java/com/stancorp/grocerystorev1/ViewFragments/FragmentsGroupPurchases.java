@@ -24,6 +24,7 @@ import com.stancorp.grocerystorev1.Classes.Agent;
 import com.stancorp.grocerystorev1.Classes.StoreTransaction;
 import com.stancorp.grocerystorev1.DisplayStakeholder.AgentViewActivity;
 import com.stancorp.grocerystorev1.DisplayTransactions.TransactionViewActivity;
+import com.stancorp.grocerystorev1.MainActivity;
 import com.stancorp.grocerystorev1.R;
 
 import java.util.LinkedHashMap;
@@ -67,6 +68,8 @@ public class FragmentsGroupPurchases extends FragmentsGroups {
 
     @Override
     protected void initialize() {
+        ((MainActivity) getActivity()).navigationView.setCheckedItem(R.id.purchase_menu);
+        toolbar.setTitle("Purchases");
         transactions = new LinkedHashMap<>();
         searchedittext.setHint("Search for purchase using referenceid");
         firebaseFirestore = FirebaseFirestore.getInstance();
@@ -90,8 +93,6 @@ public class FragmentsGroupPurchases extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
-        startcode = "!";
-        endcode = "{";
         if (transactions != null) {
             attachListData(startcode, endcode);
         }

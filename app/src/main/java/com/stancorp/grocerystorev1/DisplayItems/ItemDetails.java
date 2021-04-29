@@ -1,8 +1,8 @@
 package com.stancorp.grocerystorev1.DisplayItems;
 
-import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -10,16 +10,17 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.firebase.firestore.DocumentChange;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.Classes.ItemStockInfo;
 import com.stancorp.grocerystorev1.Classes.Items;
+import com.stancorp.grocerystorev1.Classes.LocationStockItem;
+import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 
 public class ItemDetails extends Fragment {
@@ -30,6 +31,8 @@ public class ItemDetails extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String ARG_PARAM3 = "param3";
+    private static final String ARG_PARAM4 = "param4";
+    private static final String ARG_PARAM5 = "param5";
     TextView ItemName;
     TextView ItemCode;
     TextView ItemCategory;
@@ -40,10 +43,23 @@ public class ItemDetails extends Fragment {
     TextView ItemSellingPrice;
     TextView ItemPurchasePrice;
 
-    private Items mParam1;
-    private String mParam2;
-    private ItemStockInfo mParam3;
+    //Itemstocklayout
+    TextView LocationCode;
+    TextView Reorderquantity;
+    TextView rlvl;
+    TextView elvl;
+    TextView blvl;
+    ImageView WarningImg;
+    TextView WarningText;
+    View ItemstockLayout;
+
+    Gfunc gfunc;
+
+    private Items items;
     private ItemStockInfo itemStockInfo;
+    private String UserPermission;
+    private String UserLocation;
+    private String ShopCode;
 
     public ItemDetails() {
         // Required empty public constructor
@@ -51,12 +67,15 @@ public class ItemDetails extends Fragment {
 
 
     // TODO: Rename and change types and number of parameters
-    public static ItemDetails newInstance(Items item, String shopcode,ItemStockInfo itemStockInfo) {
+    public static ItemDetails newInstance(Items item, ItemStockInfo itemStockInfo,String UserPermission,
+                                          String UserLocation,String ShopCode) {
         ItemDetails fragment = new ItemDetails();
         Bundle args = new Bundle();
         args.putSerializable(ARG_PARAM1, item);
-        args.putString(ARG_PARAM2, shopcode);
-        args.putSerializable(ARG_PARAM3,itemStockInfo);
+        args.putSerializable(ARG_PARAM2,itemStockInfo);
+        args.putString(ARG_PARAM3,UserPermission);
+        args.putString(ARG_PARAM4,UserLocation);
+        args.putString(ARG_PARAM5,ShopCode);
         fragment.setArguments(args);
         return fragment;
     }
@@ -65,10 +84,13 @@ public class ItemDetails extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = (Items) getArguments().getSerializable(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-            mParam3 = (ItemStockInfo) getArguments().getSerializable(ARG_PARAM3);
+            items = (Items) getArguments().getSerializable(ARG_PARAM1);
+            itemStockInfo = (ItemStockInfo) getArguments().getSerializable(ARG_PARAM2);
+            UserPermission = getArguments().getString(ARG_PARAM3);
+            UserLocation = getArguments().getString(ARG_PARAM4);
+            ShopCode = getArguments().getString(ARG_PARAM5);
         }
+        gfunc = new Gfunc();
         firebaseFirestore = FirebaseFirestore.getInstance();
     }
 
@@ -87,12 +109,67 @@ public class ItemDetails extends Fragment {
         ItemSellingPrice = view.findViewById(R.id.DetailsItemSPData);
         ItemPurchasePrice = view.findViewById(R.id.DetailsItemPPData);
 
-        item = new Items(mParam1);
+        ItemstockLayout = view.findViewById(R.id.itemstocklayout);
+        LocationCode = ItemstockLayout.findViewById(R.id.LocationCode);
+        Reorderquantity = ItemstockLayout.findViewById(R.id.ReorderQuantity);
+        rlvl = ItemstockLayout.findViewById(R.id.Reorderlvl);
+        elvl = ItemstockLayout.findViewById(R.id.Excesslvl);
+        blvl = ItemstockLayout.findViewById(R.id.Balancelvl);
+        WarningImg = ItemstockLayout.findViewById(R.id.Warningimg);
+        WarningText = ItemstockLayout.findViewById(R.id.Warningtext);
+
+        item = new Items(items);
 
         SetTextViews();
-        setitemstockinfo(mParam3);
+        setitemstockinfo(itemStockInfo);
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if(UserPermission.compareTo("Employee")==0){
+            fetchlocationstockbalance(view);
+        }else{
+            ItemstockLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void fetchlocationstockbalance(final View view) {
+        firebaseFirestore.collection(ShopCode).document("doc").collection("Location")
+                .document(item.ItemCode+UserLocation).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(!task.getResult().exists()){
+                    WarningImg.setBackground(ContextCompat.getDrawable(view.getContext(), R.drawable.circle_grey));
+                    blvl.setTextColor(ContextCompat.getColor(view.getContext(), R.color.Edittext));
+                    WarningText.setText("Item Stock not available");
+                } else {
+                    LocationStockItem locationStockItem = task.getResult().toObject(LocationStockItem.class);
+                    Float Reorderlvl = Float.parseFloat(item.Reorder_Lvl);
+                    Float Balance = Float.parseFloat(locationStockItem.Balance_Qty);
+                    Float Excesslvl = Float.parseFloat(item.Excess_LvL);
+                    if(Reorderlvl > Balance || Balance > Excesslvl){
+                        WarningImg.setBackground(ContextCompat.getDrawable(view.getContext(), R.drawable.circle_red));
+                        blvl.setTextColor(ContextCompat.getColor(view.getContext(), R.color.Red));
+                        WarningText.setText("Balance quantity present at optimum Level");
+                    }else {
+                        WarningImg.setBackground(ContextCompat.getDrawable(view.getContext(), R.drawable.circle_green));
+                        blvl.setTextColor(ContextCompat.getColor(view.getContext(),R.color.green));
+                        if(Reorderlvl >= Balance)
+                            WarningText.setText("Item needs to be restocked");
+                        if(Balance > Excesslvl)
+                            WarningText.setText("Item is present at an excess level");
+                    }
+                    LocationCode.setText(locationStockItem.LocationCode);
+                    Reorderquantity.setText(locationStockItem.Reorder_Qty);
+                    rlvl.setText(String.valueOf(Reorderlvl));
+                    elvl.setText(String.valueOf(Excesslvl));
+                    blvl.setText(String.valueOf(Balance));
+                }
+            }
+        });
     }
 
     private void SetTextViews() {
@@ -122,6 +199,7 @@ public class ItemDetails extends Fragment {
                 p_price = T_Price / T_bal;
             } else
                 p_price = (float) 0;
+            gfunc.roundof(p_price,2);
             ItemPurchasePrice.setText(String.valueOf(p_price) + " INR\n" + "per " + item.Unit + "\n" + "( Weighted Average )");
         }
     }

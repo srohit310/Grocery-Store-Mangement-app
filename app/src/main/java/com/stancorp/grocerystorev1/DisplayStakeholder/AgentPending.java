@@ -31,9 +31,13 @@ public class AgentPending extends Fragment implements BaseRecyclerAdapter.OnNote
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM3 = "param3";
+    private static final String ARG_PARAM4 = "param4";
 
     private String ShopCode;
     private String AgentCode;
+    private String UserPermission;
+    private String UserLocation;
 
     FirebaseFirestore firebaseFirestore;
     ListenerRegistration pendinglistener;
@@ -43,13 +47,15 @@ public class AgentPending extends Fragment implements BaseRecyclerAdapter.OnNote
     LinkedHashMap<String, StoreTransaction> transactions;
     TransactionAdapter transactionAdapter;
 
-    public static AgentPending newInstance(String ShopCode, String AgentCode) {
+    public static AgentPending newInstance(String ShopCode, String AgentCode, String UserPermission, String UserLocation) {
 
         Bundle args = new Bundle();
 
         AgentPending fragment = new AgentPending();
         args.putString(ARG_PARAM1, ShopCode);
         args.putString(ARG_PARAM2, AgentCode);
+        args.putString(ARG_PARAM3, UserPermission);
+        args.putString(ARG_PARAM4, UserLocation);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,6 +66,8 @@ public class AgentPending extends Fragment implements BaseRecyclerAdapter.OnNote
         if (getArguments() != null) {
             ShopCode = getArguments().getString(ARG_PARAM1);
             AgentCode = getArguments().getString(ARG_PARAM2);
+            UserPermission = getArguments().getString(ARG_PARAM3);
+            UserLocation = getArguments().getString(ARG_PARAM4);
         }
         firebaseFirestore = FirebaseFirestore.getInstance();
     }
@@ -92,34 +100,41 @@ public class AgentPending extends Fragment implements BaseRecyclerAdapter.OnNote
     }
 
     private void attachDatabaseListener() {
-        pendinglistener =
+
+        Query query =
                 firebaseFirestore.collection(ShopCode).document("doc").collection("TransactionDetails")
-                        .whereEqualTo("pending", true).whereEqualTo("stakeholderCode", AgentCode).limit(20)
-                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                            @Override
-                            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                                if (error != null) {
-                                    Log.i("failfirestore", error.getMessage());
-                                }
-                                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                                        StoreTransaction transaction;
-                                        switch (doc.getType()) {
-                                            case ADDED:
-                                                transaction = doc.getDocument().toObject(StoreTransaction.class);
-                                                transactions.put(transaction.code, transaction);
-                                                transactionAdapter.notifyDataSetChanged();
-                                                break;
-                                            case MODIFIED:
-                                                transaction = doc.getDocument().toObject(StoreTransaction.class);
-                                                transactions.put(transaction.code, transaction);
-                                                transactionAdapter.notifyDataSetChanged();
-                                                break;
-                                        }
-                                    }
-                                }
-                            }
-                        });
+                        .whereEqualTo("pending", true).whereEqualTo("stakeholderCode", AgentCode);
+
+        if(UserPermission.compareTo("Employee")==0){
+            query = query.whereEqualTo("locationCode",UserLocation);
+        }
+        query = query.limit(20);
+
+        pendinglistener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Log.i("failfirestore", error.getMessage());
+                }
+                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                        StoreTransaction transaction;
+                        switch (doc.getType()) {
+                            case ADDED:
+                                transaction = doc.getDocument().toObject(StoreTransaction.class);
+                                transactions.put(transaction.code, transaction);
+                                transactionAdapter.notifyDataSetChanged();
+                                break;
+                            case MODIFIED:
+                                transaction = doc.getDocument().toObject(StoreTransaction.class);
+                                transactions.put(transaction.code, transaction);
+                                transactionAdapter.notifyDataSetChanged();
+                                break;
+                        }
+                    }
+                }
+            }
+        });
     }
 
     @Override

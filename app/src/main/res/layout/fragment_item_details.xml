@@ -299,6 +299,12 @@
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/itemstocklayout"
+                layout="@layout/item_stock_layout"
+                android:layout_marginBottom="20dp"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </FrameLayout>

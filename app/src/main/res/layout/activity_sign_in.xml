@@ -4,181 +4,192 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/signinmenubackground"
     tools:context=".LoginModule.SignInActivity">
 
-    <androidx.core.widget.NestedScrollView
+    <ImageView
+        android:id="@+id/rootlayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/signinmenubackground"
+        android:scaleType="matrix" />
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:padding="15dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:elevation="10dp"
-            app:cardCornerRadius="40dp">
-
-            <RelativeLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:animateLayoutChanges="true">
-
-                <Button
-                    android:id="@+id/upbutton"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_margin="15dp"
-                    android:background="@drawable/ic_baseline_arrow_back_24" />
-
-                <TextView
-                    android:id="@+id/signinGsmTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="10dp"
-                    android:text="GSM"
-                    android:textColor="#023047"
-                    android:textSize="25dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/signinTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/signinGsmTextView"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="30dp"
-                    android:text="Sign-In"
-                    android:textColor="#023047"
-                    android:textSize="45dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/incorrectTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/signinTextView"
-                    android:layout_marginTop="50dp"
-                    android:text="Wrong Shopcode or Email entered"
-                    android:textAlignment="center"
-                    android:textColor="@color/Red"
-                    android:visibility="gone" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/signinshop"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/signinTextView"
-                    android:layout_marginHorizontal="25dp"
-                    android:layout_marginTop="100dp"
-                    android:textColor="@color/colorAccent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:drawableRight="@drawable/ic_baseline_store_24"
-                        android:hint="Shop Code"
-                        android:inputType="textCapCharacters"
-                        android:singleLine="true" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/signinemail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/signinshop"
-                    android:layout_marginHorizontal="25dp"
-                    android:layout_marginTop="5dp"
-                    android:textColor="@color/colorAccent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/colorAccent"
-                        android:drawableRight="@drawable/ic_baseline_email_primary_24"
-                        android:hint="E-mail"
-                        android:inputType="textEmailAddress" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/signinpassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/signinemail"
-                    android:layout_marginHorizontal="25dp"
-                    android:layout_marginTop="5dp"
-                    android:textColor="@color/colorAccent"
-                    android:visibility="gone"
-                    app:passwordToggleEnabled="true">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Password"
-                        android:inputType="textPassword" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <TextView
-                    android:id="@+id/ForgotPassword"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/signinpassword"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginRight="25dp"
-                    android:text="Forgot Password?"
-                    android:textColor="@color/colorAccent"
-                    android:visibility="gone" />
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/RegisterCardView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/signinpassword"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginHorizontal="100dp"
-                    android:layout_marginTop="60dp"
-                    android:elevation="10dp"
-                    app:cardCornerRadius="30dp">
-
-                    <Button
-                        android:id="@+id/SignInButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="45dp"
-                        android:background="@drawable/loginactivitybutton"
-                        android:text="@string/NextButton"
-                        android:textStyle="bold" />
-                </androidx.cardview.widget.CardView>
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@color/white"
+                android:elevation="10dp"
+                app:cardCornerRadius="40dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
+                    android:layout_height="match_parent"
+                    android:animateLayoutChanges="true"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/Registerintenttext"
+                    <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="DON'T HAVE AN ACCOUNT?"
+                        android:layout_margin="15dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/upbutton"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:background="@drawable/ic_baseline_arrow_back_24" />
+
+                        <TextView
+                            android:id="@+id/signinGsmTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:text="GSM"
+                            android:textColor="#023047"
+                            android:textSize="25dp"
+                            android:textStyle="bold" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:id="@+id/signinTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="30dp"
+                        android:text="Sign-In"
+                        android:textColor="#023047"
+                        android:textSize="45dp"
                         android:textStyle="bold" />
 
-                    <Button
-                        android:id="@+id/Registerintent"
+                    <TextView
+                        android:id="@+id/incorrectTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@color/white"
-                        android:gravity="center"
-                        android:text="Register ACCOUNT"
-                        android:textColor="@color/colorAccent" />
+                        android:layout_below="@+id/signinTextView"
+                        android:layout_marginTop="50dp"
+                        android:text="Wrong Shopcode or Email entered"
+                        android:textAlignment="center"
+                        android:textColor="@color/Red"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/signinshop"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/signinTextView"
+                        android:layout_marginHorizontal="25dp"
+                        android:layout_marginTop="50dp"
+                        android:textColor="@color/colorAccent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:drawableRight="@drawable/ic_baseline_store_24"
+                            android:hint="Shop Code"
+                            android:inputType="textCapCharacters"
+                            android:singleLine="true" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/signinemail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/signinshop"
+                        android:layout_marginHorizontal="25dp"
+                        android:layout_marginTop="5dp"
+                        android:textColor="@color/colorAccent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@color/colorAccent"
+                            android:drawableRight="@drawable/ic_baseline_email_primary_24"
+                            android:hint="E-mail"
+                            android:inputType="textEmailAddress" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/signinpassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/signinemail"
+                        android:layout_marginHorizontal="25dp"
+                        android:layout_marginTop="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:visibility="gone"
+                        app:passwordToggleEnabled="true">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Password"
+                            android:inputType="textPassword" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/ForgotPassword"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="25dp"
+                        android:text="Forgot Password?"
+                        android:textColor="@color/colorAccent"
+                        android:visibility="gone" />
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/RegisterCardView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/signinpassword"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginHorizontal="100dp"
+                        android:layout_marginTop="60dp"
+                        android:elevation="10dp"
+                        app:cardCornerRadius="30dp">
+
+                        <Button
+                            android:id="@+id/SignInButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="45dp"
+                            android:background="@drawable/loginactivitybutton"
+                            android:text="@string/NextButton"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="40dp"
+                        android:layout_marginBottom="50dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/Registerintenttext"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="DON'T HAVE AN ACCOUNT?"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/Registerintent"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@color/white"
+                            android:gravity="center"
+                            android:text="Register ACCOUNT"
+                            android:textColor="@color/colorAccent" />
+                    </LinearLayout>
                 </LinearLayout>
-            </RelativeLayout>
-        </androidx.cardview.widget.CardView>
-    </androidx.core.widget.NestedScrollView>
+            </androidx.cardview.widget.CardView>
+    </ScrollView>
 
     <RelativeLayout
         android:id="@+id/ProgressLayout"

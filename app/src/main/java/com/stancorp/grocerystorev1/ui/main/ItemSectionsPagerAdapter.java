@@ -1,13 +1,11 @@
 package com.stancorp.grocerystorev1.ui.main;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import com.stancorp.grocerystorev1.Classes.ItemStockInfo;
@@ -31,9 +29,10 @@ public class ItemSectionsPagerAdapter extends FragmentStatePagerAdapter {
     private String ShopCode;
     private String Username;
     private String UserPermission;
+    private String UserLocation;
 
-    public ItemSectionsPagerAdapter(Context context, FragmentManager fm, Items Item, String Shopcode, String Username,ItemStockInfo itemStockInfo,
-                                    String userPermission) {
+    public ItemSectionsPagerAdapter(Context context, FragmentManager fm, Items Item, String Shopcode, String Username, ItemStockInfo itemStockInfo,
+                                    String userPermission, String userLocation) {
         super(fm);
         mContext = context;
         this.Item = new Items(Item);
@@ -41,6 +40,7 @@ public class ItemSectionsPagerAdapter extends FragmentStatePagerAdapter {
         this.Username = Username;
         this.itemStockInfo = itemStockInfo;
         this.UserPermission = userPermission;
+        this.UserLocation = userLocation;
     }
 
     @Override
@@ -50,10 +50,10 @@ public class ItemSectionsPagerAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = null;
         switch (position){
             case 0 :
-                fragment = ItemDetails.newInstance(Item,ShopCode,itemStockInfo);
+                fragment = ItemDetails.newInstance(Item,itemStockInfo,UserPermission,UserLocation,ShopCode);
                 break;
             case 1:
-                fragment = ItemAdjustment.newInstance(Item,ShopCode,Username);
+                fragment = ItemAdjustment.newInstance(Item,ShopCode,Username,UserPermission,UserLocation);
                 break;
             case 2:
                 fragment = ItemStock.newInstance(Item,ShopCode);

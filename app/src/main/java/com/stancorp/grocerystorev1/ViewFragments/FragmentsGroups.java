@@ -64,6 +64,8 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
     public Spinner toolbarspinner;
     public boolean Flag;
 
+    public Toolbar toolbar;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -71,7 +73,7 @@ public abstract class FragmentsGroups extends Fragment implements BaseRecyclerAd
         View view = inflater.inflate(R.layout.fragment_group,container,false);
         final AppCompatActivity act = (AppCompatActivity) getActivity();
         if (act.getSupportActionBar() != null) {
-            Toolbar toolbar = (Toolbar) act.findViewById(R.id.toolbar);
+            toolbar = (Toolbar) act.findViewById(R.id.toolbar);
             toolbarspinner = toolbar.findViewById(R.id.spinnertoolbar);
             toolbarspinner.setVisibility(View.VISIBLE);
         }

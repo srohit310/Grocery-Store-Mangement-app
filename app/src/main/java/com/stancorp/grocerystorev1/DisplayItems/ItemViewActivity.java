@@ -1,7 +1,5 @@
 package com.stancorp.grocerystorev1.DisplayItems;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -170,7 +168,7 @@ public class ItemViewActivity extends AppCompatActivity {
 
     private void setPagerAdapter(){
         ItemSectionsPagerAdapter itemSectionsPagerAdapter = new ItemSectionsPagerAdapter(this, getSupportFragmentManager(),
-                iteminfo, Shopcode, UserName,itemStockInfo, UserPermission);
+                iteminfo, Shopcode, UserName,itemStockInfo, UserPermission, UserLocation);
         ViewPager viewPager = findViewById(R.id.view_pager);
         if(iteminfo.Valid) {
             viewPager.setOffscreenPageLimit(3);
@@ -309,9 +307,15 @@ public class ItemViewActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.itemdetialsmenu, menu);
         MenuItem target = menu.findItem(R.id.Invalid);
         MenuItem Edit = menu.findItem(R.id.Edit);
+        MenuItem Adjustment = menu.findItem(R.id.Adjustment);
         if(UserPermission.compareTo("Employee")==0) {
             target.setVisible(false);
             Edit.setVisible(false);
+        }
+        if(!iteminfo.Valid){
+            target.setTitle("Make Item Valid");
+            Edit.setVisible(false);
+            Adjustment.setVisible(false);
         }
         return true;
     }
@@ -334,40 +338,48 @@ public class ItemViewActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.Invalid:
-                confirmMakeInvalid();
+                confirmMakeValidation();
                 return true;
         }
 
         return (super.onOptionsItemSelected(item));
     }
 
-    private void confirmMakeInvalid() {
-        new AlertDialog.Builder(ItemViewActivity.this, R.style.MyDialogTheme)
-                .setTitle("Confirm Action")
-                .setMessage("You cannot revert this action once done")
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+    private void confirmMakeValidation() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(ItemViewActivity.this, R.style.MyDialogTheme);
+                alertDialog.setTitle("Confirm Action");
+                if(!iteminfo.Valid){
+                    alertDialog.setMessage("Make the item valid");
+                }else {
+                    alertDialog.setMessage("This item wont be displayed for any transactions");
+                }
+                alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        invalidate();
+                        validation();
                     }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void invalidate() {
+    private void validation() {
         WriteBatch batch = firebaseFirestore.batch();
         batch.update(firebaseFirestore.collection(Shopcode).document("doc").collection("Items")
-                .document(iteminfo.ItemCode), "Valid", false);
+                .document(iteminfo.ItemCode), "Valid", !iteminfo.Valid);
         batch.update(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
-                .document(iteminfo.ItemCode), "valid", false);
+                .document(iteminfo.ItemCode), "valid", !iteminfo.Valid);
         batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Item " + iteminfo.name + "is invalid", Toast.LENGTH_SHORT).show();
+                    if(!iteminfo.Valid) {
+                        Toast.makeText(getApplicationContext(), "Item " + iteminfo.name + " is invalid", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getApplicationContext(), "Item " + iteminfo.name + " is valid", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Toast.makeText(getApplicationContext(), "Failed to invalidate. Try again later", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Failed to validate. Try again later", Toast.LENGTH_SHORT).show();
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -390,7 +402,7 @@ public class ItemViewActivity extends AppCompatActivity {
         Locationtext = alertview.findViewById(R.id.Locationtextview);
         locationsearch = alertview.findViewById(R.id.getLocation);
         AutoProgress = alertview.findViewById(R.id.autoprogress);
-        RadioButton price = imageView.findViewById(R.id.radioButton2);
+        RadioButton price = alertview.findViewById(R.id.radioButton2);
 
         if(UserPermission.compareTo("Admin")==0) {
             locationsearch.setAdapter(locationAdapter);
@@ -438,6 +450,7 @@ public class ItemViewActivity extends AppCompatActivity {
         }else{
             Locationtext.setVisibility(View.GONE);
             locationsearch.setText(UserLocation);
+            locationsearch.setEnabled(false);
             price.setEnabled(false);
         }
 

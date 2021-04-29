@@ -39,6 +39,7 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
 
     @Override
     protected void initialize() {
+        toolbar.setTitle("Customers");
         agents = new LinkedHashMap<>();
         searchedittext.setHint("Search for Customer using name");
         agentAdaptor = new AgentAdapter(agents, getContext(), this, "Customer");
@@ -48,8 +49,6 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
-        startcode = "!";
-        endcode = "{";
         if (agents != null) {
             attachListData(startcode, endcode);
         }
@@ -114,10 +113,11 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
     protected void displayIntent(int position) {
         Intent intent = new Intent(getContext(), AgentViewActivity.class);
         Agent agent = (Agent) agents.values().toArray()[position];
-        intent.putExtra("AgentCode", agent.Code);
         intent.putExtra("Agent", agent);
         intent.putExtra("Mode", "Customer");
         intent.putExtra("ShopCode", user.ShopCode);
+        intent.putExtra("UserPermission",user.PermissionLevel);
+        intent.putExtra("UserLocation",user.Location);
         startActivity(intent);
     }
 }
