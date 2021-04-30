@@ -100,7 +100,7 @@
                                 android:checked="false"
                                 android:scaleX="0.85"
                                 android:scaleY="0.85"
-                                android:text="Indivitual"
+                                android:text="Individual"
                                 android:textSize="15dp" />
                         </RadioGroup>
                     </LinearLayout>

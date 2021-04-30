@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
@@ -33,6 +34,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -72,11 +74,13 @@ public class AddlocationActivity extends AppCompatActivity {
     String hint;
     EditText ItemStock;
     String Shopcode;
+    String Mode;
     String LocationCode;
     FirebaseFirestore firebaseFirestore;
     RelativeLayout ProgressLayout;
-    NestedScrollView scrollview;
+    TextView infotext;
     Button SKU;
+    Location existingloc;
 
     Gfunc gfunc;
 
@@ -86,6 +90,7 @@ public class AddlocationActivity extends AppCompatActivity {
 
     ArrayList<EditText> editTexts;
     ArrayList<EditText> alertEditTexts;
+    CardView itemstockcard;
     ArrayList<String> ItemString;
     Pair<String, Boolean> itemvalid;
     LinkedHashMap<String, ItemStockInfo> ItemCodes;
@@ -106,6 +111,7 @@ public class AddlocationActivity extends AppCompatActivity {
         gfunc = new Gfunc();
         ProgressLayout = findViewById(R.id.ProgressLayout);
         Shopcode = getIntent().getStringExtra("ShopCode");
+        Mode = getIntent().getStringExtra("Mode");
 
         //Arraylists initialization
         editTexts = new ArrayList<>(Arrays.<EditText>asList((EditText) findViewById(R.id.AddLocationEditText2)
@@ -131,69 +137,86 @@ public class AddlocationActivity extends AppCompatActivity {
             }
         });
 
-        Itemsearch = findViewById(R.id.ItemsearchAuto);
-        AutoProgress = findViewById(R.id.autoprogress);
-        Itemsearch.setThreshold(0);
-        Itemsearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                itemhandler.removeCallbacksAndMessages(null);
-            }
-
-            @Override
-            public void afterTextChanged(final Editable editable) {
-                Itemsearch.dismissDropDown();
-                if (editable.toString().length() > 0) {
-                    AutoProgress.setVisibility(View.VISIBLE);
-                    if (items.containsKey(editable.toString())) {
-                        AutoProgress.setVisibility(View.GONE);
-                        return;
-                    }
-                } else
-                    AutoProgress.setVisibility(View.GONE);
-
-                itemhandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (editable.toString().length() > 0) {
-                            addItems(editable.toString());
-                        }
-                    }
-                }, 1500);
-            }
-        });
-        Itemsearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                Itemsearch.showDropDown();
-            }
-        });
-        itemAdapter = new AutoCompleteItemAdapter(getApplicationContext(), items);
-        Itemsearch.setAdapter(itemAdapter);
 
         firebaseFirestore = FirebaseFirestore.getInstance();
-        ItemAddButton = findViewById(R.id.ItemaddButton);
-        scrollview = findViewById(R.id.AddLocationScrollView);
-        scrollview.setEnabled(false);
+        itemstockcard = findViewById(R.id.AdditemstockCard);
+        infotext = findViewById(R.id.infotext);
 
-        // Setting up Recycler View
-        recyclerView = findViewById(R.id.ItemStockList);
-        mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(mLayoutManager);
-        codesRecyclerAdapter = new CodesItemRecyclerAdapter(getApplicationContext(), locationStockItems, ItemCodes, StockValue);
-        recyclerView.setAdapter(codesRecyclerAdapter);
+        if (Mode.compareTo("Edit") == 0) {
+            getSupportActionBar().setTitle("Edit Location Details");
+            existingloc = (Location) getIntent().getSerializableExtra("LocationDetails");
+            itemstockcard.setVisibility(View.GONE);
+            setEditTexts(existingloc);
+        } else {
+            infotext.setVisibility(View.GONE);
+            Itemsearch = findViewById(R.id.ItemsearchAuto);
+            AutoProgress = findViewById(R.id.autoprogress);
+            Itemsearch.setThreshold(0);
+            Itemsearch.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-        ItemAddButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AddItemOpeningStock(Itemsearch.getText().toString());
-            }
-        });
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    itemhandler.removeCallbacksAndMessages(null);
+                }
+
+                @Override
+                public void afterTextChanged(final Editable editable) {
+                    Itemsearch.dismissDropDown();
+                    if (editable.toString().length() > 0) {
+                        AutoProgress.setVisibility(View.VISIBLE);
+                        if (items.containsKey(editable.toString())) {
+                            AutoProgress.setVisibility(View.GONE);
+                            return;
+                        }
+                    } else
+                        AutoProgress.setVisibility(View.GONE);
+
+                    itemhandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (editable.toString().length() > 0) {
+                                addItems(editable.toString());
+                            }
+                        }
+                    }, 1500);
+                }
+            });
+            Itemsearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View view, boolean b) {
+                    Itemsearch.showDropDown();
+                }
+            });
+            itemAdapter = new AutoCompleteItemAdapter(getApplicationContext(), items);
+            Itemsearch.setAdapter(itemAdapter);
+            ItemAddButton = findViewById(R.id.ItemaddButton);
+
+            // Setting up Recycler View
+            recyclerView = findViewById(R.id.ItemStockList);
+            mLayoutManager = new LinearLayoutManager(getApplicationContext());
+            recyclerView.setLayoutManager(mLayoutManager);
+            codesRecyclerAdapter = new CodesItemRecyclerAdapter(getApplicationContext(), locationStockItems, ItemCodes, StockValue);
+            recyclerView.setAdapter(codesRecyclerAdapter);
+
+            ItemAddButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    AddItemOpeningStock(Itemsearch.getText().toString());
+                }
+            });
+        }
+    }
+
+    private void setEditTexts(Location location) {
+        editTexts.get(0).setText(location.name);
+        editTexts.get(1).setText(location.address.State);
+        editTexts.get(2).setText(location.address.City);
+        editTexts.get(3).setText(location.address.Street);
+        editTexts.get(4).setText(String.valueOf(location.address.Pincode));
     }
 
     private void addItems(final String search) {
@@ -253,7 +276,10 @@ public class AddlocationActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         AlertDialog.Builder alert = new AlertDialog.Builder(AddlocationActivity.this, R.style.MyDialogTheme);
-        alert.setMessage("Discard Location");
+        if(Mode.compareTo("Edit")==0){
+            alert.setTitle("Discard Changes");
+        }else
+            alert.setTitle("Discard Location");
         alert.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -362,7 +388,7 @@ public class AddlocationActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.register_menu, menu);
+        getMenuInflater().inflate(R.menu.add_menu, menu);
         return true;
     }
 
@@ -386,7 +412,7 @@ public class AddlocationActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            case R.id.Register:
+            case R.id.Save:
                 AlertDialog.Builder alert = new AlertDialog.Builder(AddlocationActivity.this, R.style.MyDialogTheme);
                 alert.setMessage("Confirm Location Details");
                 alert.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
@@ -444,32 +470,38 @@ public class AddlocationActivity extends AppCompatActivity {
                     tempstockinfo.Total_Price = String.valueOf(T_price);
                     newitemstocks.add(tempstockinfo);
                 }
-                maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(Shopcode).document("maxIndex"))
-                        .toObject(maxindex.class);
-                if (max != null) {
-                    location.code = "LOC-" + String.valueOf(max.locationCode + 1);
-                    LocationCode = location.code;
-                    location.codeno = max.locationCode + 1;
-                    max.locationCode = max.locationCode + 1;
-                    transaction.set(firebaseFirestore.collection(Shopcode).document("maxIndex"), max);
-                } else {
-                    location.code = "LOC-1";
-                    LocationCode = location.code;
-                    location.codeno = 1L;
-                    max = new maxindex(0, 1, 0, 0, 0, 0);
-                    transaction.set(firebaseFirestore.collection(Shopcode).document("maxIndex"), max);
+                if(Mode.compareTo("Add")==0) {
+                    maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(Shopcode).document("maxIndex"))
+                            .toObject(maxindex.class);
+                    if (max != null) {
+                        location.code = "LOC-" + String.valueOf(max.locationCode + 1);
+                        LocationCode = location.code;
+                        location.codeno = max.locationCode + 1;
+                        max.locationCode = max.locationCode + 1;
+                        transaction.set(firebaseFirestore.collection(Shopcode).document("maxIndex"), max);
+                    } else {
+                        location.code = "LOC-1";
+                        LocationCode = location.code;
+                        location.codeno = 1L;
+                        max = new maxindex(0, 1, 0, 0, 0, 0);
+                        transaction.set(firebaseFirestore.collection(Shopcode).document("maxIndex"), max);
+                    }
+                }else{
+                    location.code = existingloc.code;
                 }
                 DocumentReference doc = firebaseFirestore.collection(Shopcode).document("doc").collection("LocationDetails")
                         .document(location.code);
                 transaction.set(doc, location);
-                for (int i = 0; i < ItemCodes.size(); i++) {
-                    ItemStockInfo tempstockinfo = new ItemStockInfo(newitemstocks.get(i));
-                    LocationStockItem locationStockItem = locationStockItems.get(tempstockinfo.ItemCode);
-                    locationStockItem.LocationCode = location.code;
-                    transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("Location")
-                            .document(tempstockinfo.ItemCode + location.code), locationStockItem);
-                    transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
-                            .document(tempstockinfo.ItemCode), tempstockinfo);
+                if(Mode.compareTo("Add")==0) {
+                    for (int i = 0; i < ItemCodes.size(); i++) {
+                        ItemStockInfo tempstockinfo = new ItemStockInfo(newitemstocks.get(i));
+                        LocationStockItem locationStockItem = locationStockItems.get(tempstockinfo.ItemCode);
+                        locationStockItem.LocationCode = location.code;
+                        transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("Location")
+                                .document(tempstockinfo.ItemCode + location.code), locationStockItem);
+                        transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
+                                .document(tempstockinfo.ItemCode), tempstockinfo);
+                    }
                 }
                 return null;
             }
@@ -485,9 +517,15 @@ public class AddlocationActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Item " + itemvalid.first + " was made invalid during after addition into list", Toast.LENGTH_SHORT).show();
                     }
                     if (itemvalid == null) {
-                        Toast.makeText(getApplicationContext(), "Location entered", Toast.LENGTH_SHORT).show();
-                        SDProgress(false);
-                        showLocationCode();
+                        if(Mode.compareTo("Add")==0) {
+                            Toast.makeText(getApplicationContext(), "Location entered", Toast.LENGTH_SHORT).show();
+                            SDProgress(false);
+                            showLocationCode();
+                        }else{
+                            Toast.makeText(getApplicationContext(), "Location Updated", Toast.LENGTH_SHORT).show();
+                            SDProgress(false);
+                            finish();
+                        }
                     } else {
                         itemvalid = null;
                         SDProgress(false);

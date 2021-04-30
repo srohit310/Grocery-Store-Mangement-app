@@ -32,13 +32,13 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:textAlignment="center"
-                        android:background="@drawable/title_background"
-                        android:padding="7dp"
                         android:layout_marginLeft="10dp"
                         android:layout_marginTop="8dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@drawable/title_background"
+                        android:padding="7dp"
                         android:text="Item Details"
+                        android:textAlignment="center"
                         android:textColor="@color/white"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -53,7 +53,7 @@
                             android:layout_height="wrap_content"
                             android:paddingLeft="25dp"
                             android:text="Code"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/DetailsItemCodeData"
@@ -74,7 +74,7 @@
                             android:layout_height="wrap_content"
                             android:paddingLeft="25dp"
                             android:text="Name"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/DetailsItemNameData"
@@ -95,7 +95,7 @@
                             android:layout_height="wrap_content"
                             android:paddingLeft="25dp"
                             android:text="Category"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/DetailsItemCategoryData"
@@ -116,7 +116,7 @@
                             android:layout_height="wrap_content"
                             android:paddingLeft="25dp"
                             android:text="Brand"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/DetailsItemBrandData"
@@ -134,8 +134,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="20dp">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -146,37 +146,54 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:textAlignment="center"
-                        android:background="@drawable/title_background"
-                        android:padding="7dp"
                         android:layout_marginLeft="10dp"
                         android:layout_marginTop="8dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@drawable/title_background"
+                        android:padding="7dp"
                         android:text="Stock Information"
+                        android:textAlignment="center"
                         android:textColor="@color/white"
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:id="@+id/BalqText"
-                            android:layout_width="170dp"
+                            android:layout_width="150dp"
                             android:layout_height="wrap_content"
                             android:paddingLeft="25dp"
                             android:text="Balance Stock"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/BalanceQtyText"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:layout_toRightOf="@id/BalqText"
-                            android:paddingRight="5dp" />
+                            android:layout_marginBottom="10dp"
+                            android:orientation="vertical">
 
-                    </RelativeLayout>
+                            <TextView
+
+                                android:id="@+id/BalanceQtyText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_toRightOf="@id/BalqText"
+                                android:gravity="center_horizontal"
+                                android:paddingRight="5dp" />
+
+                            <include
+                                android:id="@+id/locationtag"
+                                layout="@layout/tag_layout"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center" />
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
@@ -184,17 +201,18 @@
 
                         <TextView
                             android:id="@+id/StockTypeText"
-                            android:layout_width="170dp"
+                            android:layout_width="150dp"
                             android:layout_height="wrap_content"
                             android:paddingLeft="25dp"
                             android:text="Stock Type"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/StockType"
-                            android:layout_width="wrap_content"
+                            android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:layout_toRightOf="@+id/StockTypeText" />
+                            android:layout_toRightOf="@+id/StockTypeText"
+                            android:gravity="center_horizontal" />
                     </RelativeLayout>
 
                     <RelativeLayout
@@ -203,17 +221,18 @@
 
                         <TextView
                             android:id="@+id/Validity"
-                            android:layout_width="170dp"
+                            android:layout_width="150dp"
                             android:layout_height="wrap_content"
                             android:paddingLeft="25dp"
                             android:text="Validity"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/ValidityInfo"
-                            android:layout_width="wrap_content"
+                            android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:layout_toRightOf="@+id/Validity" />
+                            android:layout_toRightOf="@+id/Validity"
+                            android:gravity="center_horizontal" />
                     </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -222,8 +241,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="20dp">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -234,13 +253,13 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:textAlignment="center"
-                        android:background="@drawable/title_background"
-                        android:padding="7dp"
                         android:layout_marginLeft="10dp"
                         android:layout_marginTop="8dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@drawable/title_background"
+                        android:padding="7dp"
                         android:text="Sales and Purchase information"
+                        android:textAlignment="center"
                         android:textColor="@color/white"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -288,23 +307,38 @@
                             android:gravity="center"
                             android:padding="10dp" />
 
-                        <TextView
-                            android:id="@+id/DetailsItemPPData"
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:gravity="center"
-                            android:padding="10dp" />
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/DetailsItemPPData"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:padding="8dp" />
+
+                            <include
+                                layout="@layout/tag_layout"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal" />
+                        </LinearLayout>
+
                     </LinearLayout>
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
+
             <include
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
                 android:id="@+id/itemstocklayout"
                 layout="@layout/item_stock_layout"
-                android:layout_marginBottom="20dp"/>
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="20dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </FrameLayout>

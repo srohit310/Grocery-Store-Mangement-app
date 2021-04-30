@@ -42,6 +42,7 @@ public class ItemDetails extends Fragment {
     TextView Validity;
     TextView ItemSellingPrice;
     TextView ItemPurchasePrice;
+    TextView locationtexttag;
 
     //Itemstocklayout
     TextView LocationCode;
@@ -118,6 +119,9 @@ public class ItemDetails extends Fragment {
         WarningImg = ItemstockLayout.findViewById(R.id.Warningimg);
         WarningText = ItemstockLayout.findViewById(R.id.Warningtext);
 
+        View locationtag = view.findViewById(R.id.locationtag);
+        locationtexttag = locationtag.findViewById(R.id.tag);
+
         item = new Items(items);
 
         SetTextViews();
@@ -164,6 +168,11 @@ public class ItemDetails extends Fragment {
                     }
                     LocationCode.setText(locationStockItem.LocationCode);
                     Reorderquantity.setText(locationStockItem.Reorder_Qty);
+                    if(UserPermission.compareTo("Admin")==0){
+                        locationtexttag.setText("All locations");
+                    }else{
+                        locationtexttag.setText(locationStockItem.LocationCode);
+                    }
                     rlvl.setText(String.valueOf(Reorderlvl));
                     elvl.setText(String.valueOf(Excesslvl));
                     blvl.setText(String.valueOf(Balance));
@@ -178,6 +187,7 @@ public class ItemDetails extends Fragment {
         ItemCode.setText(item.ItemCode);
         ItemCategory.setText(item.Category);
         ItemBrand.setText(item.Brand);
+        locationtexttag.setText("All locations");
         StockType.setText(item.Stock_Type);
         if(item.Valid) {
             Validity.setText("Valid");
@@ -191,7 +201,8 @@ public class ItemDetails extends Fragment {
 
     private void setitemstockinfo(ItemStockInfo itemStockInfo) {
         if (itemStockInfo != null) {
-            BalanceQtyText.setText(itemStockInfo.Total_Balance_Quantity + " " + item.Unit + " (All Locations)");
+            BalanceQtyText.setText(itemStockInfo.Total_Balance_Quantity + " " + item.Unit);
+
             Float T_bal = Float.parseFloat(itemStockInfo.Total_Balance_Quantity);
             Float T_Price = Float.parseFloat(itemStockInfo.Total_Price);
             Float p_price;
@@ -200,7 +211,7 @@ public class ItemDetails extends Fragment {
             } else
                 p_price = (float) 0;
             gfunc.roundof(p_price,2);
-            ItemPurchasePrice.setText(String.valueOf(p_price) + " INR\n" + "per " + item.Unit + "\n" + "( Weighted Average )");
+            ItemPurchasePrice.setText(String.valueOf(gfunc.roundof(p_price,2)) + " INR\n" + "per " + item.Unit);
         }
     }
 

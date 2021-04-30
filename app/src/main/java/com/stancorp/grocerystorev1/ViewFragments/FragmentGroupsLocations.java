@@ -52,6 +52,7 @@ public class FragmentGroupsLocations extends FragmentsGroups {
     protected void AddIntent() {
         Intent intent = new Intent(getContext(), AddlocationActivity.class);
         intent.putExtra("ShopCode", user.ShopCode);
+        intent.putExtra("Mode","Add");
         startActivity(intent);
     }
 
@@ -111,6 +112,11 @@ public class FragmentGroupsLocations extends FragmentsGroups {
 
     @Override
     protected void displayIntent(int position) {
-
+        Location location = (Location) locations.values().toArray()[position];
+        Intent intent = new Intent(getContext(), AddlocationActivity.class);
+        intent.putExtra("ShopCode", user.ShopCode);
+        intent.putExtra("Mode","Edit");
+        intent.putExtra("LocationDetails",location);
+        startActivity(intent);
     }
 }

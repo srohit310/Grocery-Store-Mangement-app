@@ -33,10 +33,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private StorageReference photostorageReference;
     private FirebaseAuth.AuthStateListener authStateListener;
     private static final int RC_SIGN_IN = 123;
-    private static final int RC_PHOTO_PICKER = 2;
+    private static final int RC_USER_SETTINGS = 2;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -221,6 +223,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 finish();
             }
         }
+        if( requestCode == RC_USER_SETTINGS){
+            if(resultCode == RESULT_OK){
+                User.Name = data.getStringExtra("Name");
+                if(data.getBooleanExtra("imgchange",false)){
+                    setProfileImage();
+                }
+            }
+        }
     }
 
     private void OnSignedInInitialize(String email) {
@@ -242,26 +252,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                     textViewname.setText(gfunc.capitalize(User.Name));
                     textViewpermission.setText(gfunc.capitalize(User.PermissionLevel));
-                    if (User.PhotoUri) {
-                        photostorageReference.child(User.ShopCode).child("ProfileImages").child(User.Email)
-                                .getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(Uri uri) {
-                                imageView.setForeground(null);
-                                Glide.with(imageView.getContext())
-                                        .load(uri)
-                                        .into(imageView);
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    } else {
-                        Glide.with(imageView.getContext())
-                                .clear(imageView);
-                    }
                     if (User.PermissionLevel.compareTo("Employee") == 0) {
                         Menu menu = navigationView.getMenu();
                         MenuItem target = menu.findItem(R.id.Locations_menu);
@@ -275,10 +265,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         target = menu.findItem(R.id.manage_users_menu);
                         target.setVisible(true);
                     }
+                    if (User.PhotoUri) {
+                        setProfileImage();
+                    } else {
+                        Glide.with(imageView.getContext())
+                                .clear(imageView);
+                        ProgressLayout.setVisibility(View.GONE);
+                        actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+                    }
                     getSupportActionBar().show();
-                    ProgressLayout.setVisibility(View.GONE);
-                    actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
-                    relativeLayout.setEnabled(true);
                     navigationView.setCheckedItem(R.id.dash);
                     getSupportActionBar().setTitle("Main Menu");
                     getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
@@ -294,6 +289,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ProgressLayout.setVisibility(View.GONE);
             actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
         }
+    }
+
+    private void setProfileImage() {
+
+        photostorageReference.child(User.ShopCode).child("ProfileImages").child(User.Email)
+                .getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                imageView.setForeground(null);
+                Glide.with(MainActivity.this)
+                        .load(uri)
+                        .into(imageView);
+                ProgressLayout.setVisibility(View.GONE);
+                actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                ProgressLayout.setVisibility(View.GONE);
+                actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+            }
+        });
     }
 
     private void OnSignOutCleanUp() {
@@ -350,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     case R.id.settings_change_menu:
                         Intent intent = new Intent(MainActivity.this,UserSettingsActivity.class);
                         intent.putExtra("UserData",User);
-                        startActivity(intent);
+                        startActivityForResult(intent,RC_USER_SETTINGS);
                         break;
                     case R.id.sign_out_menu:
                         User = null;

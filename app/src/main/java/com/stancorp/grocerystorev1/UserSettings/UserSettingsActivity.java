@@ -19,6 +19,7 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -292,6 +293,8 @@ public class UserSettingsActivity extends AppCompatActivity {
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent();
+                            setResult(RESULT_CANCELED,intent);
                             finish();
                         }
                     }).show();
@@ -305,6 +308,7 @@ public class UserSettingsActivity extends AppCompatActivity {
             UpdateName.setError("Enter a Name having 8 - 16 characters");
             UpdateName.requestFocus();
         }else{
+            SDProgress(true);
             if(photoUri!=null){
                 storageReference.child(user.ShopCode).child("ProfileImages").child(user.Email)
                         .putFile(photoUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
@@ -312,6 +316,8 @@ public class UserSettingsActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if(task.isSuccessful()){
                             user.PhotoUri = true;
+                        }else{
+                            photoUri = null;
                         }
                         updatetodatabase();
                     }
@@ -334,17 +340,24 @@ public class UserSettingsActivity extends AppCompatActivity {
                             for(DocumentSnapshot doc:task.getResult()) {
                                 key = doc.getId();
                             }
-                            user.Name = UpdateName.getText().toString().toLowerCase();
+                            user.Name = UpdateName.getText().toString().toLowerCase().trim();
                             firebaseFirestore.collection("UserDetails").document(key)
                                     .set(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
+                                    Intent intent = new Intent();
                                     if(task.isSuccessful()){
                                         Toast.makeText(getApplicationContext(),"User info updated",Toast.LENGTH_SHORT).show();
-
+                                        intent.putExtra("Name",user.Name);
+                                        intent.putExtra("imgchange",photoUri!=null);
+                                        setResult(RESULT_OK,intent);
+                                        finish();
                                     }else{
                                         Toast.makeText(getApplicationContext(),"Could not update info",Toast.LENGTH_SHORT).show();
+                                        setResult(RESULT_CANCELED,intent);
+                                        finish();
                                     }
+                                    SDProgress(false);
                                 }
                             });
                         }
@@ -381,7 +394,7 @@ public class UserSettingsActivity extends AppCompatActivity {
     }
 
     private void setTexts() {
-        progressLayout.setVisibility(View.VISIBLE);
+        SDProgress(true);
         UpdateName.setText(gfunc.capitalize(user.Name));
         permission.setText(user.PermissionLevel);
         if (user.PermissionLevel.toLowerCase().compareTo("admin") == 0) {
@@ -400,16 +413,27 @@ public class UserSettingsActivity extends AppCompatActivity {
                     Glide.with(profileImage.getContext())
                             .load(uri)
                             .into(profileImage);
-                    progressLayout.setVisibility(View.GONE);
+                    SDProgress(false);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                    progressLayout.setVisibility(View.GONE);
+                    SDProgress(false);
                 }
             });
         } else {
+            SDProgress(false);
+        }
+    }
+
+    public void SDProgress(boolean show) {
+        if (show) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            progressLayout.setVisibility(View.VISIBLE);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             progressLayout.setVisibility(View.GONE);
         }
     }

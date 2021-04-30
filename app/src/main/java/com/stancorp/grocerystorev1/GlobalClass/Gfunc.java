@@ -19,7 +19,7 @@ public class Gfunc {
     }
 
     public float roundof(float digit,int numberofplaces){
-        long no_of_places = (long) Math.pow(10,numberofplaces);
+        float no_of_places = (float) Math.pow(10,numberofplaces);
         float roundOff = (float) (Math.round(digit * no_of_places) / no_of_places);
         return roundOff;
     }

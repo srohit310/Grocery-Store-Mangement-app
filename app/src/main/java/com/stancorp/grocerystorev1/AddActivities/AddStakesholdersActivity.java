@@ -107,7 +107,7 @@ public class AddStakesholdersActivity extends AppCompatActivity {
         agentValid = true;
 
         //supportactionbar
-        getSupportActionBar().setTitle("Add Customer / Vendor");
+        getSupportActionBar().setTitle(Mode+" Customer / Vendor");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //Arraylist initialization

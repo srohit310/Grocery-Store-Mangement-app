@@ -363,14 +363,14 @@ public class RegisterActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.register_menu, menu);
+        getMenuInflater().inflate(R.menu.add_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.Register:
+            case R.id.Save:
                 flagAlert = "Register";
                 onBackPressed();
                 return true;

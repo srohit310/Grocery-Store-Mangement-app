@@ -154,6 +154,7 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/AdditemstockCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -179,7 +180,7 @@
                         android:layout_height="wrap_content"
                         android:alpha="0.5"
                         android:paddingHorizontal="10dp"
-                        android:text="(For items not added, intial stock will be set to zero)"
+                        android:text="(For items not added, intial stock will not be registered)"
                         android:textColor="@color/colorAccent"
                         android:textSize="15dp"
                         android:textStyle="bold" />
@@ -267,11 +268,12 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/infotext"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:alpha="0.5"
                         android:paddingHorizontal="10dp"
-                        android:text="Item stock can be left blank if location is being added for the first time"
+                        android:text="Item initial stock at location can be added through add Item"
                         android:textColor="@color/colorAccent"
                         android:textSize="15dp"
                         android:textStyle="bold" />

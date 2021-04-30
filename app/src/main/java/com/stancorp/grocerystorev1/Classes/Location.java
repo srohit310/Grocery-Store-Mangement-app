@@ -1,6 +1,8 @@
 package com.stancorp.grocerystorev1.Classes;
 
-public class Location {
+import java.io.Serializable;
+
+public class Location implements Serializable {
     public String code;
     public String name;
     public DeliveryAddress address;
