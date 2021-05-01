@@ -9,6 +9,8 @@ import androidx.appcompat.app.AlertDialog;
 import com.stancorp.grocerystorev1.R;
 
 import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -24,9 +26,16 @@ public class Gfunc {
         return roundOff;
     }
 
-    public String getCurrentDate(){
+    public String getYesterdayDate(String Format) {
+        final Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        String dateFormat = (String) DateFormat.format(Format,cal.getTime());
+        return dateFormat;
+    }
+
+    public String getCurrentDate(String Format){
         Date date= new Date();
-        String currentdate = (String) DateFormat.format("MMMM d, yyyy ", date.getTime());
+        String currentdate = (String) DateFormat.format(Format, date.getTime());
         return  currentdate;
     }
 

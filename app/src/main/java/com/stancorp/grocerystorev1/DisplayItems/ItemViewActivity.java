@@ -512,7 +512,7 @@ public class ItemViewActivity extends AppCompatActivity {
                 if (flag) {
                     adjustedamount = Float.parseFloat(adjustmentamount.getText().toString());
                     LocationCode = locationsearch.getText().toString();
-                    String currentdate = gfunc.getCurrentDate();
+                    String currentdate = gfunc.getCurrentDate("dd/MM/yyyy");
                     itemAdjustmentClass = new ItemAdjustmentClass(modeselected, iteminfo.ItemCode, LocationCode,
                             currentdate, Reason, "", UserName);
                 }

@@ -154,17 +154,18 @@ public class ItemDetails extends Fragment {
                     Float Reorderlvl = Float.parseFloat(item.Reorder_Lvl);
                     Float Balance = Float.parseFloat(locationStockItem.Balance_Qty);
                     Float Excesslvl = Float.parseFloat(item.Excess_LvL);
+                    BalanceQtyText.setText(locationStockItem.Balance_Qty+ " " + item.Unit);
                     if(Reorderlvl > Balance || Balance > Excesslvl){
                         WarningImg.setBackground(ContextCompat.getDrawable(view.getContext(), R.drawable.circle_red));
                         blvl.setTextColor(ContextCompat.getColor(view.getContext(), R.color.Red));
-                        WarningText.setText("Balance quantity present at optimum Level");
-                    }else {
-                        WarningImg.setBackground(ContextCompat.getDrawable(view.getContext(), R.drawable.circle_green));
-                        blvl.setTextColor(ContextCompat.getColor(view.getContext(),R.color.green));
                         if(Reorderlvl >= Balance)
                             WarningText.setText("Item needs to be restocked");
                         if(Balance > Excesslvl)
                             WarningText.setText("Item is present at an excess level");
+                    }else {
+                        WarningImg.setBackground(ContextCompat.getDrawable(view.getContext(), R.drawable.circle_green));
+                        blvl.setTextColor(ContextCompat.getColor(view.getContext(),R.color.green));
+                        WarningText.setText("Balance quantity present at optimum Level");
                     }
                     LocationCode.setText(locationStockItem.LocationCode);
                     Reorderquantity.setText(locationStockItem.Reorder_Qty);
@@ -201,7 +202,8 @@ public class ItemDetails extends Fragment {
 
     private void setitemstockinfo(ItemStockInfo itemStockInfo) {
         if (itemStockInfo != null) {
-            BalanceQtyText.setText(itemStockInfo.Total_Balance_Quantity + " " + item.Unit);
+            if(UserPermission.compareTo("Admin")==0)
+                BalanceQtyText.setText(itemStockInfo.Total_Balance_Quantity + " " + item.Unit);
 
             Float T_bal = Float.parseFloat(itemStockInfo.Total_Balance_Quantity);
             Float T_Price = Float.parseFloat(itemStockInfo.Total_Price);

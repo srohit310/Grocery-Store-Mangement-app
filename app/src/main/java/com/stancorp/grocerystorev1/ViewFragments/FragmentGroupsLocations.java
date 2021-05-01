@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -33,10 +34,6 @@ public class FragmentGroupsLocations extends FragmentsGroups {
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
         toolbarspinner.setVisibility(View.GONE);
-        locations = new LinkedHashMap<>();
-        startcode = "!";
-        endcode = "{";
-        attachListData(startcode,endcode);
     }
 
     @Override
@@ -46,6 +43,7 @@ public class FragmentGroupsLocations extends FragmentsGroups {
         firebaseFirestore = FirebaseFirestore.getInstance();
         locationAdapter = new LocationAdapter(locations, this, getContext());
         recyclerView.setAdapter(locationAdapter);
+        attachListData(startcode, endcode);
     }
 
     @Override
@@ -59,6 +57,8 @@ public class FragmentGroupsLocations extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
+        startcode = "!";
+        endcode = "{";
         if(locations!=null) {
             attachListData(startcode, endcode);
         }
@@ -76,7 +76,7 @@ public class FragmentGroupsLocations extends FragmentsGroups {
         locationlistener =
         firebaseFirestore.collection(user.ShopCode).document("doc").collection("LocationDetails")
                 .whereGreaterThanOrEqualTo("name", startcode).whereLessThan("name", endcode)
-                .orderBy("name", direction).limit(20).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                .limit(20).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
                 if (error != null) {

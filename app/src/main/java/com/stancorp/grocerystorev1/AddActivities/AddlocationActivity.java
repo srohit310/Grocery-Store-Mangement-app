@@ -399,6 +399,7 @@ public class AddlocationActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 if (data == null) {
                     Toast.makeText(getApplicationContext(), "Could not fetch Code", Toast.LENGTH_SHORT).show();
+                    SDProgress(false);
                 } else {
                     AddItemOpeningStock(data.getStringExtra("SKUCODE"));
                 }

@@ -71,14 +71,14 @@ public class ItemStockAdapter extends BaseRecyclerAdapter{
         } else if(Reorderlvl > Balance || Balance > Excesslvl){
             WarningImg.setBackground(ContextCompat.getDrawable(BASE_CONTEXT, R.drawable.circle_red));
             blvl.setTextColor(ContextCompat.getColor(BASE_CONTEXT, R.color.Red));
-            WarningText.setText("Balance quantity present at optimum Level");
-        }else {
-            WarningImg.setBackground(ContextCompat.getDrawable(BASE_CONTEXT, R.drawable.circle_green));
-            blvl.setTextColor(ContextCompat.getColor(BASE_CONTEXT,R.color.green));
             if(Reorderlvl >= Balance)
                 WarningText.setText("Item needs to be restocked");
             if(Balance > Excesslvl)
                 WarningText.setText("Item is present at an excess level");
+        }else {
+            WarningImg.setBackground(ContextCompat.getDrawable(BASE_CONTEXT, R.drawable.circle_green));
+            blvl.setTextColor(ContextCompat.getColor(BASE_CONTEXT,R.color.green));
+            WarningText.setText("Balance quantity present at optimum Level");
         }
 
         LocationCode.setText(locationStockItem.LocationCode);

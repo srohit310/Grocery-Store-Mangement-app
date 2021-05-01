@@ -384,7 +384,7 @@ public class UserSettingsActivity extends AppCompatActivity {
     }
 
     private boolean checkinputchange() {
-        if (UpdateName.getText().toString().compareToIgnoreCase(user.Name) != 0) {
+        if (UpdateName.getText().toString().trim().compareToIgnoreCase(user.Name) != 0) {
             return true;
         }
         if(photoUri!=null){

@@ -32,9 +32,6 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
         toolbarspinner.setVisibility(View.GONE);
-        agents = new LinkedHashMap<>();
-        agentAdaptor = new AgentAdapter(agents, getContext(), this, "Customer");
-        attachListData(startcode, endcode);
     }
 
     @Override
@@ -44,11 +41,14 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
         searchedittext.setHint("Search for Customer using name");
         agentAdaptor = new AgentAdapter(agents, getContext(), this, "Customer");
         recyclerView.setAdapter(agentAdaptor);
+        attachListData(startcode, endcode);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        startcode = "!";
+        endcode = "{";
         if (agents != null) {
             attachListData(startcode, endcode);
         }

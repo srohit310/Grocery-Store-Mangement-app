@@ -59,6 +59,7 @@ import com.stancorp.grocerystorev1.AutoCompleteAdapter.AutoCompleteAgentAdapter;
 import com.stancorp.grocerystorev1.AutoCompleteAdapter.AutoCompleteItemAdapter;
 import com.stancorp.grocerystorev1.AutoCompleteAdapter.AutoCompleteLocationAdapter;
 import com.stancorp.grocerystorev1.Classes.Agent;
+import com.stancorp.grocerystorev1.Classes.DaySaleInfo;
 import com.stancorp.grocerystorev1.Classes.DeliveryAddress;
 import com.stancorp.grocerystorev1.Classes.ItemStockInfo;
 import com.stancorp.grocerystorev1.Classes.Itemtransaction;
@@ -535,6 +536,7 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                     fetchlocationbalancestock(itemStockInfo);
                 } else {
                     Toast.makeText(getApplicationContext(), "SKU code dosen't exist", Toast.LENGTH_SHORT).show();
+                    SDProgress(false);
                 }
             }
         });
@@ -1034,7 +1036,7 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
         else
             type = "Sale";
         storeTransaction = new StoreTransaction("", 0L, type, ReferenceCode.getText().toString().trim().toLowerCase(), AgentSearch.getText().toString(),
-                LocationSearch.getText().toString(), totalcost, 0.0f, Username, Useremail, gfunc.getCurrentDate(), true, deliveryAddressfrom, deliveryAddressto,
+                LocationSearch.getText().toString(), totalcost, 0.0f, Username, Useremail, gfunc.getCurrentDate("MMMM d, yyyy "), true, deliveryAddressfrom, deliveryAddressto,
                 DeliveryDate, transactionDate.getText().toString());
 
         initiatetransaction();
@@ -1048,6 +1050,32 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                 float TotalProfit = 0.0f;
                 int overallpending = 0;
                 int locationpending = 0;
+                String currentdate = gfunc.getCurrentDate("dd/MM/yyyy");
+
+                /////////////////////////////////////////////////////////////////////
+                ///// transaction prop - Profits for the day calculation ///////////
+                ///////////////////////////////////////////////////////////////////
+
+                DaySaleInfo daySaleInfoOverall = (DaySaleInfo) transaction.get(firebaseFirestore.collection(ShopCode)
+                        .document("doc").collection("ProfitforDay").document("Overall"))
+                        .toObject(DaySaleInfo.class);
+
+                if (daySaleInfoOverall == null || daySaleInfoOverall.date.compareTo(currentdate)!=0) {
+                    daySaleInfoOverall = new DaySaleInfo(currentdate,0,0,0);
+                }
+
+                DaySaleInfo daySaleInfoLocation = (DaySaleInfo) transaction.get(firebaseFirestore.collection(ShopCode)
+                        .document("doc").collection("ProfitforDay").document(storeTransaction.locationCode))
+                        .toObject(DaySaleInfo.class);
+
+                if (daySaleInfoLocation == null || daySaleInfoLocation.date.compareTo(currentdate)!=0) {
+                    daySaleInfoLocation = new DaySaleInfo(currentdate,0,0,0);
+                }
+
+                /////////////////////////////////////////////////////////
+                ///// transaction prop - Pending calculation ///////////
+                ///////////////////////////////////////////////////////
+
                 TransactionProperties overallprop = (TransactionProperties) transaction.get(firebaseFirestore.collection(ShopCode)
                         .document("doc").collection("Pending").document("Overall"))
                         .toObject(TransactionProperties.class);
@@ -1060,6 +1088,7 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                 } else {
                     overallprop = new TransactionProperties(0, 0);
                 }
+
                 TransactionProperties locationprop = (TransactionProperties) transaction.get(firebaseFirestore.collection(ShopCode)
                         .document("doc").collection("Pending").document(storeTransaction.locationCode))
                         .toObject(TransactionProperties.class);
@@ -1072,6 +1101,11 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                 } else {
                     locationprop = new TransactionProperties(0, 0);
                 }
+
+                ////////////////////////////////////////////////////////////////////////////////////
+                ///// transaction prop - retrieve Itemstockinfo and location stock ////////////////
+                //////////////////////////////////////////////////////////////////////////////////
+
                 ArrayList<ItemStockInfo> itemStockInfoArrayList = new ArrayList<>();
                 ArrayList<LocationStockItem> locationStockItems = new ArrayList<>();
                 Boolean valid = transaction.get(firebaseFirestore.collection(ShopCode).document("doc")
@@ -1106,6 +1140,10 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                     locationStockItems.add(locationStockItem);
                 }
 
+                ////////////////////////////////////////////////////////
+                ///// transaction prop - assignShopCode ///////////////
+                //////////////////////////////////////////////////////
+
                 maxindex max = (maxindex) transaction.get(firebaseFirestore.collection(ShopCode).document("maxIndex"))
                         .toObject(maxindex.class);
                 if (Mode.compareTo("Vendor") == 0) {
@@ -1117,6 +1155,11 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                 }
                 storeTransaction.codeno = max.salesCode + max.purchaseCode;
                 transaction.set(firebaseFirestore.collection(ShopCode).document("maxIndex"), max);
+
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                ///// transaction prop - making changes in Itemstockinfo and location stock and setting in transaction /////
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
                 for (int i = 0; i < transactionitemlist.size(); i++) {
                     ItemStockInfo itemStockInfo = itemStockInfoArrayList.get(i);
                     Itemtransaction itemtransaction = (Itemtransaction) transactionitemlist.values().toArray()[i];
@@ -1146,6 +1189,11 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                             .document(locationStockItem.ItemCode + storeTransaction.locationCode), locationStockItem);
                 }
                 storeTransaction.totalProfit = TotalProfit;
+
+                /////////////////////////////////////////////////////////////////////////////////////////////////////
+                ///// transaction prop - adding the transaction details as well as transaction items ///////////////
+                ///////////////////////////////////////////////////////////////////////////////////////////////////
+
                 transaction.set(firebaseFirestore.collection(ShopCode).document("doc")
                         .collection("TransactionDetails").document(storeTransaction.code), storeTransaction);
                 Collection<Itemtransaction> tempitemsstore = transactionitemlist.values();
@@ -1153,6 +1201,31 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                 TransactionItemList transactionitems = new TransactionItemList(itemspartoftransaction);
                 transaction.set(firebaseFirestore.collection(ShopCode).document("doc")
                         .collection("TransactionItems").document(storeTransaction.code), transactionitems);
+
+                //////////////////////////////////////////////////////////////////////
+                ///// transaction prop - adding the pending attribute ///////////////
+                ////////////////////////////////////////////////////////////////////
+
+                if (Mode.compareTo("Vendor") == 0) {
+                    daySaleInfoOverall.noofPurchases += 1;
+                    daySaleInfoLocation.noofPurchases += 1;
+                } else {
+                    daySaleInfoOverall.noofSales += 1;
+                    daySaleInfoLocation.noofSales += 1;
+                    daySaleInfoOverall.dayProfit += TotalProfit;
+                    daySaleInfoLocation.dayProfit += TotalProfit;
+                }
+
+                transaction.set(firebaseFirestore.collection(ShopCode)
+                        .document("doc").collection("ProfitforDay").document("Overall"), daySaleInfoOverall);
+                transaction.set(firebaseFirestore.collection(ShopCode)
+                        .document("doc").collection("ProfitforDay").document(storeTransaction.locationCode), daySaleInfoLocation);
+
+
+                //////////////////////////////////////////////////////////////////////
+                ///// transaction prop - adding the pending attribute ///////////////
+                ////////////////////////////////////////////////////////////////////
+
                 overallpending += 1;
                 locationpending += 1;
                 if (Mode.compareTo("Vendor") == 0) {
@@ -1160,13 +1233,20 @@ public class AddTransactionActivity extends AppCompatActivity implements BaseRec
                     locationprop.pendingPurchases = locationpending;
                 } else {
                     overallprop.pendingSales = overallpending;
-                    locationprop.pendingPurchases = locationpending;
+                    locationprop.pendingSales = locationpending;
                 }
                 transaction.set(firebaseFirestore.collection(ShopCode).document("doc").collection("Pending")
                         .document("Overall"), overallprop);
                 transaction.set(firebaseFirestore.collection(ShopCode).document("doc").collection("Pending")
-                        .document(storeTransaction.locationCode),locationprop);
+                        .document(storeTransaction.locationCode), locationprop);
+
+                //////////////////////////////////////////////////////
+                ///// transaction prop - if successful //////////////
+                ////////////////////////////////////////////////////
+
                 return null;
+
+
             }
         }).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

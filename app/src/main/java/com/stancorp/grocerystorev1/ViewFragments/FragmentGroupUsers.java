@@ -8,6 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -86,6 +87,8 @@ public class FragmentGroupUsers extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
+        startcode = "!";
+        endcode = "{";
         if(users!=null){
             attachListData(startcode,endcode);
         }

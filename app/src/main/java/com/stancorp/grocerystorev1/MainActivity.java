@@ -270,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     } else {
                         Glide.with(imageView.getContext())
                                 .clear(imageView);
+                        imageView.setBackground(ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_baseline_account_circle_24));
                         ProgressLayout.setVisibility(View.GONE);
                         actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
                     }

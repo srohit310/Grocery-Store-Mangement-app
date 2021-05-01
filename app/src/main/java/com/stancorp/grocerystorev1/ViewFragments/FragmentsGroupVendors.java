@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -33,14 +34,11 @@ public class FragmentsGroupVendors extends FragmentsGroups {
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
         toolbarspinner.setVisibility(View.GONE);
-        agents = new LinkedHashMap<>();
-        agentAdaptor = new AgentAdapter(agents, getContext(), this, "Customer");
-        attachListData(startcode, endcode);
     }
 
     @Override
     protected void initialize() {
-        if(agents!=null) {
+        if (agents == null) {
             agents = new LinkedHashMap<>();
             startcode = "!";
             endcode = "{";
@@ -62,7 +60,9 @@ public class FragmentsGroupVendors extends FragmentsGroups {
     @Override
     public void onResume() {
         super.onResume();
-        if(agents!=null) {
+        startcode = "!";
+        endcode = "{";
+        if (agents != null) {
             attachListData(startcode, endcode);
         }
     }
@@ -121,8 +121,8 @@ public class FragmentsGroupVendors extends FragmentsGroups {
         intent.putExtra("AgentCode", agent.Code);
         intent.putExtra("Agent", agent);
         intent.putExtra("Mode", "Vendor");
-        intent.putExtra("UserPermission",user.PermissionLevel);
-        intent.putExtra("UserLocation",user.Location);
+        intent.putExtra("UserPermission", user.PermissionLevel);
+        intent.putExtra("UserLocation", user.Location);
         intent.putExtra("ShopCode", user.ShopCode);
         startActivity(intent);
     }
