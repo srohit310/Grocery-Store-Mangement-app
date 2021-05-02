@@ -34,4 +34,5 @@
     <string name="details_location_description">Add the different locations in which your branch is situated</string>
     <string name="Locations_menu">Locations</string>
     <string name="manage_users_menu">Manage Users</string>
+    <string name="Mark_del">Mark Delivery As Complete</string>
 </resources>

@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.stancorp.grocerystorev1.Classes.DaySaleInfo;
@@ -139,7 +140,7 @@ public class MainFragment extends Fragment {
                         purchasesMade.setText(String.valueOf(daySaleInfo.noofPurchases));
                         salesMade.setText(String.valueOf(daySaleInfo.noofSales));
                     } else if (daySaleInfo.date.compareTo(gfunc.getYesterdayDate("dd/MM/yyyy")) == 0) {
-                        profitMade.setText(String.valueOf(gfunc.roundof(daySaleInfo.dayProfit, 2)));
+                        prevprofitMade.setText(String.valueOf(gfunc.roundof(daySaleInfo.dayProfit, 2)));
                         if (daySaleInfo.dayProfit >= 0) {
                             prevprofitimg.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.greenrs));
                             prevprofitMade.setTextColor(ContextCompat.getColor(getContext(), R.color.green));

@@ -145,6 +145,11 @@ public class FragmentGroupUsers extends FragmentsGroups {
 
     @Override
     protected void displayIntent(int posiiton) {
-
+        StoreUser tempuser = (StoreUser) users.values().toArray()[posiiton];
+        Intent intent = new Intent(getContext(), AddUsersActivity.class);
+        intent.putExtra("ShopCode", user.ShopCode);
+        intent.putExtra("Mode","Edit");
+        intent.putExtra("User", user);
+        startActivity(intent);
     }
 }
