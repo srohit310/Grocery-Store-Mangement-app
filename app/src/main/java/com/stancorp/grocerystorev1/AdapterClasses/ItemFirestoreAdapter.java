@@ -3,25 +3,20 @@ package com.stancorp.grocerystorev1.AdapterClasses;
 import android.content.Context;
 import android.net.Uri;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.firebase.ui.firestore.paging.FirestorePagingOptions;
 import com.stancorp.grocerystorev1.Classes.Items;
 import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 
-import java.util.LinkedHashMap;
-
-
-public class ItemAdaptor extends BaseRecyclerAdapter {
-
-    private LinkedHashMap<String,Items> itemsArrayList;
-    private BaseRecyclerAdapter.OnNoteListner mOnNoteListner;
+public class ItemFirestoreAdapter extends FirestoreBaseRecyclerAdapter<Items> {
 
     TextView ItemName;
     TextView ItemCode;
@@ -31,25 +26,18 @@ public class ItemAdaptor extends BaseRecyclerAdapter {
     ImageView ItemImage;
     Gfunc gfunc;
 
-    String ShopCode;
-
-    public ItemAdaptor(LinkedHashMap<String,Items> items, Context context, OnNoteListner onNoteListner, String ShopCode) {
-        super(context, onNoteListner);
+    public ItemFirestoreAdapter(@NonNull FirestorePagingOptions<Items> options, Context context, OnNoteListner onNoteListner, RelativeLayout progressLayout) {
+        super(options, context, onNoteListner, progressLayout);
         gfunc = new Gfunc();
-        dataList = items;
         this.context = context;
-        itemsArrayList = items;
-        this.mOnNoteListner = onNoteListner;
         layout_id = R.layout.items_layout;
-        this.ShopCode = ShopCode;
+        this.mOnNoteListner = onNoteListner;
+        this.progressLayout = progressLayout;
     }
 
 
     @Override
-    public void onBindViewHold(int position, MyViewHolder holder) {
-        Items item = (Items) dataList.values().toArray()[position];
-
-        //Initializing
+    protected void onBindViewHolder(@NonNull FirestoreBaseRecyclerAdapter.MyViewHolder holder, int position, @NonNull Items item) {
         ItemName = holder.itemView.findViewById(R.id.ItemName);
         ItemCode = holder.itemView.findViewById(R.id.ItemCode);
         Category = holder.itemView.findViewById(R.id.ItemCategory);
@@ -62,13 +50,12 @@ public class ItemAdaptor extends BaseRecyclerAdapter {
         SpText.setText(String.valueOf(item.Selling_Price) + "/" + item.Unit);
         if(item.Imguri){
             Uri uri = Uri.parse(item.ImgUriString);
-                    ItemImage.setForeground(null);
-                    Glide.with(ItemImage.getContext())
-                            .load(uri)
-                            .into(ItemImage);
+            ItemImage.setForeground(null);
+            Glide.with(ItemImage.getContext())
+                    .load(uri)
+                    .into(ItemImage);
         }else{
             ItemImage.setBackground(ContextCompat.getDrawable(context,R.drawable.ic_baseline_shopping_basket_accend_24));
         }
     }
-
 }

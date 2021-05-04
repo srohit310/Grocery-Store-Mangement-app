@@ -26,9 +26,6 @@ public class ItemStockAdapter extends BaseRecyclerAdapter{
     private float Reorderlvl;
     private float Excesslvl;
     private float Balance;
-    private float max;
-
-    private String unit;
 
     TextView LocationCode;
     TextView Reorderquantity;
@@ -39,13 +36,12 @@ public class ItemStockAdapter extends BaseRecyclerAdapter{
     TextView WarningText;
 
     public ItemStockAdapter(Context context, OnNoteListner onNoteListner, LinkedHashMap<String, LocationStockItem> locationstocks,
-                            Float Reorderlvl,Float ExcessLvl, String Unit) {
+                            Float Reorderlvl,Float ExcessLvl) {
         super(context, onNoteListner);
         this.dataList = locationstocks;
         this.Reorderlvl = Reorderlvl;
         this.Excesslvl = ExcessLvl;
         this.BASE_CONTEXT = context;
-        this.unit = Unit;
         this.layout_id = R.layout.item_stock_layout;
 
     }

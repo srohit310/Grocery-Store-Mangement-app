@@ -84,7 +84,7 @@ public class ItemStock extends Fragment implements BaseRecyclerAdapter.OnNoteLis
         mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
         itemStockAdapter = new ItemStockAdapter(getContext(),this,locationStockItems,
-                Float.parseFloat(item.Reorder_Lvl),Float.parseFloat(item.Excess_LvL),item.Unit);
+                Float.parseFloat(item.Reorder_Lvl),Float.parseFloat(item.Excess_LvL));
         recyclerView.setAdapter(itemStockAdapter);
         attachDatabaseListener();
         debug.setOnClickListener(new View.OnClickListener() {

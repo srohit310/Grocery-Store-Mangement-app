@@ -51,6 +51,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.github.hajiyevelnur92:intentanimation:1.0'
     implementation 'com.github.thomhurst:ExpandableHintText:1.0.7'
+    implementation 'android.arch.paging:runtime:1.0.1'
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

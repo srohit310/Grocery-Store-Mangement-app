@@ -2,48 +2,36 @@ package com.stancorp.grocerystorev1.ViewFragments;
 
 import android.content.Intent;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.paging.PagedList;
 
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.firebase.ui.firestore.paging.FirestorePagingOptions;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.stancorp.grocerystorev1.AdapterClasses.TransactionAdapter;
+import com.stancorp.grocerystorev1.AdapterClasses.TransactionFirestoreAdapter;
 import com.stancorp.grocerystorev1.AddActivities.AddTransactionActivity;
-import com.stancorp.grocerystorev1.Classes.Agent;
 import com.stancorp.grocerystorev1.Classes.StoreTransaction;
-import com.stancorp.grocerystorev1.DisplayStakeholder.AgentViewActivity;
 import com.stancorp.grocerystorev1.DisplayTransactions.TransactionViewActivity;
 import com.stancorp.grocerystorev1.MainActivity;
 import com.stancorp.grocerystorev1.R;
 
-import java.util.LinkedHashMap;
-
 public class FragmentsGroupPurchases extends FragmentsGroups {
 
-    LinkedHashMap<String, StoreTransaction> transactions;
-    FirebaseFirestore firebaseFirestore;
-    TransactionAdapter transactionAdapter;
-    ListenerRegistration transactionListener;
+    TransactionFirestoreAdapter transactionAdapter;
     Boolean pending;
 
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
-        ArrayAdapter itemfilteroptions = ArrayAdapter.createFromResource(getContext(),
+        ArrayAdapter transactionfilteroptions = ArrayAdapter.createFromResource(getContext(),
                 R.array.array_transaction_filter_options, R.layout.spinner_item_text);
 
-        itemfilteroptions.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-        toolbarspinner.setAdapter(itemfilteroptions);
+        transactionfilteroptions.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        toolbarspinner.setAdapter(transactionfilteroptions);
         toolbarspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -68,13 +56,10 @@ public class FragmentsGroupPurchases extends FragmentsGroups {
 
     @Override
     protected void initialize() {
+
         ((MainActivity) getActivity()).navigationView.setCheckedItem(R.id.purchase_menu);
         toolbar.setTitle("Purchases");
-        transactions = new LinkedHashMap<>();
         searchedittext.setHint("Search for purchase using referenceid");
-        firebaseFirestore = FirebaseFirestore.getInstance();
-        transactionAdapter = new TransactionAdapter(transactions, getContext(), this, null);
-        recyclerView.setAdapter(transactionAdapter);
         pending = true;
     }
 
@@ -91,24 +76,21 @@ public class FragmentsGroupPurchases extends FragmentsGroups {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (transactions != null) {
-            attachListData(startcode, endcode);
-        }
+    public void onStop() {
+        super.onStop();
+        transactionAdapter.stopListening();
     }
 
     @Override
-    public void onPause() {
-        transactionListener.remove();
-        super.onPause();
+    public void onStart() {
+        super.onStart();
+        if (transactionAdapter != null)
+            transactionAdapter.startListening();
     }
 
     @Override
     protected void attachListData(String startcode, String endcode) {
         SDProgress(true);
-        transactions.clear();
-        transactionAdapter.notifyDataSetChanged();
         Query query =
                 firebaseFirestore.collection(user.ShopCode).document("doc").collection("TransactionDetails")
                         .whereEqualTo("pending", pending).whereGreaterThanOrEqualTo("reference", startcode)
@@ -118,45 +100,27 @@ public class FragmentsGroupPurchases extends FragmentsGroups {
         } else {
             query = query.limit(20);
         }
-        transactionListener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                if (error != null) {
-                    Log.i("failfirestore", error.getMessage());
-                }
-                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                        StoreTransaction transaction;
-                        switch (doc.getType()) {
-                            case ADDED:
-                                transaction = doc.getDocument().toObject(StoreTransaction.class);
-                                transactions.put(transaction.code, transaction);
-                                transactionAdapter.notifyDataSetChanged();
-                                break;
-                            case MODIFIED:
-                                transaction = doc.getDocument().toObject(StoreTransaction.class);
-                                transactions.put(transaction.code, transaction);
-                                transactionAdapter.notifyDataSetChanged();
-                                break;
-                            case REMOVED:
-                                transaction = doc.getDocument().toObject(StoreTransaction.class);
-                                transactions.remove(transaction.code);
-                                transactionAdapter.notifyDataSetChanged();
-                                break;
-                        }
-                    }
-                    SDProgress(false);
-                } else {
-                    SDProgress(false);
-                }
-            }
-        });
+
+        PagedList.Config config = new PagedList.Config.Builder()
+                .setInitialLoadSizeHint(10)
+                .setPageSize(3)
+                .build();
+
+        FirestorePagingOptions<StoreTransaction> options = new FirestorePagingOptions.Builder<StoreTransaction>()
+                .setQuery(query, config, StoreTransaction.class)
+                .build();
+
+        transactionAdapter = new TransactionFirestoreAdapter(options, getContext(), this, null, progressLayout);
+        transactionAdapter.startListening();
+        transactionAdapter.notifyDataSetChanged();
+        recyclerView.setAdapter(transactionAdapter);
+        recyclerView.scheduleLayoutAnimation();
     }
 
     @Override
-    protected void displayIntent(int position) {
+    protected void displayFirestoreIntent(DocumentSnapshot documentSnapshot, int posiiton) {
         Intent intent = new Intent(getContext(), TransactionViewActivity.class);
-        StoreTransaction transaction = (StoreTransaction) transactions.values().toArray()[position];
+        StoreTransaction transaction = documentSnapshot.toObject(StoreTransaction.class);
         intent.putExtra("Transaction", transaction);
         intent.putExtra("Mode", "Purchase");
         intent.putExtra("ShopCode", user.ShopCode);

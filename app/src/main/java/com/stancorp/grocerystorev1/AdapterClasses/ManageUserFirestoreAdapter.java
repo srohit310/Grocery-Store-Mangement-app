@@ -4,25 +4,20 @@ import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.SignInMethodQueryResult;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.firebase.ui.firestore.paging.FirestorePagingOptions;
 import com.stancorp.grocerystorev1.Classes.StoreUser;
 import com.stancorp.grocerystorev1.R;
 
-import java.util.LinkedHashMap;
+public class ManageUserFirestoreAdapter extends FirestoreBaseRecyclerAdapter<StoreUser> {
 
-public class ManageUserAdapter extends BaseRecyclerAdapter {
-
-    private BaseRecyclerAdapter.OnNoteListner mOnNoteListner;
+    private OnNoteListner mOnNoteListner;
     TextView UserName;
     TextView UserEmail;
     TextView UserPhone;
@@ -31,17 +26,16 @@ public class ManageUserAdapter extends BaseRecyclerAdapter {
     ImageView Registeredstatus;
     Context context;
 
-    public ManageUserAdapter(LinkedHashMap<String,StoreUser> storeUsers, BaseRecyclerAdapter.OnNoteListner onNoteListner, Context context) {
-        super(context, onNoteListner);
-        dataList = storeUsers;
+    public ManageUserFirestoreAdapter(@NonNull FirestorePagingOptions<StoreUser> options, Context context, OnNoteListner onNoteListner, RelativeLayout progressLayout) {
+        super(options, context, onNoteListner, progressLayout);
         this.mOnNoteListner = onNoteListner;
         layout_id = R.layout.user_layout;
         this.context = context;
+        this.progressLayout = progressLayout;
     }
 
     @Override
-    public void onBindViewHold(int position, MyViewHolder holder) {
-        StoreUser user = (StoreUser) dataList.values().toArray()[position];
+    protected void onBindViewHolder(@NonNull FirestoreBaseRecyclerAdapter.MyViewHolder holder, int position, @NonNull StoreUser user) {
         //initialize
         UserName = holder.itemView.findViewById(R.id.UserName);
         UserEmail = holder.itemView.findViewById(R.id.UserEmail);
@@ -66,7 +60,5 @@ public class ManageUserAdapter extends BaseRecyclerAdapter {
         } else {
             Registeredstatus.setBackground(ContextCompat.getDrawable(context, R.drawable.circle_green));
         }
-
-
     }
 }

@@ -4,46 +4,45 @@ import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.firebase.ui.firestore.paging.FirestorePagingOptions;
 import com.stancorp.grocerystorev1.Classes.StoreTransaction;
 import com.stancorp.grocerystorev1.R;
 
-import java.util.LinkedHashMap;
-
 import javax.annotation.Nullable;
 
-public class TransactionAdapter extends BaseRecyclerAdapter {
+public class TransactionFirestoreAdapter extends FirestoreBaseRecyclerAdapter<StoreTransaction> {
 
-    private LinkedHashMap<String, StoreTransaction> transactionsArrayList;
-    private BaseRecyclerAdapter.OnNoteListner mOnNoteListner;
+    private OnNoteListner mOnNoteListner;
 
     TextView transactionCode;
     TextView transactionReference;
-    TextView fromcode,fromtype;
-    TextView tocode,totype;
+    TextView fromcode, fromtype;
+    TextView tocode, totype;
     TextView totalPrice;
     LinearLayout transactionExchange;
     ImageView approved;
     Context context;
     String contentSize;
 
-    public TransactionAdapter(LinkedHashMap<String,StoreTransaction> transactions,Context context, OnNoteListner onNoteListner,
-                              @Nullable String contentSize) {
-        super(context, onNoteListner);
-        dataList = transactions;
+    public TransactionFirestoreAdapter(@NonNull FirestorePagingOptions<StoreTransaction> options, Context context, OnNoteListner onNoteListner,
+                                       @Nullable String contentSize, RelativeLayout progressLayout) {
+        super(options, context, onNoteListner, progressLayout);
         this.context = context;
-        transactionsArrayList = transactions;
         this.mOnNoteListner = onNoteListner;
         layout_id = R.layout.transaction_layout;
         this.contentSize = contentSize;
+        this.progressLayout = progressLayout;
     }
 
     @Override
-    public void onBindViewHold(int position, MyViewHolder holder) {
-        StoreTransaction transaction = (StoreTransaction) dataList.values().toArray()[position];
+    protected void onBindViewHolder(@NonNull FirestoreBaseRecyclerAdapter.MyViewHolder holder, int position, @NonNull StoreTransaction transaction) {
 
         transactionCode = holder.itemView.findViewById(R.id.Code);
         transactionReference = holder.itemView.findViewById(R.id.Referenceid);
@@ -55,16 +54,17 @@ public class TransactionAdapter extends BaseRecyclerAdapter {
         totype = holder.itemView.findViewById(R.id.totype);
         transactionExchange = holder.itemView.findViewById(R.id.transactionexchange);
 
-        if(transaction!=null){
+        if (transaction != null) {
             transactionCode.setText(transaction.code);
             transactionReference.setText(transaction.reference);
-            totalPrice.setText(String.valueOf(transaction.totalPrice)+" "+"INR");
+            String totalPriceText = String.valueOf(transaction.totalPrice) + " " + "INR";
+            totalPrice.setText(totalPriceText);
             if (transaction.pending) {
                 approved.setBackground(ContextCompat.getDrawable(context, R.drawable.circle_red));
             } else {
                 approved.setBackground(ContextCompat.getDrawable(context, R.drawable.circle_green));
             }
-            if(contentSize == null) {
+            if (contentSize == null) {
                 if (transaction.type.compareTo("Purchase") == 0) {
                     fromcode.setText(transaction.stakeholderCode);
                     fromtype.setText("Vendor");
@@ -76,8 +76,8 @@ public class TransactionAdapter extends BaseRecyclerAdapter {
                     tocode.setText(transaction.stakeholderCode);
                     totype.setText("Customer");
                 }
-            }else{
-                if(contentSize.compareTo("Small")==0){
+            } else {
+                if (contentSize.compareTo("Small") == 0) {
                     transactionExchange.setVisibility(View.GONE);
                 }
             }

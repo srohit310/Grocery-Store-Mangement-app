@@ -60,11 +60,5 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<BaseRecyc
         }
     }
 
-
-    public void filterList(LinkedHashMap<String,?> filteredList) {
-        dataList = filteredList;
-        notifyDataSetChanged();
-    }
-
     public interface OnNoteListner { void OnNoteClick(int position);}
 }

@@ -2,38 +2,26 @@ package com.stancorp.grocerystorev1.ViewFragments;
 
 import android.content.Intent;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.paging.PagedList;
 
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.stancorp.grocerystorev1.AdapterClasses.ManageUserAdapter;
-import com.stancorp.grocerystorev1.AdapterClasses.TransactionAdapter;
-import com.stancorp.grocerystorev1.AddActivities.AddItemActivity;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.firebase.ui.firestore.paging.FirestorePagingOptions;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
+import com.stancorp.grocerystorev1.AdapterClasses.ManageUserFirestoreAdapter;
 import com.stancorp.grocerystorev1.AddActivities.AddUsersActivity;
-import com.stancorp.grocerystorev1.Classes.StoreTransaction;
 import com.stancorp.grocerystorev1.Classes.StoreUser;
 import com.stancorp.grocerystorev1.R;
 
-import java.util.LinkedHashMap;
-
 public class FragmentGroupUsers extends FragmentsGroups {
 
-    LinkedHashMap<String, StoreUser> users;
-    FirebaseFirestore firebaseFirestore;
-    ManageUserAdapter manageUserAdapter;
-    ListenerRegistration userListener;
+    ManageUserFirestoreAdapter manageUserAdapter;
     String Permission;
 
     @Override
@@ -69,12 +57,8 @@ public class FragmentGroupUsers extends FragmentsGroups {
 
     @Override
     protected void initialize() {
-        users = new LinkedHashMap<>();
         searchedittext.setHint("Search for purchase using referenceid");
-        firebaseFirestore = FirebaseFirestore.getInstance();
-        manageUserAdapter = new ManageUserAdapter(users, this, getContext());
-        recyclerView.setAdapter(manageUserAdapter);
-        Permission= "Admin";
+        Permission = "Admin";
     }
 
     @Override
@@ -85,70 +69,47 @@ public class FragmentGroupUsers extends FragmentsGroups {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        startcode = "!";
-        endcode = "{";
-        if(users!=null){
-            attachListData(startcode,endcode);
-        }
+    public void onStop() {
+        super.onStop();
+        manageUserAdapter.stopListening();
     }
 
     @Override
-    public void onPause() {
-        userListener.remove();
-        super.onPause();
+    public void onStart() {
+        super.onStart();
+        if (manageUserAdapter != null)
+            manageUserAdapter.startListening();
     }
 
     @Override
     protected void attachListData(String startcode, String endcode) {
         SDProgress(true);
-        users.clear();
-        manageUserAdapter.notifyDataSetChanged();
-        userListener =
-                firebaseFirestore.collection("UserDetails").whereEqualTo("ShopCode", user.ShopCode)
+        Query query =  firebaseFirestore.collection("UserDetails").whereEqualTo("ShopCode", user.ShopCode)
                         .whereGreaterThanOrEqualTo("Name", startcode).whereLessThan("Name", endcode)
-                        .whereEqualTo("PermissionLevel",Permission).limit(50)
-                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                            @Override
-                            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                                if(error!=null){
-                                    Log.i("failuserentry",error.getMessage());
-                                }
-                                if (value != null && !value.isEmpty()) {
-                                    for (DocumentChange doc : value.getDocumentChanges()) {
-                                        StoreUser temp = doc.getDocument().toObject(StoreUser.class);
-                                        if(temp.Email.compareTo(user.Email)==0){
-                                            continue;
-                                        }
-                                        switch (doc.getType()) {
-                                            case ADDED:
-                                                users.put(temp.Email,temp);
-                                                manageUserAdapter.notifyDataSetChanged();
-                                                break;
-                                            case MODIFIED:
-                                                users.put(temp.Email,temp);
-                                                manageUserAdapter.notifyDataSetChanged();
-                                                break;
-                                            case REMOVED:
-                                                users.remove(temp.Email);
-                                                manageUserAdapter.notifyDataSetChanged();
-                                                break;
-                                        }
-                                        recyclerView.scheduleLayoutAnimation();
-                                    }
-                                }
-                                SDProgress(false);
-                            }
-                        });
+                        .whereEqualTo("PermissionLevel", Permission).limit(50);
+
+        PagedList.Config config = new PagedList.Config.Builder()
+                .setInitialLoadSizeHint(6)
+                .setPageSize(3)
+                .build();
+
+        FirestorePagingOptions<StoreUser> options = new FirestorePagingOptions.Builder<StoreUser>()
+                .setQuery(query, config, StoreUser.class)
+                .build();
+
+        manageUserAdapter = new ManageUserFirestoreAdapter(options, getContext(), this, progressLayout);
+        manageUserAdapter.startListening();
+        manageUserAdapter.notifyDataSetChanged();
+        recyclerView.setAdapter(manageUserAdapter);
+        recyclerView.scheduleLayoutAnimation();
     }
 
     @Override
-    protected void displayIntent(int posiiton) {
-        StoreUser tempuser = (StoreUser) users.values().toArray()[posiiton];
+    protected void displayFirestoreIntent(DocumentSnapshot documentSnapshot, int posiiton) {
+        StoreUser tempuser = documentSnapshot.toObject(StoreUser.class);
         Intent intent = new Intent(getContext(), AddUsersActivity.class);
         intent.putExtra("ShopCode", user.ShopCode);
-        intent.putExtra("Mode","Edit");
+        intent.putExtra("Mode", "Edit");
         intent.putExtra("User", user);
         startActivity(intent);
     }

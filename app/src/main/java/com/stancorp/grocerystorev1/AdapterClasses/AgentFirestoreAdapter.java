@@ -1,21 +1,20 @@
 package com.stancorp.grocerystorev1.AdapterClasses;
 
 import android.content.Context;
-import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.firebase.ui.firestore.paging.FirestorePagingOptions;
 import com.stancorp.grocerystorev1.Classes.Agent;
-import com.stancorp.grocerystorev1.Classes.Items;
 import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 
-import java.util.LinkedHashMap;
-
-public class AgentAdapter extends BaseRecyclerAdapter {
-
-    private LinkedHashMap<String, Agent> agentsArrayList;
-    private BaseRecyclerAdapter.OnNoteListner mOnNoteListner;
+public class AgentFirestoreAdapter extends FirestoreBaseRecyclerAdapter<Agent> {
 
     TextView Name;
     TextView Code;
@@ -23,24 +22,20 @@ public class AgentAdapter extends BaseRecyclerAdapter {
     TextView Phoneno;
     Context context;
     LinearLayout customertypeLayout;
-    String agenttype;
-
     Gfunc gfunc;
 
-    public AgentAdapter(LinkedHashMap<String, Agent> agents, Context context, OnNoteListner onNoteListner, String Type) {
-        super(context, onNoteListner);
-        dataList = agents;
+
+    public AgentFirestoreAdapter(@NonNull FirestorePagingOptions<Agent> options, Context context, OnNoteListner onNoteListner, RelativeLayout progressLayout) {
+        super(options, context, onNoteListner, progressLayout);
         gfunc = new Gfunc();
         this.context = context;
-        agentsArrayList = agents;
         this.mOnNoteListner = onNoteListner;
         layout_id = R.layout.agent_layout;
-        this.agenttype = Type;
+        this.progressLayout = progressLayout;
     }
 
     @Override
-    public void onBindViewHold(int position, MyViewHolder holder) {
-        Agent agent = (Agent) dataList.values().toArray()[position];
+    protected void onBindViewHolder(@NonNull FirestoreBaseRecyclerAdapter.MyViewHolder holder, int position, @NonNull Agent agent) {
 
         Name = holder.itemView.findViewById(R.id.agentName);
         Code = holder.itemView.findViewById(R.id.agentCode);
