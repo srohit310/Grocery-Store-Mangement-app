@@ -111,7 +111,7 @@ public class AgentPending extends Fragment implements FirestoreBaseRecyclerAdapt
                 .setQuery(query, config, StoreTransaction.class)
                 .build();
 
-        transactionAdapter = new TransactionFirestoreAdapter(options, getContext(), this,null , null);
+        transactionAdapter = new TransactionFirestoreAdapter(options, getContext(), this,null , null, null);
         transactionAdapter.startListening();
         transactionAdapter.notifyDataSetChanged();
         recyclerView.setAdapter(transactionAdapter);

@@ -95,7 +95,8 @@ public class MainFragment extends Fragment {
                         new FragmentsGroupSales()).commit();
             }
         });
-        fetchtransactionPending();
+        if(((MainActivity) getActivity()).User != null)
+            fetchtransactionPending();
     }
 
     private void fetchtransactionPending() {

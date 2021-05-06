@@ -574,31 +574,28 @@ public class AddItemActivity extends AppCompatActivity {
 
         //Units
         Units = new ArrayList<>();
-        firebaseFirestore.collection(ShopCode).document("doc").collection("CodesMaster").document("doc").collection("Units")
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firebaseFirestore.collection(ShopCode).document("doc").collection("CodesMaster").document("Units")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (!task.getResult().isEmpty()) {
-                    for (DocumentSnapshot postSnapshot : task.getResult()) {
-                        Unit unit = postSnapshot.toObject(Unit.class);
-                        Units.add(unit.unit);
-                    }
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.getResult().exists()){
+                    Unit unit = task.getResult().toObject(Unit.class);
+                    Units = unit.unit;
                     UnitAdapter = new ArrayAdapter(AddItemActivity.this, android.R.layout.simple_list_item_1, Units);
                     unittext.setAdapter(UnitAdapter);
                 }
             }
         });
+
         //Category
         Categorys = new ArrayList<>();
-        firebaseFirestore.collection(ShopCode).document("doc").collection("CodesMaster").document("doc").collection("Categories")
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firebaseFirestore.collection(ShopCode).document("doc").collection("CodesMaster").document("Categories")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (!task.getResult().isEmpty()) {
-                    for (DocumentSnapshot postSnapshot : task.getResult()) {
-                        Category category = postSnapshot.toObject(Category.class);
-                        Categorys.add(category.category);
-                    }
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.getResult().exists()){
+                    Category category = task.getResult().toObject(Category.class);
+                    Categorys = category.category;
                     categoryAdapter = new ArrayAdapter(AddItemActivity.this, android.R.layout.simple_list_item_1, Categorys);
                     categorytext.setAdapter(categoryAdapter);
                 }
@@ -607,15 +604,13 @@ public class AddItemActivity extends AppCompatActivity {
 
         //Brand
         Brands = new ArrayList<>();
-        firebaseFirestore.collection(ShopCode).document("doc").collection("CodesMaster").document("doc").collection("Brands")
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firebaseFirestore.collection(ShopCode).document("doc").collection("CodesMaster").document("Brands")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (!task.getResult().isEmpty()) {
-                    for (DocumentSnapshot postSnapshot : task.getResult()) {
-                        Brand brand = postSnapshot.toObject(Brand.class);
-                        Brands.add(brand.brand);
-                    }
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.getResult().exists()){
+                    Brand brand = task.getResult().toObject(Brand.class);
+                    Brands = brand.brand;
                     brandAdapter = new ArrayAdapter(AddItemActivity.this, android.R.layout.simple_list_item_1, Brands);
                     brandtext.setAdapter(brandAdapter);
                 }
@@ -863,25 +858,28 @@ public class AddItemActivity extends AppCompatActivity {
         String unit = item.Unit.toLowerCase();
         boolean unitexists = Units.contains(unit);
         if (!unitexists) {
-            Unit newunit = new Unit(unit);
+            Units.add(unit);
+            Unit newunit = new Unit(Units);
             transaction.set(firebaseFirestore.collection(ShopCode).document("doc").collection("CodesMaster")
-                    .document("doc").collection("Units").document(), newunit);
+                    .document("Units"), newunit);
         }
         //Category
         String category = item.Category.toLowerCase();
         boolean categoryexists = Categorys.contains(category);
         if (!categoryexists) {
-            Category newcategory = new Category(category);
+            Categorys.add(category);
+            Category newcategory = new Category(Categorys);
             transaction.set(firebaseFirestore.collection(ShopCode).document("doc").collection("CodesMaster")
-                    .document("doc").collection("Categories").document(), newcategory);
+                    .document("Categories"), newcategory);
         }
         //Brand
         String brand = item.Brand.toLowerCase();
         boolean brandexists = Brands.contains(brand);
         if (!brandexists) {
-            Brand newbrand = new Brand(brand);
+            Brands.add(brand);
+            Brand newbrand = new Brand(Brands);
             transaction.set(firebaseFirestore.collection(ShopCode).document("doc").collection("CodesMaster")
-                    .document("doc").collection("Brands").document(), newbrand);
+                    .document("Brands"), newbrand);
         }
 
     }

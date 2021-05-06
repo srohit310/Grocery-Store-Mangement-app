@@ -97,7 +97,7 @@ public class FragmentGroupUsers extends FragmentsGroups {
                 .setQuery(query, config, StoreUser.class)
                 .build();
 
-        manageUserAdapter = new ManageUserFirestoreAdapter(options, getContext(), this, progressLayout);
+        manageUserAdapter = new ManageUserFirestoreAdapter(options, getContext(), this, progressLayout, emptyview);
         manageUserAdapter.startListening();
         manageUserAdapter.notifyDataSetChanged();
         recyclerView.setAdapter(manageUserAdapter);

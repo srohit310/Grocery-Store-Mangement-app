@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.paging.PagedList;
 
@@ -58,7 +59,8 @@ public class FragmentsGroupSales extends FragmentsGroups {
     protected void initialize() {
 
         toolbar.setTitle("Sales");
-        ((MainActivity) getActivity()).navigationView.setCheckedItem(R.id.sales_menu);
+        if(((MainActivity) getActivity())!=null)
+            ((MainActivity) getActivity()).navigationView.setCheckedItem(R.id.sales_menu);
         searchedittext.setHint("Search for sales using referenceid");
         pending = true;
     }
@@ -110,7 +112,7 @@ public class FragmentsGroupSales extends FragmentsGroups {
                 .setQuery(query, config, StoreTransaction.class)
                 .build();
 
-        transactionAdapter = new TransactionFirestoreAdapter(options, getContext(), this,null, progressLayout);
+        transactionAdapter = new TransactionFirestoreAdapter(options, getContext(), this,null, progressLayout, emptyview);
         transactionAdapter.startListening();
         transactionAdapter.notifyDataSetChanged();
         recyclerView.setAdapter(transactionAdapter);

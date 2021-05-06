@@ -2,16 +2,21 @@ package com.stancorp.grocerystorev1.ViewFragments;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,12 +24,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.Guideline;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -44,6 +53,7 @@ public abstract class FragmentsGroups extends Fragment implements FirestoreBaseR
     public  RelativeLayout progressLayout;
     private static final int RC_ADD = 251;
     public StoreUser user;
+    public ConstraintLayout emptyview;
     public EditText searchedittext;
     public ListenerRegistration registration;
     public SearchView searchbarView;
@@ -52,7 +62,10 @@ public abstract class FragmentsGroups extends Fragment implements FirestoreBaseR
     public Query.Direction direction;
     public EditText searchBox;
     public Spinner toolbarspinner;
+    public TextView categoryfilter;
+    public TextView brandfilter;
     public boolean Flag;
+    public LinearLayout itemfilterlayout;
 
     public Toolbar toolbar;
 
@@ -63,6 +76,7 @@ public abstract class FragmentsGroups extends Fragment implements FirestoreBaseR
         View view = inflater.inflate(R.layout.fragment_group,container,false);
         firebaseFirestore = FirebaseFirestore.getInstance();
         final AppCompatActivity act = (AppCompatActivity) getActivity();
+        emptyview = view.findViewById(R.id.emptyLayout);
         if (act.getSupportActionBar() != null) {
             toolbar = (Toolbar) act.findViewById(R.id.toolbar);
             toolbarspinner = toolbar.findViewById(R.id.spinnertoolbar);
@@ -72,13 +86,31 @@ public abstract class FragmentsGroups extends Fragment implements FirestoreBaseR
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        bundle.putSerializable("User", user);
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         searchBox = view.findViewById(R.id.SearchText);
+        itemfilterlayout = view.findViewById(R.id.filteritem);
+        itemfilterlayout.setVisibility(View.GONE);
+        categoryfilter = view.findViewById(R.id.Categorytext);
+        brandfilter = view.findViewById(R.id.BrandText);
         startcode = "!";
         endcode = "{";
         Flag = true;
-        user = ((MainActivity)getActivity()).User;
+        if (savedInstanceState != null) {
+            Log.i("beforecrashv1", "onassign");
+            int currentPID = android.os.Process.myPid();
+            if (currentPID != savedInstanceState.getInt("PID")) {
+                user = (StoreUser) savedInstanceState.getSerializable("User");
+            }
+        }else{
+            user = ((MainActivity)getActivity()).User;
+        }
         mfloat = view.findViewById(R.id.floatingActionButton);
         mfloat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,6 +131,13 @@ public abstract class FragmentsGroups extends Fragment implements FirestoreBaseR
 
     protected abstract void initialize();
 
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+        }else if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        }
+    }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {

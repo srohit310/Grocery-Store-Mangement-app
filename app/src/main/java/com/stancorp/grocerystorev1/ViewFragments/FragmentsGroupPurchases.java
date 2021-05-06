@@ -110,7 +110,7 @@ public class FragmentsGroupPurchases extends FragmentsGroups {
                 .setQuery(query, config, StoreTransaction.class)
                 .build();
 
-        transactionAdapter = new TransactionFirestoreAdapter(options, getContext(), this, null, progressLayout);
+        transactionAdapter = new TransactionFirestoreAdapter(options, getContext(), this, null, progressLayout, emptyview);
         transactionAdapter.startListening();
         transactionAdapter.notifyDataSetChanged();
         recyclerView.setAdapter(transactionAdapter);

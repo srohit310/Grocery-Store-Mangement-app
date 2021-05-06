@@ -73,7 +73,7 @@ public class FragmentsGroupVendors extends FragmentsGroups {
                 .setQuery(query, config, Agent.class)
                 .build();
 
-        agentAdaptor = new AgentFirestoreAdapter(options, getContext(), this, progressLayout);
+        agentAdaptor = new AgentFirestoreAdapter(options, getContext(), this, progressLayout, emptyview);
         agentAdaptor.startListening();
         agentAdaptor.notifyDataSetChanged();
         recyclerView.setAdapter(agentAdaptor);

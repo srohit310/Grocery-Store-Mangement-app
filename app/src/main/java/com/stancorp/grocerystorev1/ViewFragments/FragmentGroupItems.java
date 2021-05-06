@@ -7,28 +7,39 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.GridLayoutManager;
 
-import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.firebase.ui.firestore.paging.FirestorePagingOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.stancorp.grocerystorev1.AdapterClasses.FirestoreBaseRecyclerAdapter;
 import com.stancorp.grocerystorev1.AdapterClasses.ItemFirestoreAdapter;
 import com.stancorp.grocerystorev1.AddActivities.AddItemActivity;
+import com.stancorp.grocerystorev1.Classes.Brand;
+import com.stancorp.grocerystorev1.Classes.Category;
 import com.stancorp.grocerystorev1.Classes.Items;
 import com.stancorp.grocerystorev1.DisplayItems.ItemViewActivity;
 import com.stancorp.grocerystorev1.R;
 
-public class FragmentGroupItems extends FragmentsGroups implements FirestoreBaseRecyclerAdapter.OnNoteListner {
+import java.util.ArrayList;
+
+public class FragmentGroupItems extends FragmentsGroups {
 
     FirebaseFirestore firebaseFirestore;
     ItemFirestoreAdapter itemAdaptor;
     Boolean valid;
+    ArrayList<String> categories;
+    ArrayList<String> brands;
+    String Category;
+    String Brand;
 
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
@@ -65,11 +76,69 @@ public class FragmentGroupItems extends FragmentsGroups implements FirestoreBase
     protected void initialize() {
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         valid = true;
+        categories = new ArrayList<>();
+        brands = new ArrayList<>();
         searchedittext.setHint("Search for item using name");
         firebaseFirestore = FirebaseFirestore.getInstance();
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+            recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        }
         if (user.PermissionLevel.compareTo("Employee") == 0) {
             mfloat.setVisibility(View.GONE);
         }
+        Category = "All Categories";
+        Brand = "All Brands";
+        categories.add(Category);
+        brands.add(Brand);
+        addcategory();
+    }
+
+    private void addcategory() {
+        firebaseFirestore.collection(user.ShopCode).document("doc").collection("CodesMaster")
+                .document("Categories").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.getResult().exists()){
+                    Category category = task.getResult().toObject(Category.class);
+                    categories.addAll(category.category);
+                }
+                addbrand();
+            }
+        });
+    }
+
+    private void addbrand() {
+        firebaseFirestore.collection(user.ShopCode).document("doc").collection("CodesMaster")
+                .document("Brands").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.getResult().exists()){
+                    Brand brand = task.getResult().toObject(Brand.class);
+                    brands.addAll(brand.brand);
+                }
+                setupfilterlayout();
+            }
+        });
+    }
+
+    private void setupfilterlayout() {
+        itemfilterlayout.setVisibility(View.VISIBLE);
+        categoryfilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int position = categories.indexOf(Category);
+                BottomFragmentItems bottomFragmentItems = BottomFragmentItems.newInstance("Category",categories,position);
+                bottomFragmentItems.show(getChildFragmentManager(),BottomFragmentItems.TAG);
+            }
+        });
+        brandfilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int position = brands.indexOf(Brand);
+                BottomFragmentItems bottomFragmentItems = BottomFragmentItems.newInstance("Brand",brands,position);
+                bottomFragmentItems.show(getChildFragmentManager(),BottomFragmentItems.TAG);
+            }
+        });
     }
 
     @Override
@@ -93,6 +162,10 @@ public class FragmentGroupItems extends FragmentsGroups implements FirestoreBase
             itemAdaptor.startListening();
     }
 
+    public void filterchange(){
+        attachListData(startcode,endcode);
+    }
+
     @Override
     protected void attachListData(String startcode, String endcode) {
         SDProgress(true);
@@ -100,16 +173,23 @@ public class FragmentGroupItems extends FragmentsGroups implements FirestoreBase
                 .whereEqualTo("Valid", valid).whereGreaterThanOrEqualTo("name", startcode)
                 .whereLessThan("name", endcode).orderBy("name", direction).limit(50);
 
+        if(Category.compareToIgnoreCase("All Categories")!=0){
+            query = query.whereEqualTo("Category",Category);
+        }
+        if(Brand.compareToIgnoreCase("All Brands")!=0){
+            query = query.whereEqualTo("Brand",Brand);
+        }
+
         PagedList.Config config = new PagedList.Config.Builder()
-                .setInitialLoadSizeHint(10)
-                .setPageSize(3)
+                .setInitialLoadSizeHint(8)
+                .setPageSize(4)
                 .build();
 
         FirestorePagingOptions<Items> options = new FirestorePagingOptions.Builder<Items>()
                 .setQuery(query, config , Items.class)
                 .build();
 
-        itemAdaptor = new ItemFirestoreAdapter(options, getContext(), this, progressLayout);
+        itemAdaptor = new ItemFirestoreAdapter(options, getContext(), this, progressLayout, emptyview);
         itemAdaptor.startListening();
         itemAdaptor.notifyDataSetChanged();
         recyclerView.setAdapter(itemAdaptor);

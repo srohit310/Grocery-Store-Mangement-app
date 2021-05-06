@@ -7,6 +7,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
@@ -26,8 +27,9 @@ public class ItemFirestoreAdapter extends FirestoreBaseRecyclerAdapter<Items> {
     ImageView ItemImage;
     Gfunc gfunc;
 
-    public ItemFirestoreAdapter(@NonNull FirestorePagingOptions<Items> options, Context context, OnNoteListner onNoteListner, RelativeLayout progressLayout) {
-        super(options, context, onNoteListner, progressLayout);
+    public ItemFirestoreAdapter(@NonNull FirestorePagingOptions<Items> options, Context context, OnNoteListner onNoteListner
+            , RelativeLayout progressLayout, ConstraintLayout emptyview) {
+        super(options, context, onNoteListner, progressLayout, emptyview);
         gfunc = new Gfunc();
         this.context = context;
         layout_id = R.layout.items_layout;

@@ -5,6 +5,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.firebase.ui.firestore.paging.FirestorePagingOptions;
@@ -14,15 +15,15 @@ import com.stancorp.grocerystorev1.R;
 
 public class LocationFirestoreAdapter extends FirestoreBaseRecyclerAdapter<Location>{
 
-    private OnNoteListner mOnNoteListner;
     TextView LocationName;
     TextView LocationCode;
     TextView LocationAddress;
     Context context;
     Gfunc gfunc;
 
-    public LocationFirestoreAdapter(@NonNull FirestorePagingOptions<Location> options, Context context, OnNoteListner onNoteListner, RelativeLayout progressLayout) {
-        super(options, context, onNoteListner, progressLayout);
+    public LocationFirestoreAdapter(@NonNull FirestorePagingOptions<Location> options, Context context, OnNoteListner onNoteListner,
+                                    RelativeLayout progressLayout, ConstraintLayout emptyview) {
+        super(options, context, onNoteListner, progressLayout, emptyview);
         gfunc = new Gfunc();
         this.context = context;
         layout_id = R.layout.location_layout;

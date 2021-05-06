@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -18,8 +19,6 @@ import com.stancorp.grocerystorev1.R;
 import javax.annotation.Nullable;
 
 public class TransactionFirestoreAdapter extends FirestoreBaseRecyclerAdapter<StoreTransaction> {
-
-    private OnNoteListner mOnNoteListner;
 
     TextView transactionCode;
     TextView transactionReference;
@@ -32,8 +31,8 @@ public class TransactionFirestoreAdapter extends FirestoreBaseRecyclerAdapter<St
     String contentSize;
 
     public TransactionFirestoreAdapter(@NonNull FirestorePagingOptions<StoreTransaction> options, Context context, OnNoteListner onNoteListner,
-                                       @Nullable String contentSize, RelativeLayout progressLayout) {
-        super(options, context, onNoteListner, progressLayout);
+                                       @Nullable String contentSize, RelativeLayout progressLayout, ConstraintLayout emptyview) {
+        super(options, context, onNoteListner, progressLayout, emptyview);
         this.context = context;
         this.mOnNoteListner = onNoteListner;
         layout_id = R.layout.transaction_layout;

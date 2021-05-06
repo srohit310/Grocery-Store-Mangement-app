@@ -1,11 +1,13 @@
 package com.stancorp.grocerystorev1.Classes;
 
+import java.util.ArrayList;
+
 public class Unit {
-    public String unit;
+    public ArrayList<String> unit;
 
     public Unit(){}
 
-    public Unit(String unit){
+    public Unit(ArrayList<String> unit){
         this.unit = unit;
     }
 }

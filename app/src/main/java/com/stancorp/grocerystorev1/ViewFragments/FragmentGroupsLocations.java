@@ -71,7 +71,7 @@ public class FragmentGroupsLocations extends FragmentsGroups {
                 .setQuery(query, config, Location.class)
                 .build();
 
-        locationAdapter = new LocationFirestoreAdapter(options, getContext(), this, progressLayout);
+        locationAdapter = new LocationFirestoreAdapter(options, getContext(), this, progressLayout, emptyview);
         locationAdapter.startListening();
         locationAdapter.notifyDataSetChanged();
         recyclerView.setAdapter(locationAdapter);

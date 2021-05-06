@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -17,7 +18,6 @@ import com.stancorp.grocerystorev1.R;
 
 public class ManageUserFirestoreAdapter extends FirestoreBaseRecyclerAdapter<StoreUser> {
 
-    private OnNoteListner mOnNoteListner;
     TextView UserName;
     TextView UserEmail;
     TextView UserPhone;
@@ -26,8 +26,9 @@ public class ManageUserFirestoreAdapter extends FirestoreBaseRecyclerAdapter<Sto
     ImageView Registeredstatus;
     Context context;
 
-    public ManageUserFirestoreAdapter(@NonNull FirestorePagingOptions<StoreUser> options, Context context, OnNoteListner onNoteListner, RelativeLayout progressLayout) {
-        super(options, context, onNoteListner, progressLayout);
+    public ManageUserFirestoreAdapter(@NonNull FirestorePagingOptions<StoreUser> options, Context context, OnNoteListner onNoteListner,
+                                      RelativeLayout progressLayout, ConstraintLayout emptyview) {
+        super(options, context, onNoteListner, progressLayout, emptyview);
         this.mOnNoteListner = onNoteListner;
         layout_id = R.layout.user_layout;
         this.context = context;

@@ -20,6 +20,9 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
+import android.os.Process;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -67,6 +70,8 @@ import com.stancorp.grocerystorev1.ViewFragments.FragmentsGroupVendors;
 import com.stancorp.grocerystorev1.LoginModule.LoginActivity;
 
 import maes.tech.intentanim.CustomIntent;
+
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -152,20 +157,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     OnSignedInInitialize(user.getEmail());
                 } else {
                     OnSignOutCleanUp();
-                    Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                     startActivityForResult(
                             intent,
                             RC_SIGN_IN);
-                    CustomIntent.customType(MainActivity.this,"bottom-to-up");
+                    CustomIntent.customType(MainActivity.this, "bottom-to-up");
                 }
             }
         };
-        if(savedInstanceState == null && User!=null) {
+
+        if (savedInstanceState != null) {
+            Log.i("beforecrashv1", "onassign");
+            int currentPID = android.os.Process.myPid();
+            if (currentPID != savedInstanceState.getInt("PID")) {
+                User = null;
+                firebaseAuth.addAuthStateListener(authStateListener);
+                authStateListener.onAuthStateChanged(FirebaseAuth.getInstance());
+            }
+        }
+
+        if (savedInstanceState == null && User != null) {
             navigationView.setCheckedItem(R.id.dash);
             getSupportActionBar().setTitle("Main Menu");
             getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
                     new MainFragment()).commit();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle bundle, @NonNull PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(bundle, outPersistentState);
+        bundle.putInt("PID", android.os.Process.myPid());
     }
 
     @Override
@@ -183,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else if(getSupportActionBar().getTitle() != "Main Menu"){
+        } else if (getSupportActionBar().getTitle() != "Main Menu") {
             getSupportActionBar().setTitle("Main Menu");
             navigationView.setCheckedItem(R.id.dash);
             getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
@@ -195,9 +217,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 
-        }else if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
 
         }
     }
@@ -207,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         firebaseAuth.addAuthStateListener(authStateListener);
         super.onResume();
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -223,10 +246,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 finish();
             }
         }
-        if( requestCode == RC_USER_SETTINGS){
-            if(resultCode == RESULT_OK){
+        if (requestCode == RC_USER_SETTINGS) {
+            if (resultCode == RESULT_OK) {
                 User.Name = data.getStringExtra("Name");
-                if(data.getBooleanExtra("imgchange",false)){
+                if (data.getBooleanExtra("imgchange", false)) {
                     setProfileImage();
                 }
             }
@@ -242,11 +265,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void GetUserData(String email) {
-        if(User==null) {
+        if (User == null) {
+            Log.i("beforecrashv1", "it reached here");
             Query query = firebaseFirestore.collection("UserDetails").whereEqualTo("Email", email);
             query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    Log.i("beforecrashv1", "it reached here");
                     for (DocumentSnapshot snapshot1 : task.getResult()) {
                         User = snapshot1.toObject(StoreUser.class);
                     }
@@ -270,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     } else {
                         Glide.with(imageView.getContext())
                                 .clear(imageView);
-                        imageView.setBackground(ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_baseline_account_circle_24));
+                        imageView.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_baseline_account_circle_24));
                         ProgressLayout.setVisibility(View.GONE);
                         actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
                     }
@@ -280,9 +305,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     getSupportFragmentManager().beginTransaction().replace(R.id.fLayout,
                             new MainFragment()).commit();
                     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+                    Log.i("beforecrashv1", "it reached there");
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.i("beforecrashv1",e.getMessage());
                 }
             });
-        }else{
+        } else {
             textViewemail.setText(gfunc.capitalize(User.Email));
             textViewname.setText(gfunc.capitalize(User.Name));
             textViewpermission.setText(gfunc.capitalize(User.PermissionLevel));
@@ -367,9 +399,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
 
                     case R.id.settings_change_menu:
-                        Intent intent = new Intent(MainActivity.this,UserSettingsActivity.class);
-                        intent.putExtra("UserData",User);
-                        startActivityForResult(intent,RC_USER_SETTINGS);
+                        Intent intent = new Intent(MainActivity.this, UserSettingsActivity.class);
+                        intent.putExtra("UserData", User);
+                        startActivityForResult(intent, RC_USER_SETTINGS);
                         break;
                     case R.id.sign_out_menu:
                         User = null;
@@ -377,13 +409,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                 }
             }
-        },250);
+        }, 250);
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    public String UID(){
+    public String UID() {
         return UID;
     }
 

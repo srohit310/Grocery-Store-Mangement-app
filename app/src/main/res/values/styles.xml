@@ -8,7 +8,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorSurface">#FFFFFF</item>
-
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
         <item name="android:colorButtonNormal">@drawable/button_selector</item>
         <item name="colorButtonNormal">@drawable/button_selector</item>
         <item name="android:buttonStyle">@style/FriendlyButtonStyle</item>
@@ -19,6 +19,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textViewStyle">@style/MyTextViewStyle</item>
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
         <item name="editTextStyle">@style/AddEditTexts</item>
         <item name="autoCompleteTextViewStyle">@style/AddAutoCompleteText</item>
     </style>
@@ -26,6 +27,7 @@
     <style name="AppTheme.NoActionBar">
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="windowActionBar">false</item>
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
         <item name="windowNoTitle">true</item>
     </style>
 
@@ -65,6 +67,14 @@
         <item name="android:textViewStyle">@style/MyTextViewStyle</item>
         <item name="editTextStyle">@style/LocationAddEditText</item>
         <item name="autoCompleteTextViewStyle">@style/AdditionAutotext</item>
+    </style>
+
+    <style name="AppBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalStyle</item>
+    </style>
+
+    <style name="AppModalStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/rounded_dialog</item>
     </style>
 
     <style name="MyTextViewStyle" parent="android:Widget.TextView">

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -26,11 +27,13 @@ public abstract class FirestoreBaseRecyclerAdapter<T> extends FirestorePagingAda
     public OnNoteListner mOnNoteListner;
     Context BASE_CONTEXT;
     public RelativeLayout progressLayout;
+    public ConstraintLayout emptyview;
 
     public FirestoreBaseRecyclerAdapter(@NonNull FirestorePagingOptions<T> options, Context context, OnNoteListner onNoteListner,
-                                        RelativeLayout progressLayout) {
+                                        RelativeLayout progressLayout, ConstraintLayout emptyview) {
         super((FirestorePagingOptions<T>) options);
         this.BASE_CONTEXT = context;
+        this.emptyview = emptyview;
     }
 
     @NonNull
@@ -70,8 +73,16 @@ public abstract class FirestoreBaseRecyclerAdapter<T> extends FirestorePagingAda
                     break;
                 case LOADED:
                     SDProgress(false);
+                case FINISHED:
+                    SDProgress(false);
+                    if(getItemCount() == 0){
+                        emptyview.setVisibility(View.VISIBLE);
+                    }else{
+                        emptyview.setVisibility(View.GONE);
+                    }
                     break;
             }
+            notifyDataSetChanged();
         }
     }
 

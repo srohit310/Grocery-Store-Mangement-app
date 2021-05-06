@@ -7,6 +7,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.firebase.ui.firestore.paging.FirestorePagingOptions;
@@ -25,8 +26,9 @@ public class AgentFirestoreAdapter extends FirestoreBaseRecyclerAdapter<Agent> {
     Gfunc gfunc;
 
 
-    public AgentFirestoreAdapter(@NonNull FirestorePagingOptions<Agent> options, Context context, OnNoteListner onNoteListner, RelativeLayout progressLayout) {
-        super(options, context, onNoteListner, progressLayout);
+    public AgentFirestoreAdapter(@NonNull FirestorePagingOptions<Agent> options, Context context, OnNoteListner onNoteListner,
+                                 RelativeLayout progressLayout, ConstraintLayout emptyview) {
+        super(options, context, onNoteListner, progressLayout, emptyview);
         gfunc = new Gfunc();
         this.context = context;
         this.mOnNoteListner = onNoteListner;
