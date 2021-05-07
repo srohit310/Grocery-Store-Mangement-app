@@ -4,6 +4,12 @@
         <item>@string/permission_admin</item>
         <item>@string/permission_employee</item>
     </string-array>
+    <string-array name="user_options">
+        <item>@string/valid_admin</item>
+        <item>@string/valid_employee</item>
+        <item>@string/invalid_admin</item>
+        <item>@string/invalid_employee</item>
+    </string-array>
     <string-array name="array_item_search_options">
         <item>@string/item_name</item>
         <item>@string/item_code</item>
@@ -52,4 +58,8 @@
     <string name="invalid_items">Invalid Items</string>
     <string name="pending">Pending Transaction</string>
     <string name="completed">Completed Transaction</string>
+    <string name="valid_admin">Valid Admin</string>
+    <string name="valid_employee">Valid Employee</string>
+    <string name="invalid_admin">Invalid Admin</string>
+    <string name="invalid_employee">Invalid Employee</string>
 </resources>

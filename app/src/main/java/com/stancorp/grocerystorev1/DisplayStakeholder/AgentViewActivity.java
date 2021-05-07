@@ -30,10 +30,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.stancorp.grocerystorev1.AddActivities.AddItemActivity;
 import com.stancorp.grocerystorev1.AddActivities.AddStakesholdersActivity;
 import com.stancorp.grocerystorev1.Classes.Agent;
-import com.stancorp.grocerystorev1.Classes.Items;
 import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 import com.stancorp.grocerystorev1.ui.main.StakeholderSectionsPagerAdapter;
@@ -45,6 +43,7 @@ public class AgentViewActivity extends AppCompatActivity {
     String UserPermission;
     String UserLocation;
     Agent agent;
+    String agentCode;
     Gfunc gfunc;
     FirebaseFirestore firebaseFirestore;
     ListenerRegistration agentlistener;
@@ -63,7 +62,7 @@ public class AgentViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view);
         ShopCode = getIntent().getStringExtra("ShopCode");
         Mode = getIntent().getStringExtra("Mode");
-        agent = (Agent) getIntent().getSerializableExtra("Agent");
+        agentCode = getIntent().getStringExtra("AgentCode");
         UserPermission = getIntent().getStringExtra("UserPermission");
         UserLocation = getIntent().getStringExtra("UserLocation");
 
@@ -72,7 +71,7 @@ public class AgentViewActivity extends AppCompatActivity {
         ProgressLayout = findViewById(R.id.ProgressLayout);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(gfunc.capitalize(agent.Code));
+        toolbar.setTitle(gfunc.capitalize(agentCode));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -83,9 +82,6 @@ public class AgentViewActivity extends AppCompatActivity {
         Name = findViewById(R.id.ItemName);
         img = findViewById(R.id.ItemDetailsImage);
         img.setVisibility(View.GONE);
-
-        setUpTextviews();
-        setupchangelistener();
     }
 
     private void setPageAdapter() {
@@ -108,33 +104,41 @@ public class AgentViewActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setupchangelistener();
+        retrieveagentdata();
     }
 
-    private void setupchangelistener() {
+    private void retrieveagentdata() {
         SDProgress(true);
         agentlistener =
                 firebaseFirestore.collection(ShopCode).document("doc").collection("StakeHolders")
-                        .whereEqualTo("Code", agent.Code).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        .whereEqualTo("Code", agentCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
                         if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
                             for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                                Agent tempagent;
                                 switch (doc.getType()) {
-                                    case MODIFIED:
-                                        Agent tempagent = doc.getDocument().toObject(Agent.class);
+                                    case ADDED:
+                                        tempagent = doc.getDocument().toObject(Agent.class);
                                         agent = tempagent;
-                                        setUpTextviews();
+                                        break;
+                                    case MODIFIED:
+                                        tempagent = doc.getDocument().toObject(Agent.class);
+                                        agent = tempagent;
                                         break;
                                     case REMOVED:
                                         Toast.makeText(getApplicationContext(), "Agent has been removed", Toast.LENGTH_SHORT).show();
                                         finish();
                                         break;
                                 }
+                                setUpTextviews();
+                                setPageAdapter();
+                                SDProgress(false);
                             }
+                        }else{
+                            Toast.makeText(getApplicationContext(),"The agent was deleted",Toast.LENGTH_SHORT).show();
+                            finish();
                         }
-                        SDProgress(false);
-                        setPageAdapter();
                     }
                 });
     }

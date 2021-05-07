@@ -84,7 +84,7 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
     protected void displayFirestoreIntent(DocumentSnapshot documentSnapshot, int posiiton) {
         Intent intent = new Intent(getContext(), AgentViewActivity.class);
         Agent agent = documentSnapshot.toObject(Agent.class);
-        intent.putExtra("Agent", agent);
+        intent.putExtra("AgentCode", agent.Code);
         intent.putExtra("Mode", "Customer");
         intent.putExtra("ShopCode", user.ShopCode);
         intent.putExtra("UserPermission", user.PermissionLevel);

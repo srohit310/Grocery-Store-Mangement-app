@@ -121,7 +121,7 @@ public class FragmentsGroupPurchases extends FragmentsGroups {
     protected void displayFirestoreIntent(DocumentSnapshot documentSnapshot, int posiiton) {
         Intent intent = new Intent(getContext(), TransactionViewActivity.class);
         StoreTransaction transaction = documentSnapshot.toObject(StoreTransaction.class);
-        intent.putExtra("Transaction", transaction);
+        intent.putExtra("TransactionCode", transaction.code);
         intent.putExtra("Mode", "Purchase");
         intent.putExtra("ShopCode", user.ShopCode);
         startActivity(intent);

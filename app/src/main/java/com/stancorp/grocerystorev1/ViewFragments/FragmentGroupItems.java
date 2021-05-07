@@ -159,7 +159,7 @@ public class FragmentGroupItems extends FragmentsGroups {
     public void onStart() {
         super.onStart();
         if (itemAdaptor != null)
-            itemAdaptor.startListening();
+            attachListData(startcode,endcode);
     }
 
     public void filterchange(){
@@ -210,7 +210,7 @@ public class FragmentGroupItems extends FragmentsGroups {
     protected void displayFirestoreIntent(DocumentSnapshot documentSnapshot, int position) {
         Intent intent = new Intent(getContext(), ItemViewActivity.class);
         Items item = (Items) documentSnapshot.toObject(Items.class);
-        intent.putExtra("Item", item);
+        intent.putExtra("ItemCode", item.ItemCode);
         intent.putExtra("ShopCode", user.ShopCode);
         intent.putExtra("UserName", user.Name);
         intent.putExtra("UserPermission", user.PermissionLevel);

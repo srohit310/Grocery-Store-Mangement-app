@@ -515,7 +515,7 @@ public class AddlocationActivity extends AppCompatActivity {
                         ItemCodes.remove(itemvalid.first);
                         StockValue.remove(itemvalid.first);
                         codesRecyclerAdapter.notifyDataSetChanged();
-                        Toast.makeText(getApplicationContext(), "Item " + itemvalid.first + " was made invalid during after addition into list", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Item " + itemvalid.first + " was made invalid after addition into list", Toast.LENGTH_SHORT).show();
                     }
                     if (itemvalid == null) {
                         if(Mode.compareTo("Add")==0) {

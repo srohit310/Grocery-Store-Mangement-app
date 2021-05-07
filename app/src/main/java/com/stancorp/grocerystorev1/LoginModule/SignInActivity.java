@@ -239,7 +239,12 @@ public class SignInActivity extends AppCompatActivity {
                         SDProgress(false);
                         Wrongcredential.setText("Account Not Registered Yet!");
                         Wrongcredential.setVisibility(View.VISIBLE);
-                    }else {
+                    }else if(!User.valid){
+                        SDProgress(false);
+                        Wrongcredential.setText("Account is Invalid!");
+                        Wrongcredential.setVisibility(View.VISIBLE);
+                    }
+                    else {
                         SDProgress(false);
                         Shop.setEnabled(false);
                         Email.setEnabled(false);

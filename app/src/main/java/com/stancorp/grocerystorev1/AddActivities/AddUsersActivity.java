@@ -1,9 +1,5 @@
 package com.stancorp.grocerystorev1.AddActivities;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,13 +20,21 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.stancorp.grocerystorev1.AutoCompleteAdapter.AutoCompleteLocationAdapter;
 import com.stancorp.grocerystorev1.Classes.Location;
@@ -38,7 +42,6 @@ import com.stancorp.grocerystorev1.Classes.StoreUser;
 import com.stancorp.grocerystorev1.GlobalClass.Gfunc;
 import com.stancorp.grocerystorev1.R;
 
-import java.security.Permission;
 import java.util.LinkedHashMap;
 
 public class AddUsersActivity extends AppCompatActivity {
@@ -50,7 +53,10 @@ public class AddUsersActivity extends AppCompatActivity {
     String permission;
     String ShopCode;
     String location;
+    String Mode;
+    String userEmail;
     StoreUser user;
+    String key;
     Gfunc gfunc;
     ImageView UpButton;
     RelativeLayout ProgressLayout;
@@ -71,6 +77,10 @@ public class AddUsersActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_users);
         permission = "Admin";
         ShopCode = getIntent().getStringExtra("ShopCode");
+        Mode = getIntent().getStringExtra("Mode");
+        if (Mode.compareToIgnoreCase("Edit") == 0) {
+            userEmail = getIntent().getStringExtra("UserEmail");
+        }
         gfunc = new Gfunc();
         ProgressLayout = findViewById(R.id.ProgressLayout);
 
@@ -84,15 +94,32 @@ public class AddUsersActivity extends AppCompatActivity {
         Register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new AlertDialog.Builder(AddUsersActivity.this,R.style.MyDialogTheme)
-                        .setTitle("Confirm User Details")
+                AlertDialog.Builder alertdialog = new AlertDialog.Builder(AddUsersActivity.this, R.style.MyDialogTheme);
+                alertdialog.setTitle("Confirm User Details")
                         .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 checkInput();
                             }
-                        })
-                        .setNegativeButton("No",null).show();
+                        });
+                if (Register.getText().toString().compareToIgnoreCase("Delete User") == 0) {
+                    alertdialog.setTitle("Delete User?");
+                    alertdialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            deleteUser();
+                        }
+                    });
+                } else if (Register.getText().toString().compareToIgnoreCase("Disable User") == 0) {
+                    alertdialog.setTitle("Disable User?");
+                    alertdialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            disableUser();
+                        }
+                    });
+                }
+                alertdialog.setNegativeButton("No", null).show();
             }
         });
 
@@ -100,15 +127,19 @@ public class AddUsersActivity extends AppCompatActivity {
         UpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new AlertDialog.Builder(AddUsersActivity.this,R.style.MyDialogTheme)
-                        .setTitle("Discard User")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                finish();
-                            }
-                        })
-                        .setNegativeButton("No",null).show();
+                if (Mode.compareToIgnoreCase("Add") == 0) {
+                    new AlertDialog.Builder(AddUsersActivity.this, R.style.MyDialogTheme)
+                            .setTitle("Discard User")
+                            .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    finish();
+                                }
+                            })
+                            .setNegativeButton("No", null).show();
+                } else {
+                    finish();
+                }
             }
         });
 
@@ -118,48 +149,129 @@ public class AddUsersActivity extends AppCompatActivity {
         locationAdapter = new AutoCompleteLocationAdapter(getApplicationContext(), locations);
         addEmployeeLocation = findViewById(R.id.AddEmployeeLocation);
         LocationSearch = findViewById(R.id.LocationsearchAuto);
-        LocationSearch.setThreshold(0);
-        LocationSearch.setAdapter(locationAdapter);
-        locationprogress = findViewById(R.id.autolocationprogress);
-        LocationSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                locationhandler.removeCallbacksAndMessages(null);
-                Selectedlocationfromdropdown = false;
-            }
+        if (Mode.compareToIgnoreCase("Add") == 0) {
+            addLocations("");
+            LocationSearch.setThreshold(0);
+            LocationSearch.setAdapter(locationAdapter);
+            locationprogress = findViewById(R.id.autolocationprogress);
+            LocationSearch.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                }
 
-            @Override
-            public void afterTextChanged(final Editable editable) {
-                LocationSearch.dismissDropDown();
-                if (editable.toString().length() > 0) {
-                    locationprogress.setVisibility(View.VISIBLE);
-                    if (locations.containsKey(editable.toString())) {
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    locationhandler.removeCallbacksAndMessages(null);
+                    Selectedlocationfromdropdown = false;
+                }
+
+                @Override
+                public void afterTextChanged(final Editable editable) {
+                    LocationSearch.dismissDropDown();
+                    if (editable.toString().length() > 0) {
+                        locationprogress.setVisibility(View.VISIBLE);
+                        if (locations.containsKey(editable.toString())) {
+                            locationprogress.setVisibility(View.GONE);
+                            return;
+                        }
+                    } else
                         locationprogress.setVisibility(View.GONE);
-                        return;
-                    }
-                } else
-                    locationprogress.setVisibility(View.GONE);
 
-                locationhandler.postDelayed(new Runnable() {
+                    locationhandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (editable.toString().length() > 0) {
+                                addLocations(editable.toString());
+                            }
+                        }
+                    }, 1500);
+                }
+            });
+            LocationSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Selectedlocationfromdropdown = true;
+                }
+            });
+        } else {
+            retrieveUserDetails();
+        }
+    }
+
+    private void disableUser() {
+        firebaseFirestore.collection("UserDetails").document(key).update("valid",false)
+        .addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    finish();
+                    Toast.makeText(getApplicationContext(),"User invalidated",Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getApplicationContext(),"User Could not be invalidated",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void deleteUser() {
+        firebaseFirestore.collection("UserDetails").document(key).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    finish();
+                    Toast.makeText(getApplicationContext(),"User Deleted",Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getApplicationContext(),"Fail to Delete User",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void setupViews() {
+        UserName.getEditText().setText(gfunc.capitalize(user.Name));
+        UserEmail.getEditText().setText(user.Email);
+        UserPhone.getEditText().setText(String.valueOf(user.Phone));
+        if (user.PermissionLevel.compareToIgnoreCase("Employee") == 0) {
+            PermissionLvlSpinner.setSelection(1);
+            LocationSearch.setText(user.Location);
+        }
+        UserName.setEnabled(false);
+        UserEmail.setEnabled(false);
+        UserPhone.setEnabled(false);
+        PermissionLvlSpinner.setEnabled(false);
+        Register.setText("Delete User");
+        if (user.Registeredflag) {
+            Register.setText("Disable User");
+        }
+    }
+
+    private void retrieveUserDetails() {
+        SDProgress(true);
+        firebaseFirestore.collection("UserDetails").whereEqualTo("Email", userEmail)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
-                    public void run() {
-                        if (editable.toString().length() > 0) {
-                            addLocations(editable.toString());
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+                        if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                            for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                                StoreUser tempuser;
+                                switch (doc.getType()) {
+                                    case ADDED:
+                                        key = doc.getDocument().getId();
+                                        tempuser = doc.getDocument().toObject(StoreUser.class);
+                                        user = tempuser;
+                                        break;
+                                    case MODIFIED:
+                                        tempuser = doc.getDocument().toObject(StoreUser.class);
+                                        user = tempuser;
+                                        break;
+                                }
+                                setupViews();
+                                SDProgress(false);
+                            }
                         }
                     }
-                }, 1500);
-            }
-        });
-        LocationSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Selectedlocationfromdropdown = true;
-            }
-        });
+                });
     }
 
     private void checkInput() {
@@ -189,21 +301,21 @@ public class AddUsersActivity extends AppCompatActivity {
         if (flag) {
             RegisterUser();
         } else {
-            SDProgress(false, true);
+            SDProgress(false);
         }
     }
 
     private void RegisterUser() {
         user = new StoreUser(UserName.getEditText().getText().toString().toLowerCase(), UserEmail.getEditText().getText().toString()
                 , UserPhone.getEditText().getText().toString(), false, permission, ShopCode, location, false);
-        if(permission.compareTo("Employee")==0){
+        if (permission.compareTo("Employee") == 0) {
             user.Location = LocationSearch.getText().toString();
         }
         CheckEmailDuplicate();
     }
 
     private void CheckEmailDuplicate() {
-        SDProgress(true, true);
+        SDProgress(true);
         firebaseFirestore.collection("UserDetails").whereEqualTo("Email", UserEmail.getEditText().getText().toString())
                 .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -213,7 +325,7 @@ public class AddUsersActivity extends AppCompatActivity {
                     UserEmail.getEditText().setError("Email already exists");
                     UserEmail.requestFocus();
                     ProgressLayout.setVisibility(View.GONE);
-                    SDProgress(false, true);
+                    SDProgress(false);
                 } else {
                     AddUsertoDb();
                 }
@@ -237,7 +349,7 @@ public class AddUsersActivity extends AppCompatActivity {
                 Log.i("failuseraddition", e.getMessage());
             }
         });
-        SDProgress(false, true);
+        SDProgress(false);
         finish();
     }
 
@@ -311,7 +423,8 @@ public class AddUsersActivity extends AppCompatActivity {
                         LocationSearch.setHint("Access To All Locations");
                     } else if (selection.equals(getString(R.string.permission_employee))) {
                         permission = "Employee";
-                        LocationSearch.setEnabled(true);
+                        if (Mode.compareToIgnoreCase("Add") == 0)
+                            LocationSearch.setEnabled(true);
                         LocationSearch.setHint("Search for Location using Name");
                     }
                 }
@@ -324,7 +437,7 @@ public class AddUsersActivity extends AppCompatActivity {
         });
     }
 
-    public void SDProgress(boolean show, boolean alertDialog) {
+    public void SDProgress(boolean show) {
         if (show) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

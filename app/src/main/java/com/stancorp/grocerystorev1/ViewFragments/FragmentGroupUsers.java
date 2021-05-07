@@ -23,11 +23,12 @@ public class FragmentGroupUsers extends FragmentsGroups {
 
     ManageUserFirestoreAdapter manageUserAdapter;
     String Permission;
+    Boolean Valid;
 
     @Override
     protected void toolbarspinnersetup(Spinner toolbarspinner) {
         ArrayAdapter itemfilteroptions = ArrayAdapter.createFromResource(getContext(),
-                R.array.array_permission_options, R.layout.spinner_item_text);
+                R.array.user_options, R.layout.spinner_item_text);
 
         itemfilteroptions.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         toolbarspinner.setAdapter(itemfilteroptions);
@@ -38,20 +39,28 @@ public class FragmentGroupUsers extends FragmentsGroups {
                 startcode = "!";
                 endcode = "{";
                 if (!TextUtils.isEmpty(selection)) {
-                    if (selection.equals(getString(R.string.permission_admin))) {
+                    if (selection.equals(getString(R.string.valid_admin))) {
                         Permission = "Admin";
+                        Valid = true;
                         attachListData(startcode, endcode);
-                    } else if (selection.equals(getString(R.string.permission_employee))) {
+                    } else if (selection.equals(getString(R.string.valid_employee))) {
                         Permission = "Employee";
+                        Valid = true;
+                        attachListData(startcode, endcode);
+                    } else if(selection.equals(getString(R.string.invalid_admin))){
+                        Permission = "Admin";
+                        Valid = false;
+                        attachListData(startcode, endcode);
+                    } else if(selection.equals(getString(R.string.invalid_employee))){
+                        Permission = "Employee";
+                        Valid = false;
                         attachListData(startcode, endcode);
                     }
                 }
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                filterby = "valid";
-            }
+            public void onNothingSelected(AdapterView<?> parent) { }
         });
     }
 
@@ -59,12 +68,14 @@ public class FragmentGroupUsers extends FragmentsGroups {
     protected void initialize() {
         searchedittext.setHint("Search for purchase using referenceid");
         Permission = "Admin";
+        Valid = true;
     }
 
     @Override
     protected void AddIntent() {
         Intent intent = new Intent(getContext(), AddUsersActivity.class);
         intent.putExtra("ShopCode", user.ShopCode);
+        intent.putExtra("Mode", "Add");
         startActivity(intent);
     }
 
@@ -86,7 +97,7 @@ public class FragmentGroupUsers extends FragmentsGroups {
         SDProgress(true);
         Query query =  firebaseFirestore.collection("UserDetails").whereEqualTo("ShopCode", user.ShopCode)
                         .whereGreaterThanOrEqualTo("Name", startcode).whereLessThan("Name", endcode)
-                        .whereEqualTo("PermissionLevel", Permission).limit(50);
+                        .whereEqualTo("PermissionLevel", Permission).whereEqualTo("valid",Valid).limit(50);
 
         PagedList.Config config = new PagedList.Config.Builder()
                 .setInitialLoadSizeHint(6)
@@ -107,10 +118,14 @@ public class FragmentGroupUsers extends FragmentsGroups {
     @Override
     protected void displayFirestoreIntent(DocumentSnapshot documentSnapshot, int posiiton) {
         StoreUser tempuser = documentSnapshot.toObject(StoreUser.class);
+        if(tempuser.Email.compareToIgnoreCase(user.Email)==0){
+            Toast.makeText(getContext(),"Edit details by accessing user settings",Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent intent = new Intent(getContext(), AddUsersActivity.class);
-        intent.putExtra("ShopCode", user.ShopCode);
+        intent.putExtra("ShopCode", tempuser.ShopCode);
         intent.putExtra("Mode", "Edit");
-        intent.putExtra("User", user);
+        intent.putExtra("UserEmail", tempuser.Email);
         startActivity(intent);
     }
 }

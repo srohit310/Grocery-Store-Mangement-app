@@ -6,21 +6,6 @@ import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-
-import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.tabs.TabLayout;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Handler;
 import android.text.Editable;
 import android.text.InputType;
@@ -46,6 +31,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
+
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -77,6 +75,7 @@ import java.util.LinkedHashMap;
 public class ItemViewActivity extends AppCompatActivity {
     Items iteminfo;
     String Shopcode;
+    String ItemCode;
     String UserName;
     String UserPermission;
     String UserLocation;
@@ -129,20 +128,39 @@ public class ItemViewActivity extends AppCompatActivity {
         //getting the intent data
         Intent intent = getIntent();
         Shopcode = intent.getStringExtra("ShopCode");
-        iteminfo = (Items) intent.getSerializableExtra("Item");
+        ItemCode = intent.getStringExtra("ItemCode");
         UserName = intent.getStringExtra("UserName");
         UserPermission = intent.getStringExtra("UserPermission");
         UserLocation = intent.getStringExtra("UserLocation");
 
-        addItemStockInfo();
-
-        if(iteminfo.Valid){
-            invalidateOptionsMenu();
-        }
-
         //Setting up item image
         imageView = findViewById(R.id.ItemDetailsImage);
         SDProgress(true);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(gfunc.capitalize(ItemCode));
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void setPagerAdapter() {
+        ItemSectionsPagerAdapter itemSectionsPagerAdapter = new ItemSectionsPagerAdapter(this, getSupportFragmentManager(),
+                iteminfo, Shopcode, UserName, itemStockInfo, UserPermission, UserLocation);
+        ViewPager viewPager = findViewById(R.id.view_pager);
+        if (iteminfo.Valid) {
+            viewPager.setOffscreenPageLimit(3);
+        } else {
+            viewPager.setOffscreenPageLimit(2);
+        }
+        viewPager.setAdapter(itemSectionsPagerAdapter);
+        TabLayout tabs = findViewById(R.id.tabs);
+        tabs.setupWithViewPager(viewPager);
+    }
+
+    private void setText() {
+        Name.setText(gfunc.capitalize(iteminfo.name));
+        Category.setText(gfunc.capitalize(iteminfo.Category));
+        Brand.setText(gfunc.capitalize(iteminfo.Brand));
         if (iteminfo.Imguri) {
             photostorageReference = FirebaseStorage.getInstance().getReference().child(Shopcode).child(iteminfo.ItemCode);
             photostorageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -157,75 +175,48 @@ public class ItemViewActivity extends AppCompatActivity {
         } else {
             imageView.setVisibility(View.GONE);
         }
-
-        setText();
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(gfunc.capitalize(iteminfo.ItemCode));
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    private void setPagerAdapter(){
-        ItemSectionsPagerAdapter itemSectionsPagerAdapter = new ItemSectionsPagerAdapter(this, getSupportFragmentManager(),
-                iteminfo, Shopcode, UserName,itemStockInfo, UserPermission, UserLocation);
-        ViewPager viewPager = findViewById(R.id.view_pager);
-        if(iteminfo.Valid) {
-            viewPager.setOffscreenPageLimit(3);
-        }else{
-            viewPager.setOffscreenPageLimit(2);
-        }
-        viewPager.setAdapter(itemSectionsPagerAdapter);
-        TabLayout tabs = findViewById(R.id.tabs);
-        tabs.setupWithViewPager(viewPager);
-    }
-
-    private void setText() {
-        Name.setText(gfunc.capitalize(iteminfo.name));
-        Category.setText(gfunc.capitalize(iteminfo.Category));
-        Brand.setText(gfunc.capitalize(iteminfo.Brand));
     }
 
     private void addLocations(final String search) {
         locations.clear();
-        String strFrontCode="",strEndCode="",startcode="",endcode="";
+        String strFrontCode = "", strEndCode = "", startcode = "", endcode = "";
         int strlength = search.length();
         int limit;
-        if(search.compareTo("")!=0) {
+        if (search.compareTo("") != 0) {
             strFrontCode = search.substring(0, strlength - 1);
             strEndCode = search.substring(strlength - 1, search.length());
             startcode = search;
             limit = 10;
             endcode = strFrontCode + Character.toString((char) (strEndCode.charAt(0) + 1));
-        }else{
+        } else {
             limit = 1;
             startcode = "a";
             endcode = "{";
         }
 
         firebaseFirestore.collection(Shopcode).document("doc")
-                .collection("LocationDetails").whereGreaterThanOrEqualTo("name",startcode)
-                .whereLessThan("name",endcode).limit(limit).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .collection("LocationDetails").whereGreaterThanOrEqualTo("name", startcode)
+                .whereLessThan("name", endcode).limit(limit).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 AutoProgress.setVisibility(View.GONE);
-                if(!task.getResult().isEmpty()){
-                    if(search.compareTo("")==0){
+                if (!task.getResult().isEmpty()) {
+                    if (search.compareTo("") == 0) {
                         return;
                     }
-                    for(DocumentSnapshot doc : task.getResult()){
+                    for (DocumentSnapshot doc : task.getResult()) {
                         Location location = doc.toObject(Location.class);
                         locations.put(location.code, location);
                     }
                     locationsearch.showDropDown();
                     locationAdapter.updateList(locations);
-                }else{
-                    if(search.compareTo("")==0){
+                } else {
+                    if (search.compareTo("") == 0) {
                         locationsearch.setEnabled(false);
                         locationsearch.setText("No location added");
                         add.setEnabled(false);
                         add.setAlpha(0.5f);
-                    }else {
+                    } else {
                         locationsearch.setError("No Result Found");
                     }
                 }
@@ -249,73 +240,86 @@ public class ItemViewActivity extends AppCompatActivity {
     private void addItemStockInfo() {
         SDProgress(true);
         Query query = firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
-                .whereEqualTo("ItemCode", iteminfo.ItemCode);
+                .whereEqualTo("ItemCode", ItemCode);
         itemlistenerRegistration =
                 query.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                        ItemStockInfo temp;
-                        switch (doc.getType()) {
-                            case ADDED:
-                                temp = doc.getDocument().toObject(ItemStockInfo.class);
-                                itemStockInfo = temp;
-                                break;
-                            case MODIFIED:
-                                temp = doc.getDocument().toObject(ItemStockInfo.class);
-                                itemStockInfo = temp;
-                                break;
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+                        if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                            for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                                ItemStockInfo temp;
+                                switch (doc.getType()) {
+                                    case ADDED:
+                                        temp = doc.getDocument().toObject(ItemStockInfo.class);
+                                        itemStockInfo = temp;
+                                        break;
+                                    case MODIFIED:
+                                        temp = doc.getDocument().toObject(ItemStockInfo.class);
+                                        itemStockInfo = temp;
+                                        break;
+                                }
+                            }
                         }
+                        SDProgress(false);
+                        itemchildlistener();
                     }
-                }
-                SDProgress(false);
-                itemchildlistener();
-            }
-        });
+                });
     }
-
 
 
     private void itemchildlistener() {
         SDProgress(true);
         itemstocklistenerRegisteration =
-        firebaseFirestore.collection(Shopcode).document("doc").collection("Items")
-                .whereEqualTo("ItemCode", iteminfo.ItemCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                        switch (doc.getType()) {
-                            case MODIFIED:
-                                Items tempitem = doc.getDocument().toObject(Items.class);
-                                iteminfo = tempitem;
-                                setText();
-                                break;
+                firebaseFirestore.collection(Shopcode).document("doc").collection("Items")
+                        .whereEqualTo("ItemCode", ItemCode).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+                        if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                            for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                                Items tempitem;
+                                switch (doc.getType()) {
+                                    case ADDED:
+                                        tempitem = doc.getDocument().toObject(Items.class);
+                                        iteminfo = tempitem;
+                                        setText();
+                                        break;
+                                    case MODIFIED:
+                                        tempitem = doc.getDocument().toObject(Items.class);
+                                        iteminfo = tempitem;
+                                        setText();
+                                        break;
+                                }
+                            }
                         }
+                        setText();
+                        setPagerAdapter();
+                        invalidateOptionsMenu();
+                        SDProgress(false);
                     }
-                }
-                SDProgress(false);
-                setPagerAdapter();
-            }
-        });
+                });
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem target = menu.findItem(R.id.Invalid);
+        MenuItem Edit = menu.findItem(R.id.Edit);
+        MenuItem Adjustment = menu.findItem(R.id.Adjustment);
+        if (iteminfo!=null && !iteminfo.Valid) {
+            target.setTitle("Make Item Valid");
+            Edit.setVisible(false);
+            Adjustment.setVisible(false);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.itemdetialsmenu, menu);
         MenuItem target = menu.findItem(R.id.Invalid);
         MenuItem Edit = menu.findItem(R.id.Edit);
-        MenuItem Adjustment = menu.findItem(R.id.Adjustment);
-        if(UserPermission.compareTo("Employee")==0) {
+        if (UserPermission.compareTo("Employee") == 0) {
             target.setVisible(false);
             Edit.setVisible(false);
-        }
-        if(!iteminfo.Valid){
-            target.setTitle("Make Item Valid");
-            Edit.setVisible(false);
-            Adjustment.setVisible(false);
         }
         return true;
     }
@@ -347,18 +351,18 @@ public class ItemViewActivity extends AppCompatActivity {
 
     private void confirmMakeValidation() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(ItemViewActivity.this, R.style.MyDialogTheme);
-                alertDialog.setTitle("Confirm Action");
-                if(!iteminfo.Valid){
-                    alertDialog.setMessage("Make the item valid");
-                }else {
-                    alertDialog.setMessage("This item wont be displayed for any transactions");
-                }
-                alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        validation();
-                    }
-                })
+        alertDialog.setTitle("Confirm Action");
+        if (!iteminfo.Valid) {
+            alertDialog.setMessage("Make the item valid");
+        } else {
+            alertDialog.setMessage("This item wont be displayed for any transactions");
+        }
+        alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                validation();
+            }
+        })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
@@ -373,9 +377,9 @@ public class ItemViewActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    if(!iteminfo.Valid) {
+                    if (iteminfo.Valid) {
                         Toast.makeText(getApplicationContext(), "Item " + iteminfo.name + " is invalid", Toast.LENGTH_SHORT).show();
-                    }else{
+                    } else {
                         Toast.makeText(getApplicationContext(), "Item " + iteminfo.name + " is valid", Toast.LENGTH_SHORT).show();
                     }
                 } else {
@@ -404,7 +408,7 @@ public class ItemViewActivity extends AppCompatActivity {
         AutoProgress = alertview.findViewById(R.id.autoprogress);
         RadioButton price = alertview.findViewById(R.id.radioButton2);
 
-        if(UserPermission.compareTo("Admin")==0) {
+        if (UserPermission.compareTo("Admin") == 0) {
             locationsearch.setAdapter(locationAdapter);
             locationsearch.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -447,7 +451,7 @@ public class ItemViewActivity extends AppCompatActivity {
                 }
             });
             addLocations("");
-        }else{
+        } else {
             Locationtext.setVisibility(View.GONE);
             locationsearch.setText(UserLocation);
             locationsearch.setEnabled(false);
@@ -468,7 +472,7 @@ public class ItemViewActivity extends AppCompatActivity {
                 SelectedMode = (RadioButton) alertview.findViewById(selectedId);
                 if (SelectedMode.getText().toString().compareTo("Quantity") == 0) {
                     modeselected = "Quantity";
-                    if(UserPermission.compareTo("Admin")==0) {
+                    if (UserPermission.compareTo("Admin") == 0) {
                         locationsearch.setVisibility(View.VISIBLE);
                         Locationtext.setVisibility(View.VISIBLE);
                     }
@@ -518,25 +522,25 @@ public class ItemViewActivity extends AppCompatActivity {
                 }
                 if (flag && modeselected.compareTo("Quantity") == 0) {
                     firebaseFirestore.collection(Shopcode).document("doc").collection("LocationDetails")
-                            .whereEqualTo("code",LocationCode).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            .whereEqualTo("code", LocationCode).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if(!task.getResult().isEmpty()){
+                            if (!task.getResult().isEmpty()) {
                                 firebaseFirestore.collection(Shopcode).document("doc").collection("Location")
-                                        .whereEqualTo("ItemCode",iteminfo.ItemCode).whereEqualTo("LocationCode",LocationCode)
+                                        .whereEqualTo("ItemCode", iteminfo.ItemCode).whereEqualTo("LocationCode", LocationCode)
                                         .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                        if(!task.getResult().isEmpty()){
+                                        if (!task.getResult().isEmpty()) {
                                             adjustquantity();
-                                        }else{
+                                        } else {
                                             locationsearch.setText("");
                                             locationsearch.requestFocus();
                                             locationsearch.setError("Add inital stock via Edit or make a purchase");
                                         }
                                     }
                                 });
-                            }else{
+                            } else {
                                 locationsearch.setText("");
                                 locationsearch.requestFocus();
                                 locationsearch.setError("Location Does not exist");
@@ -561,10 +565,10 @@ public class ItemViewActivity extends AppCompatActivity {
             @Override
             public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
                 DocumentReference doc = firebaseFirestore.collection(Shopcode).document("doc").collection("Location")
-                        .document(iteminfo.ItemCode+LocationCode);
+                        .document(iteminfo.ItemCode + LocationCode);
                 LocationStockItem locationStockItem = transaction.get(doc).toObject(LocationStockItem.class);
                 ItemStockInfo itemStockInfo = transaction.get(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
-                    .document(iteminfo.ItemCode)).toObject(ItemStockInfo.class);
+                        .document(iteminfo.ItemCode)).toObject(ItemStockInfo.class);
                 Float Bal = Float.valueOf(locationStockItem.Balance_Qty);
                 locationStockItem.Balance_Qty = String.valueOf(adjustedamount);
                 adjustedamount = adjustedamount - Bal;
@@ -585,7 +589,7 @@ public class ItemViewActivity extends AppCompatActivity {
                 transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemAdjustments")
                         .document(), itemAdjustmentClass);
                 transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("Location")
-                        .document(iteminfo.ItemCode+LocationCode), locationStockItem);
+                        .document(iteminfo.ItemCode + LocationCode), locationStockItem);
                 transaction.set(firebaseFirestore.collection(Shopcode).document("doc").collection("ItemStockInfo")
                         .document(iteminfo.ItemCode), itemStockInfo);
                 return null;

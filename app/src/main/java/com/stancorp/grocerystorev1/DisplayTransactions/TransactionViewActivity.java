@@ -22,12 +22,16 @@ import com.google.android.gms.common.api.Batch;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
+import com.stancorp.grocerystorev1.Classes.Agent;
 import com.stancorp.grocerystorev1.Classes.Itemtransaction;
 import com.stancorp.grocerystorev1.Classes.StoreTransaction;
 import com.stancorp.grocerystorev1.Classes.TransactionProperties;
@@ -42,9 +46,10 @@ public class TransactionViewActivity extends AppCompatActivity {
     String ShopCode;
     String Mode;
     StoreTransaction storeTransaction;
+    String storeTransactionCode;
     Gfunc gfunc;
     FirebaseFirestore firebaseFirestore;
-    ListenerRegistration itemlistlistener;
+    ListenerRegistration registration;
 
     TextView agentText;
     TextView totalPriceText;
@@ -53,6 +58,7 @@ public class TransactionViewActivity extends AppCompatActivity {
     TextView reference;
     ImageView img;
     RelativeLayout ProgressLayout;
+    Toolbar toolbar;
 
     ArrayList<Itemtransaction> itemslist;
 
@@ -62,14 +68,14 @@ public class TransactionViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view);
         ShopCode = getIntent().getStringExtra("ShopCode");
         Mode = getIntent().getStringExtra("Mode");
-        storeTransaction = (StoreTransaction) getIntent().getSerializableExtra("Transaction");
+        storeTransactionCode = getIntent().getStringExtra("TransactionCode");
         gfunc = new Gfunc();
         firebaseFirestore = FirebaseFirestore.getInstance();
         ProgressLayout = findViewById(R.id.ProgressLayout);
         itemslist = new ArrayList<>();
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(gfunc.capitalize(storeTransaction.code));
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(gfunc.capitalize(storeTransactionCode));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -80,9 +86,49 @@ public class TransactionViewActivity extends AppCompatActivity {
         reference = findViewById(R.id.ItemName);
         img = findViewById(R.id.ItemDetailsImage);
         img.setVisibility(View.GONE);
+    }
 
-        setUpTextviews();
-        setPageAdapter();
+
+    @Override
+    protected void onPause() {
+        registration.remove();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        retrievetransactiondetails();
+    }
+
+    private void retrievetransactiondetails() {
+        registration =
+                firebaseFirestore.collection(ShopCode).document("doc")
+                        .collection("TransactionDetails").whereEqualTo("code", storeTransactionCode)
+                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+                                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                                        StoreTransaction temptransaction;
+                                        switch (doc.getType()) {
+                                            case ADDED:
+                                                temptransaction = doc.getDocument().toObject(StoreTransaction.class);
+                                                storeTransaction = temptransaction;
+                                                break;
+                                            case MODIFIED:
+                                                temptransaction = doc.getDocument().toObject(StoreTransaction.class);
+                                                storeTransaction = temptransaction;
+                                                break;
+                                        }
+                                        setUpTextviews();
+                                        invalidateOptionsMenu();
+                                        setPageAdapter();
+                                        SDProgress(false);
+                                    }
+                                }
+                            }
+                        });
     }
 
     private void setPageAdapter() {
@@ -117,26 +163,31 @@ public class TransactionViewActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.transactions, menu);
+    public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem target = menu.findItem(R.id.Markdelcomplete);
-        if(!storeTransaction.pending){
+        if (storeTransaction != null && !storeTransaction.pending) {
             target.setEnabled(false);
             target.setTitle("Delivery Complete");
         }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.transactions, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
                 return true;
             case R.id.Markdelcomplete:
-                if(storeTransaction.DeliveryDate.compareTo(gfunc.getCurrentDate("dd/MM/yyyy"))>0){
-                    Toast.makeText(this,"Delivery Date has not yet arrived",Toast.LENGTH_SHORT).show();
-                }else{
+                if (storeTransaction.DeliveryDate.compareTo(gfunc.getCurrentDate("dd/MM/yyyy")) > 0) {
+                    Toast.makeText(this, "Delivery Date has not yet arrived", Toast.LENGTH_SHORT).show();
+                } else {
                     completeDelivery();
                 }
                 return true;
@@ -186,16 +237,16 @@ public class TransactionViewActivity extends AppCompatActivity {
                 transaction.set(firebaseFirestore.collection(ShopCode).document("doc").collection("Pending")
                         .document(storeTransaction.locationCode), locationprop);
                 transaction.update(firebaseFirestore.collection(ShopCode).document("doc").collection("TransactionDetails")
-                        .document(storeTransaction.code),"pending",false);
+                        .document(storeTransaction.code), "pending", false);
                 return null;
             }
         }).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    Toast.makeText(getApplicationContext(),"Transaction has been Completed",Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getApplicationContext(),"Delivery could not be marked as complete",Toast.LENGTH_SHORT).show();
+                if (task.isSuccessful()) {
+                    Toast.makeText(getApplicationContext(), "Transaction has been Completed", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Delivery could not be marked as complete", Toast.LENGTH_SHORT).show();
                 }
                 finish();
                 SDProgress(false);

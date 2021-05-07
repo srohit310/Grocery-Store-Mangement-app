@@ -15,6 +15,7 @@ public class StoreUser implements Serializable {
     public String ShopCode;
     public String Location;
     public Boolean Registeredflag;
+    public Boolean valid;
 
     public StoreUser(){ }
 
@@ -27,6 +28,7 @@ public class StoreUser implements Serializable {
         this.ShopCode = ShopCode;
         this.Location = Location;
         this.Registeredflag = Registeredflag;
+        this.valid = true;
     }
 
     public void SetProfileImageUri(Uri PhotoUri){
