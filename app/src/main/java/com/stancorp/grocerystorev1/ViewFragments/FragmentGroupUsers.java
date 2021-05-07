@@ -89,7 +89,7 @@ public class FragmentGroupUsers extends FragmentsGroups {
     public void onStart() {
         super.onStart();
         if (manageUserAdapter != null)
-            manageUserAdapter.startListening();
+            attachListData(startcode,endcode);
     }
 
     @Override

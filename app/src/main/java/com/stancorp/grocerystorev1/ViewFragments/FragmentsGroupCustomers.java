@@ -45,7 +45,7 @@ public class FragmentsGroupCustomers extends FragmentsGroups {
     public void onStart() {
         super.onStart();
         if (agentAdaptor != null)
-            agentAdaptor.startListening();
+            attachListData(startcode,endcode);
     }
 
     @Override

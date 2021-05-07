@@ -53,7 +53,7 @@ public class FragmentGroupsLocations extends FragmentsGroups {
     public void onStart() {
         super.onStart();
         if (locationAdapter != null)
-            locationAdapter.startListening();
+            attachListData(startcode,endcode);
     }
 
     @Override

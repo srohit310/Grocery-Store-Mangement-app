@@ -87,7 +87,7 @@ public class FragmentsGroupSales extends FragmentsGroups {
     public void onStart() {
         super.onStart();
         if (transactionAdapter != null)
-            transactionAdapter.startListening();
+            attachListData(startcode,endcode);
     }
 
     @Override

@@ -95,14 +95,15 @@ public class AddUsersActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder alertdialog = new AlertDialog.Builder(AddUsersActivity.this, R.style.MyDialogTheme);
-                alertdialog.setTitle("Confirm User Details")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                checkInput();
-                            }
-                        });
-                if (Register.getText().toString().compareToIgnoreCase("Delete User") == 0) {
+                if(Register.getText().toString().compareToIgnoreCase("ADD USER")==0) {
+                    alertdialog.setTitle("Confirm User Details")
+                            .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    checkInput();
+                                }
+                            });
+                } else if (Register.getText().toString().compareToIgnoreCase("Delete User") == 0) {
                     alertdialog.setTitle("Delete User?");
                     alertdialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                         @Override
@@ -110,12 +111,16 @@ public class AddUsersActivity extends AppCompatActivity {
                             deleteUser();
                         }
                     });
-                } else if (Register.getText().toString().compareToIgnoreCase("Disable User") == 0) {
-                    alertdialog.setTitle("Disable User?");
+                } else {
+                    if(user.valid) {
+                        alertdialog.setTitle("Disable User?");
+                    }else{
+                        alertdialog.setTitle("Enable User?");
+                    }
                     alertdialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            disableUser();
+                            validateUser();
                         }
                     });
                 }
@@ -199,16 +204,20 @@ public class AddUsersActivity extends AppCompatActivity {
         }
     }
 
-    private void disableUser() {
-        firebaseFirestore.collection("UserDetails").document(key).update("valid",false)
+    private void validateUser() {
+        firebaseFirestore.collection("UserDetails").document(key).update("valid",!user.valid)
         .addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
+                    if(!user.valid) {
+                        Toast.makeText(getApplicationContext(), "User invalidated", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getApplicationContext(), "User validated", Toast.LENGTH_SHORT).show();
+                    }
                     finish();
-                    Toast.makeText(getApplicationContext(),"User invalidated",Toast.LENGTH_SHORT).show();
                 }else{
-                    Toast.makeText(getApplicationContext(),"User Could not be invalidated",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"User validation could not be changed",Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -242,7 +251,10 @@ public class AddUsersActivity extends AppCompatActivity {
         PermissionLvlSpinner.setEnabled(false);
         Register.setText("Delete User");
         if (user.Registeredflag) {
-            Register.setText("Disable User");
+            if(user.valid)
+                Register.setText("Disable User");
+            else
+                Register.setText("Enable User");
         }
     }
 
