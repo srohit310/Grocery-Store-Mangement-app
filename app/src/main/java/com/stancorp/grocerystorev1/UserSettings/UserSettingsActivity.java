@@ -440,7 +440,7 @@ public class UserSettingsActivity extends AppCompatActivity {
 
     private void requestpermission(final String Permission, String Message, final Integer code) {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Permission)) {
-            new AlertDialog.Builder(this)
+            new AlertDialog.Builder(this,R.style.MyDialogTheme)
                     .setTitle("Permission Needed")
                     .setMessage(Message)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {

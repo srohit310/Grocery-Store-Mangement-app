@@ -258,7 +258,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
         relativeLayout.setEnabled(false);
         mEmail = email;
-        userListener();
+        if (User == null) {
+            userListener();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (User != null) {
+            userListener();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (registration != null)
+            registration.remove();
     }
 
     private void userListener() {
@@ -275,12 +292,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                 user = doc.getDocument().toObject(StoreUser.class);
                                                 if (!user.valid) {
                                                     User = null;
-                                                    registration.remove();
-                                                    Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                                     startActivity(intent);
+                                                    registration.remove();
                                                     FirebaseAuth.getInstance().signOut();
-                                                }else if(User == null){
+                                                } else if (User == null) {
                                                     User = user;
                                                     setUpTexts();
                                                     navigationView.setCheckedItem(R.id.dash);
@@ -289,17 +306,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                             new MainFragment()).commit();
                                                     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                                                     Log.i("beforecrashv1", "it reached there");
-                                                }else {
+                                                } else {
                                                     setUpTexts();
                                                 }
                                                 break;
                                             case MODIFIED:
                                                 user = doc.getDocument().toObject(StoreUser.class);
                                                 if (!user.valid) {
-                                                    Toast.makeText(getApplicationContext(),"Acoount has been made invalid",Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(getApplicationContext(), "Acoount has been made invalid", Toast.LENGTH_SHORT).show();
                                                     User = null;
-                                                    registration.remove();
-                                                    Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                                     startActivity(intent);
                                                     FirebaseAuth.getInstance().signOut();
@@ -422,6 +438,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                     case R.id.sign_out_menu:
                         User = null;
+                        if (registration != null) {
+                            registration.remove();
+                        }
                         FirebaseAuth.getInstance().signOut();
                         break;
                 }
