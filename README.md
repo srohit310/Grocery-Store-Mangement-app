@@ -13,6 +13,6 @@ A list of technologies used within the project:
 * [Technology Used] : Android Studio, Java 
 * [Backend]         : Firebase
 
-The repository contains all the codes and layouts used to develop the app and just have to be cloned to access it in Android Studio. It also contain the apk file under the name [GSM.pak](https://github.com/srohit310/groceryStorev1/blob/master/GSM.apk)
+The repository contains all the codes and layouts used to develop the app and just have to be cloned to access it in Android Studio. It also contain the apk file under the name [GSM.apk](https://github.com/srohit310/groceryStorev1/blob/master/GSM.apk)
 
 
